@@ -1,2 +1,2 @@
 env
-./grouprides/db.sqlite3
+grouprides/db.sqlite3
