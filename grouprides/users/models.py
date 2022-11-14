@@ -15,8 +15,6 @@ def numeric_chars(value):
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
-    first_name = models.CharField(name="First Name", max_length=50)
-    last_name = models.CharField(name="Last Name", max_length=100)
     address = models.CharField("Address", max_length=40)
     zip_code = models.CharField("Zip Code", max_length=5, validators=[numeric_chars, length_of_five])
 

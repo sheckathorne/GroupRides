@@ -1,0 +1,19 @@
+{% extends "groupridesapp/header.html" %}
+{% block content %}
+    <div class="row display-flex justify-content-start">
+
+    {% for club in my_clubs %}
+        <div class="col-lg-4 col-md-6 col-sm-12 mobiledevice">
+            <article class="media content-section customhover" style="height: 95%;">
+                <div class="media-body">
+                    <div>
+                        <a class="article-title line-clamp-2 title-style" style="font-size: 22px" href="{{club.web_url}}">
+                            {{ club.name }}
+                        </a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock content %}

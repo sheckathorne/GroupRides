@@ -17,19 +17,6 @@ def numeric_chars(value):
         raise ValidationError(f'{value} should be numbers only')
 
 
-class Rider(models.Model):
-    first_name = models.CharField("First Name", max_length=30)
-    last_name = models.CharField("Last Name", max_length=30)
-    email_address = models.EmailField("Email", max_length=100)
-    address = models.CharField("Address", max_length=40)
-    zip_code = models.CharField("Zip Code", max_length=5, validators=[numeric_chars, length_of_five])
-    create_date = models.DateField("Date Created", auto_now_add=True)
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.first_name + ' ' + self.last_name
-
-
 class Club(models.Model):
     name = models.CharField("Name", max_length=255)
     web_url = models.CharField("Website", max_length=255)
@@ -37,7 +24,7 @@ class Club(models.Model):
     zip_code = models.CharField("Zip Code", max_length=5, validators=[numeric_chars, length_of_five])
     private = models.BooleanField("Private")
     create_date = models.DateField("Date Created", auto_now_add=True)
-    created_by = models.ForeignKey(Rider, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
     # When new Group is created, the user creating it has a new Group Membership object created
     # with no expiration date
@@ -46,8 +33,8 @@ class Club(models.Model):
         super().save(*args, **kwargs)
         if created:
             ClubMembership.objects.create(
-                rider=self.created_by,
-                group=self,
+                user=self.created_by,
+                club=self,
                 active=True,
                 membership_expires=datetime.datetime(year=9999, month=12, day=31),
                 membership_type=ClubMembership.MemberType.Creator
@@ -62,7 +49,7 @@ class Route(models.Model):
     route_url = models.CharField("Route URL", max_length=255)
     distance = models.DecimalField("Distance", max_digits=7, decimal_places=2)
     elevation = models.IntegerField("Elevation")
-    created_by = models.ForeignKey(Rider, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     date_created = models.DateField("Date Created", auto_now_add=True)
 
     def __str__(self):
@@ -76,7 +63,7 @@ class ClubMembership(models.Model):
         Member = ("3", "Member")
         NonMember = ("4", "Non-Member")
 
-    rider = models.ForeignKey(Rider, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
     create_date = models.DateField("Date Joined", auto_now_add=True)
     membership_expires = models.DateField("Membership Expires")
@@ -93,7 +80,7 @@ class ClubMembership(models.Model):
     def __str__(self):
         return (
             self.club.name + " - " +
-            self.rider.last_name + ", " +
-            self.rider.first_name + " - " + ClubMembership.MemberType(self.membership_type).label
+            self.user.last_name + ", " +
+            self.user.first_name + " - " + ClubMembership.MemberType(self.membership_type).label
         )
 
