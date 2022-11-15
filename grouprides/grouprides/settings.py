@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'groupridesapp',
-    'users'
+    'users',
+    'fontawesomefree',
+    'crispy_forms'
 ]
 
 MIDDLEWARE = [
@@ -52,6 +54,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'grouprides.urls'
+
+APPEND_SLASH = True
 
 TEMPLATES = [
     {
@@ -112,6 +116,10 @@ TIME_ZONE = 'America/Chicago'
 USE_I18N = True
 
 USE_TZ = True
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+LOGIN_REDIRECT_URL = '/'
 
 
 # Static files (CSS, JavaScript, Images)
