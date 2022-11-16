@@ -5,6 +5,9 @@ from django.utils import timezone
 from django.db import models
 from django.core.exceptions import ValidationError
 from users.models import CustomUser
+from dateutil.relativedelta import relativedelta
+
+# Validators
 
 
 def length_of_five(value):
@@ -17,7 +20,15 @@ def numeric_chars(value):
         raise ValidationError(f'{value} should be numbers only')
 
 
-class MemberType(models.IntegerChoices):
+def six_months_from(start_date, end_date):
+    if end_date > start_date + relativedelta(months=+6):
+        raise ValidationError('End date must be within 6 months of start date')
+
+
+# Choice Classes
+
+
+class EventMemberType(models.IntegerChoices):
     Members = (1, "Current Members")
     Open = (2, "Open")
 
@@ -92,7 +103,7 @@ class Event(models.Model):
 
     name = models.CharField("Event Name", max_length=100)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    privacy = models.IntegerField("Privacy", choices=MemberType.choices)
+    privacy = models.IntegerField("Privacy", choices=EventMemberType.choices)
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
     start_date = models.DateField("Start Date")
     end_date = models.DateField("End Date")
@@ -105,9 +116,13 @@ class Event(models.Model):
     def __str__(self):
         return self.name
 
+    def clean(self,*args,**kwargs):
+        six_months_from(self.start_date, self.end_date)
+
     def save(self, *args, **kwargs):
         created = self.pk is None
-        super().save(*args, **kwargs)
+        self.full_clean()
+        super(Event, self).save(*args, **kwargs)
         if created:
             for i in range(0, (self.end_date - self.start_date).days + 1, self.frequency):
                 EventOccurence.objects.create(
