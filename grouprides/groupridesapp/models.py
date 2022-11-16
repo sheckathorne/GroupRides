@@ -1,6 +1,6 @@
 import datetime
+import pytz
 
-from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -17,6 +17,26 @@ def numeric_chars(value):
         raise ValidationError(f'{value} should be numbers only')
 
 
+class MemberType(models.IntegerChoices):
+    Members = (1, "Current Members")
+    Open = (2, "Open")
+
+
+class RoleType(models.IntegerChoices):
+    Leader = (1, "Ride Leader")
+    Rider = (2, "Rider")
+
+
+class MemberType(models.IntegerChoices):
+    Creator = (1, "Creator")
+    Admin = (2, "Admin")
+    Member = (3, "Member")
+    NonMember = (4, "Non-Member")
+
+
+TIMEZONE_CHOICES = zip(pytz.all_timezones, pytz.all_timezones)
+
+
 class Club(models.Model):
     name = models.CharField("Name", max_length=255)
     web_url = models.CharField("Website", max_length=255)
@@ -26,8 +46,6 @@ class Club(models.Model):
     create_date = models.DateField("Date Created", auto_now_add=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
-    # When new Group is created, the user creating it has a new Group Membership object created
-    # with no expiration date
     def save(self, *args, **kwargs):
         created = self.pk is None
         super().save(*args, **kwargs)
@@ -52,23 +70,115 @@ class Route(models.Model):
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     date_created = models.DateField("Date Created", auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+        if created:
+            UserRoute.objects.create(
+                user=self.created_by,
+                route=self
+            )
+
     def __str__(self):
         return self.name
 
 
-class ClubMembership(models.Model):
-    class MemberType(models.TextChoices):
-        Creator = ("1", "Creator")
-        Admin = ("2", "Admin")
-        Member = ("3", "Member")
-        NonMember = ("4", "Non-Member")
+class Event(models.Model):
+    class RecurrenceFrequency(models.IntegerChoices):
+        Zero = (0, "None")
+        Daily = (1, "Daily")
+        Weekly = (7, "Weekly")
+        Biweekly = (14, "Bi-Weekly")
 
+    name = models.CharField("Event Name", max_length=100)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    privacy = models.IntegerField("Privacy", choices=MemberType.choices)
+    club = models.ForeignKey(Club, on_delete=models.CASCADE)
+    start_date = models.DateField("Start Date")
+    end_date = models.DateField("End Date")
+    ride_time = models.TimeField("Ride Time")
+    time_zone = models.CharField("Time Zone", default="America/Chicago", choices=TIMEZONE_CHOICES, max_length=100)
+    frequency = models.IntegerField("Recurrence", choices=RecurrenceFrequency.choices)
+    is_canceled = models.BooleanField("Canceled", default=False)
+    route = models.ForeignKey(Route, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+        if created:
+            for i in range(0, (self.end_date - self.start_date).days + 1, self.frequency):
+                EventOccurence.objects.create(
+                    event=self,
+                    occurence_name=self.name,
+                    created_by=self.created_by,
+                    privacy=self.privacy,
+                    club=self.club,
+                    ride_date=self.start_date + datetime.timedelta(days=i),
+                    ride_time=self.ride_time,
+                    time_zone=self.time_zone,
+                    is_canceled=self.is_canceled,
+                    route=self.route
+                )
+
+
+class EventOccurence(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    occurence_name = models.CharField("Event Name", max_length=100)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    privacy = models.IntegerField("Privacy", choices=MemberType.choices)
+    club = models.ForeignKey(Club, on_delete=models.CASCADE)
+    ride_date = models.DateField("Ride Date")
+    ride_time = models.TimeField("Ride Time")
+    time_zone = models.CharField("Time Zone", default="America/Chicago", choices=TIMEZONE_CHOICES, max_length=100)
+    is_canceled = models.BooleanField("Canceled", default=False)
+    route = models.ForeignKey(Route, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+        if created:
+            EventOccurenceMember.objects.create(
+                event_occurence=self,
+                user=self.created_by,
+                role=1
+            )
+
+    def __str__(self):
+        return self.occurence_name + " - " + self.ride_date.strftime("%b %d %Y")
+
+
+class EventOccurenceMember(models.Model):
+    event_occurence = models.ForeignKey(EventOccurence, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    role = models.IntegerField("Role", choices=RoleType.choices, default=2)
+
+    def __str__(self):
+        role = RoleType(self.role).label
+        ride_date = self.event_occurence.ride_date.strftime("%b %d %Y")
+        first_name = self.user.first_name
+        last_name = self.user.last_name
+        event_name = self.event_occurence.event.name
+        return f"{event_name} - {ride_date} - {last_name}, {first_name} - {role}"
+
+
+class UserRoute(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    route = models.ForeignKey(Route, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.route.name} for profile {self.user} by {self.route.created_by}"
+
+
+class ClubMembership(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
     create_date = models.DateField("Date Joined", auto_now_add=True)
     membership_expires = models.DateField("Membership Expires")
     active = models.BooleanField("Active", default=True)
-    membership_type = models.CharField("Membership Type", choices=MemberType.choices, max_length=255)
+    membership_type = models.IntegerField("Membership Type", choices=MemberType.choices)
 
     def is_expired(self):
         now = timezone.now()
@@ -81,6 +191,5 @@ class ClubMembership(models.Model):
         return (
             self.club.name + " - " +
             self.user.last_name + ", " +
-            self.user.first_name + " - " + ClubMembership.MemberType(self.membership_type).label
+            self.user.first_name + " - " + MemberType(self.membership_type).label
         )
-
