@@ -25,17 +25,9 @@ def six_months_from(start_date, end_date):
         raise ValidationError('End date must be within 6 months of start date')
 
 
-# Choice Classes
-
-
 class EventMemberType(models.IntegerChoices):
     Members = (1, "Current Members")
     Open = (2, "Open")
-
-
-class RoleType(models.IntegerChoices):
-    Leader = (1, "Ride Leader")
-    Rider = (2, "Rider")
 
 
 class MemberType(models.IntegerChoices):
@@ -166,17 +158,42 @@ class EventOccurence(models.Model):
 
 
 class EventOccurenceMember(models.Model):
+    class RoleType(models.IntegerChoices):
+        Leader = (1, "Ride Leader")
+        Rider = (2, "Rider")
+
     event_occurence = models.ForeignKey(EventOccurence, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     role = models.IntegerField("Role", choices=RoleType.choices, default=2)
 
+    @property
+    def ride_leader_name(self):
+        leader = EventOccurenceMember.objects.get(
+            event_occurence=self.event_occurence,
+            role=EventOccurenceMember.RoleType.Leader
+        )
+
+        leader_name = f"{leader.user.first_name} {leader.user.last_name}"
+        return leader_name
+
     def __str__(self):
-        role = RoleType(self.role).label
+        role = EventOccurenceMember.RoleType(self.role).label
         ride_date = self.event_occurence.ride_date.strftime("%b %d %Y")
         first_name = self.user.first_name
         last_name = self.user.last_name
         event_name = self.event_occurence.event.name
         return f"{event_name} - {ride_date} - {last_name}, {first_name} - {role}"
+
+
+class EventOccurenceMessage(models.Model):
+    event_occurence_member = models.ForeignKey(EventOccurenceMember, on_delete=models.CASCADE)
+    message = models.CharField("Message", max_length=255)
+
+    def __str__(self):
+        first_name = self.event_occurence_member.user.first_name
+        last_name = self.event_occurence_member.user.last_name
+        message = self.message
+        return f"{first_name} {last_name} - {message}"
 
 
 class UserRoute(models.Model):

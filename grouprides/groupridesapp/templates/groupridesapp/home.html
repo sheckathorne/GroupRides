@@ -1,19 +1,26 @@
 {% extends "groupridesapp/header.html" %}
 {% block content %}
     <div class="row display-flex justify-content-start">
-
-    {% for club in my_clubs %}
-        <div class="col-lg-4 col-md-6 col-sm-12 mobiledevice">
-            <article class="media content-section customhover" style="height: 95%;">
-                <div class="media-body">
-                    <div>
-                        <a class="article-title line-clamp-2 title-style" style="font-size: 22px" href="{{club.web_url}}">
-                            {{ club.name }}
-                        </a>
-                    </div>
+        <div class="card mt-2">
+            <h5 class="card-header">My Upcoming Rides</h5>
+            {% for ride in my_upcoming_rides %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ ride.event_occurence.ride_date|date:"M d, Y" }}</h5>
+                    <p class="card-text">{{ ride.event_occurence.occurence_name }} lead by {{ ride.ride_leader_name }}</p>
+                    <a href="#" class="btn btn-primary">Go somewhere</a>
                 </div>
-            </article>
+            {% endfor %}
         </div>
-    {% endfor %}
+
+
+        <div class="card mt-2">
+            <h5 class="card-header">My Clubs</h5>
+            {% for club in my_clubs %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ club.name }}</h5>
+                    <a href="{% url 'club_home' club.id %}" class="btn btn-primary">All club rides</a>
+                </div>
+            {% endfor %}
+        </div>
     </div>
-{% endblock content %}asdfasfasfdasdfasdfasdf
+{% endblock content %}
