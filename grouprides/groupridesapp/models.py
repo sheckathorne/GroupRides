@@ -28,6 +28,11 @@ def ride_is_full(max_riders, number_of_riders):
         raise ValidationError('Ride is full.')
 
 
+def max_is_fewer_than_riders(max_riders, number_of_riders):
+    if max_riders < number_of_riders:
+        raise ValidationError('Cannot set max riders fewer than number of signed up riders')
+
+
 class EventMemberType(models.IntegerChoices):
     Members = (1, "Current Members")
     Open = (2, "Open")
@@ -176,11 +181,25 @@ class EventOccurence(models.Model):
     ride_pace = models.CharField("Pace", max_length=10)
 
     @property
+    def time_until_ride(self):
+        tz = pytz.timezone(self.time_zone)
+
+        ride_datetime = datetime.datetime.combine(self.ride_date, self.ride_time)
+        aware_ride_datetime = tz.localize(ride_datetime)
+        current_datetime = datetime.datetime.now(tz)
+        rd = relativedelta(aware_ride_datetime, current_datetime)
+
+        time_diff = (
+            f"{rd.days} day{'s'[:rd.days^1]} and {rd.hours} hour{'s'[:rd.hours^1]}" if rd.days > 0 else
+            f"{rd.hours} hour{'s'[:rd.hours^1]}")
+        return time_diff
+
+    @property
     def number_of_riders(self):
         return EventOccurenceMember.objects.filter(event_occurence__pk=self.pk).count()
 
-    # some kind of validation to prevent you from setting
-    # the max number of riders less than the current number of riders
+    def clean(self):
+        max_is_fewer_than_riders(self.max_riders, self.number_of_riders)
 
     def save(self, *args, **kwargs):
         print('save is being called')

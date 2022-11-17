@@ -6,7 +6,7 @@
             {% for ride in my_upcoming_rides %}
                 <div class="card mb-3">
                     {# it would be cool if the ride time let you know how long until the ride takes place #}
-                    <h6 class="card-header">{{ ride.event_occurence.ride_date|date:"M d, Y" }} - {{ ride.event_occurence.ride_time|time:"g:i A" }}</h6>
+                    <h6 class="card-header">{{ ride.event_occurence.ride_date|date:"M d, Y" }} - {{ ride.event_occurence.ride_time|time:"g:i A" }} (in {{ ride.event_occurence.time_until_ride }})</h6>
                     <div class="card-body">
                         <h6 class="card-title">{{ ride.event_occurence.occurence_name }} led by {{ ride.ride_leader_name }}</h6>
                             <ul>
