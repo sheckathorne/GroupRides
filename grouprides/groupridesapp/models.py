@@ -7,8 +7,6 @@ from django.core.exceptions import ValidationError
 from users.models import CustomUser
 from dateutil.relativedelta import relativedelta
 
-# Validators
-
 
 def length_of_five(value):
     if len(value) != 5:
@@ -25,6 +23,11 @@ def six_months_from(start_date, end_date):
         raise ValidationError('End date must be within 6 months of start date')
 
 
+def ride_is_full(max_riders, number_of_riders):
+    if number_of_riders >= max_riders:
+        raise ValidationError('Ride is full.')
+
+
 class EventMemberType(models.IntegerChoices):
     Members = (1, "Current Members")
     Open = (2, "Open")
@@ -35,9 +38,6 @@ class MemberType(models.IntegerChoices):
     Admin = (2, "Admin")
     Member = (3, "Member")
     NonMember = (4, "Non-Member")
-
-
-TIMEZONE_CHOICES = zip(pytz.all_timezones, pytz.all_timezones)
 
 
 class Club(models.Model):
@@ -87,11 +87,21 @@ class Route(models.Model):
 
 
 class Event(models.Model):
+    TIMEZONE_CHOICES = zip(pytz.all_timezones, pytz.all_timezones)
+
     class RecurrenceFrequency(models.IntegerChoices):
         Zero = (0, "None")
         Daily = (1, "Daily")
         Weekly = (7, "Weekly")
         Biweekly = (14, "Bi-Weekly")
+
+    class GroupClassification(models.TextChoices):
+        A = ("A", "A")
+        B = ("B", "B")
+        C = ("C", "C")
+        D = ("D", "D")
+        N = ("N", "Novice")
+        NA = ("NA", "None")
 
     name = models.CharField("Event Name", max_length=100)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -102,13 +112,16 @@ class Event(models.Model):
     ride_time = models.TimeField("Ride Time")
     time_zone = models.CharField("Time Zone", default="America/Chicago", choices=TIMEZONE_CHOICES, max_length=100)
     frequency = models.IntegerField("Recurrence", choices=RecurrenceFrequency.choices)
+    max_riders = models.IntegerField("Max Riders")
     is_canceled = models.BooleanField("Canceled", default=False)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
+    group_classification = models.CharField("Classification", choices=GroupClassification.choices, max_length=2)
+    ride_pace = models.CharField("Pace", max_length=10)
 
     def __str__(self):
         return self.name
 
-    def clean(self,*args,**kwargs):
+    def clean(self, *args, **kwargs):
         six_months_from(self.start_date, self.end_date)
 
     def save(self, *args, **kwargs):
@@ -126,12 +139,28 @@ class Event(models.Model):
                     ride_date=self.start_date + datetime.timedelta(days=i),
                     ride_time=self.ride_time,
                     time_zone=self.time_zone,
+                    max_riders=self.max_riders,
                     is_canceled=self.is_canceled,
-                    route=self.route
+                    route=self.route,
+                    group_classification=self.group_classification,
+                    ride_pace=self.ride_pace
                 )
 
 
 class EventOccurence(models.Model):
+    TIMEZONE_CHOICES = zip(pytz.all_timezones, pytz.all_timezones)
+
+    class GroupClassification(models.TextChoices):
+        A = ("A", "A")
+        B = ("B", "B")
+        C = ("C", "C")
+        D = ("D", "D")
+        N = ("N", "Novice")
+        NA = ("NA", "None")
+
+    class TimezoneChoices(models.TextChoices):
+        zip(pytz.all_timezones, pytz.all_timezones)
+
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     occurence_name = models.CharField("Event Name", max_length=100)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -140,10 +169,21 @@ class EventOccurence(models.Model):
     ride_date = models.DateField("Ride Date")
     ride_time = models.TimeField("Ride Time")
     time_zone = models.CharField("Time Zone", default="America/Chicago", choices=TIMEZONE_CHOICES, max_length=100)
+    max_riders = models.IntegerField("Max Riders")
     is_canceled = models.BooleanField("Canceled", default=False)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
+    group_classification = models.CharField("Classification", choices=GroupClassification.choices, max_length=2)
+    ride_pace = models.CharField("Pace", max_length=10)
+
+    @property
+    def number_of_riders(self):
+        return EventOccurenceMember.objects.filter(event_occurence__pk=self.pk).count()
+
+    # some kind of validation to prevent you from setting
+    # the max number of riders less than the current number of riders
 
     def save(self, *args, **kwargs):
+        print('save is being called')
         created = self.pk is None
         super().save(*args, **kwargs)
         if created:
@@ -171,10 +211,13 @@ class EventOccurenceMember(models.Model):
         leader = EventOccurenceMember.objects.get(
             event_occurence=self.event_occurence,
             role=EventOccurenceMember.RoleType.Leader
-        )
+        ).user
 
-        leader_name = f"{leader.user.first_name} {leader.user.last_name}"
+        leader_name = f"{leader.first_name} {leader.last_name}"
         return leader_name
+
+    def clean(self, *args, **kwargs):
+        ride_is_full(self.event_occurence.max_riders, self.event_occurence.number_of_riders)
 
     def __str__(self):
         role = EventOccurenceMember.RoleType(self.role).label

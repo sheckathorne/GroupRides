@@ -1,26 +1,41 @@
 {% extends "groupridesapp/header.html" %}
 {% block content %}
-    <div class="row display-flex justify-content-start">
-        <div class="card mt-2">
-            <h5 class="card-header">My Upcoming Rides</h5>
+        <div class="card border-primary mt-2">
+            <h5 class="card-header bg-primary bg-gradient text-light">My Upcoming Rides</h5>
+            <div class="card-body">
             {% for ride in my_upcoming_rides %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ ride.event_occurence.ride_date|date:"M d, Y" }}</h5>
-                    <p class="card-text">{{ ride.event_occurence.occurence_name }} lead by {{ ride.ride_leader_name }}</p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                <div class="card mb-3">
+                    {# it would be cool if the ride time let you know how long until the ride takes place #}
+                    <h6 class="card-header">{{ ride.event_occurence.ride_date|date:"M d, Y" }} - {{ ride.event_occurence.ride_time|time:"g:i A" }}</h6>
+                    <div class="card-body">
+                        <h6 class="card-title">{{ ride.event_occurence.occurence_name }} led by {{ ride.ride_leader_name }}</h6>
+                            <ul>
+                                {% with num_riders=ride.event_occurence.number_of_riders %}
+                                <li class="list-group-item">{{ num_riders }} rider{{ num_riders|pluralize }} of max {{ ride.event_occurence.max_riders }} signed up</li>
+                                {% endwith %}
+                                {% with distance=ride.event_occurence.route.distance %}
+                                <li class="list-group-item">{{ distance }} mile{{ distance|pluralize }} / {{ ride.event_occurence.route.elevation }}ft.</li>
+                                {% endwith %}
+                                <li class="list-group-item">Start Location</li>
+                            </ul>
+                        <a href="#" class="btn btn-primary">Link to ride discussion</a>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">{{ ride.event_occurence.club.name }}</small>
+                    </div>
                 </div>
             {% endfor %}
+            </div>
         </div>
 
 
-        <div class="card mt-2">
-            <h5 class="card-header">My Clubs</h5>
+        <div class="card border-primary mt-2">
+            <h5 class="card-header bg-primary bg-gradient text-light">My Clubs</h5>
             {% for club in my_clubs %}
                 <div class="card-body">
-                    <h5 class="card-title">{{ club.name }}</h5>
+                    <h6 class="card-title">{{ club.name }}</h6>
                     <a href="{% url 'club_home' club.id %}" class="btn btn-primary">All club rides</a>
                 </div>
             {% endfor %}
         </div>
-    </div>
 {% endblock content %}
