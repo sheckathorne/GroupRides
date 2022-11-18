@@ -2,8 +2,10 @@ import datetime
 
 from django.shortcuts import render
 from .models import Club, EventOccurence, EventOccurenceMember
+from django.contrib.auth.decorators import login_required
 
 
+@login_required(login_url='/login')
 def homepage(request):
     next_week = datetime.date.today() + datetime.timedelta(days=8)
     my_upcoming_rides = EventOccurenceMember.objects.filter(

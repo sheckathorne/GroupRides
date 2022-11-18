@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import get_user_model, login
+from django.contrib.auth import logout, login, authenticate
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import UserRegistrationForm
+from django.contrib.auth.forms import AuthenticationForm
 
 
 def register(request):
@@ -28,3 +30,38 @@ def register(request):
         template_name="users/register.html",
         context={"form": form}
         )
+
+
+@login_required
+def custom_logout(request):
+    logout(request)
+    messages.info(request, "Logged out successfully!")
+    return redirect("homepage")
+
+
+def custom_login(request):
+    if request.user.is_authenticated:
+        return redirect('homepage')
+
+    if request.method == "POST":
+        form = AuthenticationForm(request=request, data=request.POST)
+        if form.is_valid():
+            user = authenticate(
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password'],
+            )
+            if user is not None:
+                login(request, user)
+                messages.success(request, f"Logged in successfully!")
+                return redirect("homepage")
+            else:
+                for error in list(form.errors.values()):
+                    messages.error(request, error)
+
+    form = AuthenticationForm()
+
+    return render(
+        request=request,
+        template_name="users/login.html",
+        context={'form': form}
+    )
