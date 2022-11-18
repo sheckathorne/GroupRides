@@ -33,16 +33,14 @@ def max_is_fewer_than_riders(max_riders, number_of_riders):
         raise ValidationError('Cannot set max riders fewer than number of signed up riders')
 
 
-class EventMemberType(models.IntegerChoices):
-    Members = (1, "Current Members")
-    Open = (2, "Open")
+def membership_is_expired(expiration_date, event_date):
+    if event_date > expiration_date:
+        raise ValidationError('Club membership expires before event date')
 
 
-class MemberType(models.IntegerChoices):
-    Creator = (1, "Creator")
-    Admin = (2, "Admin")
-    Member = (3, "Member")
-    NonMember = (4, "Non-Member")
+def not_member_of_club(membership_exists):
+    if not membership_exists:
+        raise ValidationError('Must be a club member to join this event')
 
 
 class Club(models.Model):
@@ -108,6 +106,16 @@ class Event(models.Model):
         N = ("N", "Novice")
         NA = ("NA", "None")
 
+    class MemberType(models.IntegerChoices):
+        Creator = (1, "Creator")
+        Admin = (2, "Admin")
+        Member = (3, "Member")
+        NonMember = (4, "Non-Member")
+
+    class EventMemberType(models.IntegerChoices):
+        Members = (1, "Current Members")
+        Open = (2, "Open")
+
     name = models.CharField("Event Name", max_length=100)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     privacy = models.IntegerField("Privacy", choices=EventMemberType.choices)
@@ -166,11 +174,15 @@ class EventOccurence(models.Model):
     class TimezoneChoices(models.TextChoices):
         zip(pytz.all_timezones, pytz.all_timezones)
 
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    class EventMemberType(models.IntegerChoices):
+        Members = (1, "Current Members")
+        Open = (2, "Open")
+
+    event = models.ForeignKey(Event, null=True, blank=True, on_delete=models.CASCADE)
     occurence_name = models.CharField("Event Name", max_length=100)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    privacy = models.IntegerField("Privacy", choices=MemberType.choices)
-    club = models.ForeignKey(Club, on_delete=models.CASCADE)
+    privacy = models.IntegerField("Privacy", choices=EventMemberType.choices)
+    club = models.ForeignKey(Club, null=True, blank=True, on_delete=models.CASCADE)
     ride_date = models.DateField("Ride Date")
     ride_time = models.TimeField("Ride Time")
     time_zone = models.CharField("Time Zone", default="America/Chicago", choices=TIMEZONE_CHOICES, max_length=100)
@@ -238,6 +250,18 @@ class EventOccurenceMember(models.Model):
     def clean(self, *args, **kwargs):
         ride_is_full(self.event_occurence.max_riders, self.event_occurence.number_of_riders)
 
+        # If the ride is members-only, check the rider is a both
+        # (1) a member of the club hosting the ride and
+        # (2) the user's membership expires after the ride date
+        if EventOccurence.EventMemberType(self.event_occurence.privacy) is self.event_occurence.EventMemberType.Members:
+            occurence_club = self.event_occurence.club
+            club_membership_exists = ClubMembership.objects.filter(user=self.user, club=occurence_club).exists()
+            not_member_of_club(club_membership_exists)
+
+            membership = ClubMembership.objects.get(user=self.user, club=occurence_club)
+            expiration_date = membership.membership_expires
+            membership_is_expired(expiration_date, self.event_occurence.ride_date)
+
     def __str__(self):
         role = EventOccurenceMember.RoleType(self.role).label
         ride_date = self.event_occurence.ride_date.strftime("%b %d %Y")
@@ -267,6 +291,12 @@ class UserRoute(models.Model):
 
 
 class ClubMembership(models.Model):
+    class MemberType(models.IntegerChoices):
+        Creator = (1, "Creator")
+        Admin = (2, "Admin")
+        Member = (3, "Member")
+        NonMember = (4, "Non-Member")
+
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
     create_date = models.DateField("Date Joined", auto_now_add=True)
@@ -285,5 +315,5 @@ class ClubMembership(models.Model):
         return (
             self.club.name + " - " +
             self.user.last_name + ", " +
-            self.user.first_name + " - " + MemberType(self.membership_type).label
+            self.user.first_name + " - " + ClubMembership.MemberType(self.membership_type).label
         )
