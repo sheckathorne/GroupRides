@@ -7,7 +7,6 @@ from django.contrib.auth.forms import AuthenticationForm
 
 
 def register(request):
-    # Logged-in user can't register a new account
     if request.user.is_authenticated:
         return redirect("/")
 

@@ -5,24 +5,53 @@
             <div class="card-body">
             {% for ride in my_upcoming_rides %}
                 <div class="card mb-3">
-                    {# it would be cool if the ride time let you know how long until the ride takes place #}
-                    <h6 class="card-header">{{ ride.event_occurence.ride_date|date:"M d, Y" }} - {{ ride.event_occurence.ride_time|time:"g:i A" }} (in {{ ride.event_occurence.time_until_ride }})</h6>
+                    {% with event_occurence=ride.event_occurence %}
+                    <h6 class="card-header">{{ event_occurence.ride_date|date:"M d, Y" }} - {{ event_occurence.ride_time|time:"g:i A" }} (in {{ event_occurence.time_until_ride }})</h6>
                     <div class="card-body">
-                        <h6 class="card-title">{{ ride.event_occurence.occurence_name }} led by {{ ride.ride_leader_name }}</h6>
-                            <ul>
-                                {% with num_riders=ride.event_occurence.number_of_riders %}
-                                <li class="list-group-item">{{ num_riders }} rider{{ num_riders|pluralize }} of max {{ ride.event_occurence.max_riders }} signed up</li>
-                                {% endwith %}
-                                {% with distance=ride.event_occurence.route.distance %}
-                                <li class="list-group-item">{{ distance }} mile{{ distance|pluralize }} / {{ ride.event_occurence.route.elevation }}ft.</li>
-                                {% endwith %}
-                                <li class="list-group-item">Start Location</li>
-                            </ul>
+                        <h6 class="card-title">{{ event_occurence.occurence_name }} led by {{ ride.ride_leader_name }}</h6>
+                        <div class="row mb-3 d-flex align-items-center">
+                            <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-gauge-high"></i></div>
+                            <div class="col-lg-8 col-9">{{ event_occurence.group_classification_name }} / {{ event_occurence.ride_pace }}mph</div>
+                        </div>
+                        {% with distance=ride.event_occurence.route.distance %}
+                        <div class="row mb-3 d-flex align-items-center">
+                            <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-ruler-horizontal"></i></div>
+                            <div class="col-lg-8 col-9">{{ distance }} mile{{ distance|pluralize }}</div>
+                        </div>
+                        {% endwith %}
+                        <div class="row mb-3 d-flex align-items-center">
+                            <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-mountain"></i></div>
+                            <div class="col-lg-8 col-9">{{ event_occurence.route.elevation }}ft</div>
+                        </div>
+                        <div class="row mb-3 d-flex align-items-center">
+                            <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-location-dot"></i></div>
+                            <div class="col-lg-8 col-9">{{ event_occurence.route.start_location_name }}</div>
+                        </div>
+                        <div class="row mb-3 d-flex align-items-center">
+                            <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-route"></i></div>
+                            <div class="col-lg-8 col-9">Route URL Here</div>
+                        </div>
+                        {% with num_riders=event_occurence.number_of_riders %}
+                        <div class="row mb-2 d-flex align-items-center">
+                            <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-person-circle-plus"></i></div>
+                            <div class="col-lg-8 col-9">
+                                {{ num_riders }} rider{{ num_riders|pluralize }} of max {{ event_occurence.max_riders }} signed up
+                                <div class="progress">
+                                    <div class="{{ event_occurence.progress_bar_class }}" role="progressbar" style="width: {{ event_occurence.percentage_full }}%" aria-valuenow={{ num_riders }} aria-valuemin="0" aria-valuemax={{ event_occurence.max_riders }}></div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
                         <a href="#" class="btn btn-primary">Link to ride discussion</a>
                     </div>
                     <div class="card-footer">
-                        <small class="text-muted">{{ ride.event_occurence.club.name }}</small>
+                        {% if event_occurence.club is not None %}
+                        <small class="text-muted">{{ event_occurence.club.name}}</small>
+                        {% else %}
+                        <small class="text-muted">No club affiliation</small>
+                        {% endif %}
                     </div>
+                    {% endwith %}
                 </div>
             {% endfor %}
             </div>

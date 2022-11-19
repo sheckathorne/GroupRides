@@ -70,6 +70,7 @@ class Club(models.Model):
 
 class Route(models.Model):
     name = models.CharField("Route Name", max_length=240)
+    start_location_name = models.CharField("Start Location", max_length=240)
     route_url = models.CharField("Route URL", max_length=255)
     distance = models.DecimalField("Distance", max_digits=7, decimal_places=2)
     elevation = models.IntegerField("Elevation")
@@ -209,6 +210,34 @@ class EventOccurence(models.Model):
     @property
     def number_of_riders(self):
         return EventOccurenceMember.objects.filter(event_occurence__pk=self.pk).count()
+
+    @property
+    def percentage_full(self):
+        return (self.number_of_riders / float(self.max_riders)) * 100
+
+    @property
+    def nearly_full(self):
+        open_slots = self.max_riders - self.number_of_riders
+        nearly_full = ((
+            self.max_riders >= 30 and self.percentage_full >= 90) or (
+            30 > self.max_riders >= 15 and self.percentage_full >= 80) or (
+            self.max_riders < 15 and self.percentage_full >= 70) or (
+            open_slots <= 2
+        ))
+        return nearly_full
+
+    @property
+    def progress_bar_class(self):
+        if self.max_riders == self.number_of_riders:
+            return "progress-bar bg-danger"
+        elif self.nearly_full:
+            return "progress-bar bg-warning"
+        else:
+            return "progress-bar bg-success"
+
+    @property
+    def group_classification_name(self):
+        return EventOccurence.GroupClassification(self.group_classification).label
 
     def clean(self):
         max_is_fewer_than_riders(self.max_riders, self.number_of_riders)
