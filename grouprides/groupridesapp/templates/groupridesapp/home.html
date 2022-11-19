@@ -4,7 +4,7 @@
             <h5 class="card-header bg-primary bg-gradient text-light">My Upcoming Rides</h5>
             <div class="card-body">
             {% for ride in my_upcoming_rides %}
-                <div class="card mb-3">
+                <div class="card mb-3 border-dark">
                     {% with event_occurence=ride.event_occurence %}
                     <h6 class="card-header">{{ event_occurence.ride_date|date:"M d, Y" }} - {{ event_occurence.ride_time|time:"g:i A" }} (in {{ event_occurence.time_until_ride }})</h6>
                     <div class="card-body">
@@ -32,7 +32,7 @@
                             <div class="col-lg-8 col-9">Route URL Here</div>
                         </div>
                         {% with num_riders=event_occurence.number_of_riders %}
-                        <div class="row mb-2 d-flex align-items-center">
+                        <div class="row mb-3 d-flex align-items-center">
                             <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-person-circle-plus"></i></div>
                             <div class="col-lg-8 col-9">
                                 {{ num_riders }} rider{{ num_riders|pluralize }} of max {{ event_occurence.max_riders }} signed up
@@ -42,7 +42,17 @@
                             </div>
                         </div>
                         {% endwith %}
-                        <a href="#" class="btn btn-primary">Link to ride discussion</a>
+                        <div class="row">
+                            <div class="col block">
+                                <button href="#" class="btn btn-primary w-100" type="button">Ride discussion</button>
+                            </div>
+                            <div class="col block">
+                                <button href="#" class="btn btn-primary w-100" type="button">View Attendees</button>
+                            </div>
+                            <div class="col block">
+                                <button href="#" class="btn btn-danger w-100" type="button">Cancel Reservation</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-footer">
                         {% if event_occurence.club is not None %}
