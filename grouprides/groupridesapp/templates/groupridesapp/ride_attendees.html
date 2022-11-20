@@ -1,14 +1,16 @@
 {% extends "groupridesapp/header.html" %}
 {% block content %}
 <div class="card border-primary mt-2">
-    <h5 class="card-header bg-primary bg-gradient text-light">Attendees for {{ event_occurence.occurence_name }} on {{ event_occurence.ride_date|date:"M d, Y" }}</h5>
+    <h5 class="card-header bg-primary bg-gradient text-light">
+        Attendees for {{ event_occurence.occurence_name }} on {{ event_occurence.ride_date|date:"M d, Y" }}
+    </h5>
     <div class="card-body">
         <ul class="list-group list-group-flush">
         {% for member in event_members %}
             {% if member.is_ride_leader %}
-            <li class="list-group-item fw-bold">{{ member.user.last_name }}, {{ member.user.first_name }} - Ride Leader</li>
+            <li class="list-group-item fw-bold">{{ forloop.counter}}. {{ member.user.last_name }}, {{ member.user.first_name }} - Ride Leader</li>
             {% else %}
-            <li class="list-group-item">{{ member.user.last_name }}, {{ member.user.first_name }}</li>
+            <li class="list-group-item">{{ forloop.counter}}. {{ member.user.last_name }}, {{ member.user.first_name }}</li>
             {% endif %}
         {% empty %}
             No attendees signed up for this ride

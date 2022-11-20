@@ -280,18 +280,29 @@ class EventOccurenceMember(models.Model):
         return self.role == self.RoleType.Leader
 
     @property
-    def ride_leader_user(self):
-        leader = EventOccurenceMember.objects.get(
+    def ride_leader_users(self):
+        leaders = EventOccurenceMember.objects.filter(
             event_occurence=self.event_occurence,
             role=EventOccurenceMember.RoleType.Leader
-        ).user
+        )
 
-        return leader
+        return list(leaders)
 
     @property
     def ride_leader_name(self):
-        leader = self.ride_leader_user
-        leader_name = f"{leader.first_name} {leader.last_name}"
+        leader_name = ""
+
+        if len(self.ride_leader_users) == 1:
+            leader = self.ride_leader_users[0].user
+            leader_name = f"{leader.first_name} {leader.last_name}"
+        elif len(self.ride_leader_users) > 1:
+            leader = self.ride_leader_users[0].user
+            print(leader.first_name)
+            leader_name = f"{leader.first_name} {leader.last_name}"
+            for i in range(1, len(self.ride_leader_users)):
+                leader = self.ride_leader_users[i].user
+                leader_name = leader_name + f" + {leader.first_name} {leader.last_name}"
+
         return leader_name
 
     @property
