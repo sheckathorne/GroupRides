@@ -184,3 +184,7 @@ a.article-title:hover {
 .group-class-Novice {
   color: #010173;
 }
+
+.canceled {
+    color: #9c9a9a !important;
+}

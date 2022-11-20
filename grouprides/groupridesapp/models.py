@@ -276,6 +276,10 @@ class EventOccurenceMember(models.Model):
     role = models.IntegerField("Role", choices=RoleType.choices, default=2)
 
     @property
+    def is_ride_leader(self):
+        return self.role == self.RoleType.Leader
+
+    @property
     def ride_leader_user(self):
         leader = EventOccurenceMember.objects.get(
             event_occurence=self.event_occurence,
