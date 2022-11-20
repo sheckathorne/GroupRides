@@ -126,11 +126,12 @@ class Event(models.Model):
     ride_time = models.TimeField("Ride Time")
     time_zone = models.CharField("Time Zone", default="America/Chicago", choices=TIMEZONE_CHOICES, max_length=100)
     frequency = models.IntegerField("Recurrence", choices=RecurrenceFrequency.choices)
-    max_riders = models.IntegerField("Max Riders")
+    max_riders = models.PositiveIntegerField("Max Riders")
     is_canceled = models.BooleanField("Canceled", default=False)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
     group_classification = models.CharField("Classification", choices=GroupClassification.choices, max_length=2)
-    ride_pace = models.CharField("Pace", max_length=10)
+    lower_pace_range = models.PositiveIntegerField("Lower Pace Range")
+    upper_pace_range = models.PositiveIntegerField("Upper Pace Range")
 
     def __str__(self):
         return self.name
@@ -157,7 +158,8 @@ class Event(models.Model):
                     is_canceled=self.is_canceled,
                     route=self.route,
                     group_classification=self.group_classification,
-                    ride_pace=self.ride_pace
+                    lower_pace_range=self.lower_pace_range,
+                    upper_pace_range=self.upper_pace_range
                 )
 
 
@@ -187,11 +189,12 @@ class EventOccurence(models.Model):
     ride_date = models.DateField("Ride Date")
     ride_time = models.TimeField("Ride Time")
     time_zone = models.CharField("Time Zone", default="America/Chicago", choices=TIMEZONE_CHOICES, max_length=100)
-    max_riders = models.IntegerField("Max Riders")
+    max_riders = models.PositiveIntegerField("Max Riders")
     is_canceled = models.BooleanField("Canceled", default=False)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
     group_classification = models.CharField("Classification", choices=GroupClassification.choices, max_length=2)
-    ride_pace = models.CharField("Pace", max_length=10)
+    lower_pace_range = models.PositiveIntegerField("Lower Pace Range")
+    upper_pace_range = models.PositiveIntegerField("Upper Pace Range")
 
     @property
     def time_until_ride(self):
@@ -267,21 +270,27 @@ class EventOccurenceMember(models.Model):
     role = models.IntegerField("Role", choices=RoleType.choices, default=2)
 
     @property
-    def ride_leader_name(self):
+    def ride_leader_user(self):
         leader = EventOccurenceMember.objects.get(
             event_occurence=self.event_occurence,
             role=EventOccurenceMember.RoleType.Leader
         ).user
 
+        return leader
+
+    @property
+    def ride_leader_name(self):
+        leader = self.ride_leader_user
         leader_name = f"{leader.first_name} {leader.last_name}"
         return leader_name
+
+    @property
+    def is_private(self):
+        return self.event_occurence.privacy == self.event_occurence.EventMemberType.Members
 
     def clean(self, *args, **kwargs):
         ride_is_full(self.event_occurence.max_riders, self.event_occurence.number_of_riders)
 
-        # If the ride is members-only, check the rider is a both
-        # (1) a member of the club hosting the ride and
-        # (2) the user's membership expires after the ride date
         if EventOccurence.EventMemberType(self.event_occurence.privacy) is self.event_occurence.EventMemberType.Members:
             occurence_club = self.event_occurence.club
             club_membership_exists = ClubMembership.objects.filter(user=self.user, club=occurence_club).exists()
@@ -296,7 +305,7 @@ class EventOccurenceMember(models.Model):
         ride_date = self.event_occurence.ride_date.strftime("%b %d %Y")
         first_name = self.user.first_name
         last_name = self.user.last_name
-        event_name = self.event_occurence.event.name
+        event_name = self.event_occurence.occurence_name
         return f"{event_name} - {ride_date} - {last_name}, {first_name} - {role}"
 
 
