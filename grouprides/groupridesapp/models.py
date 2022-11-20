@@ -23,6 +23,11 @@ def six_months_from(start_date, end_date):
         raise ValidationError('End date must be within 6 months of start date')
 
 
+def upper_greater_than_lower_pace(lower, upper):
+    if lower > upper:
+        raise ValidationError('Upper pace range should be greater than lower pace range')
+
+
 def ride_is_full(max_riders, number_of_riders):
     if number_of_riders >= max_riders:
         raise ValidationError('Ride is full.')
@@ -138,6 +143,7 @@ class Event(models.Model):
 
     def clean(self, *args, **kwargs):
         six_months_from(self.start_date, self.end_date)
+        upper_greater_than_lower_pace(self.lower_pace_range, self.upper_pace_range)
 
     def save(self, *args, **kwargs):
         created = self.pk is None

@@ -3,6 +3,27 @@
     <div class="card-body">
     {% for ride in my_upcoming_rides %}
         <div class="card mb-3 border-dark">
+            <div class="modal fade" id="deleteModal-{{ ride.id }}" tabindex="-1" aria-labelledby="deleteModal-{{ ride.id }}-label" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    Are you sure you want to cancel your registration for this ride?
+                  </div>
+                  <div class="modal-footer">
+
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <form method="post" action="{% url 'delete_registration' ride.id%}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Confirm</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
             {% with event_occurence=ride.event_occurence %}
             <h6 class="card-header">{{ event_occurence.ride_date|date:"M d, Y" }} - {{ event_occurence.ride_time|time:"g:i A" }} (in {{ event_occurence.time_until_ride }})
                 <span class="badge rounded-pill bg-danger">
@@ -11,40 +32,49 @@
                 </span>
             </h6>
             <div class="card-body">
-                <h6 class="card-title">{{ event_occurence.occurence_name }} led by {{ ride.ride_leader_name }}</h6>
-                <div class="row mb-3 d-flex align-items-center">
-                    <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-gauge-high"></i></div>
-                    <div class="col-lg-8 col-9">{{ event_occurence.group_classification_name }} / {{ event_occurence.lower_pace_range }} - {{ event_occurence.upper_pace_range }}mph</div>
-                </div>
-                {% with distance=ride.event_occurence.route.distance %}
-                <div class="row mb-3 d-flex align-items-center">
-                    <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-ruler-horizontal"></i></div>
-                    <div class="col-lg-8 col-9">{{ distance }} mile{{ distance|pluralize }}</div>
-                </div>
+                {% with yesno_args=ride.ride_leader_name|add:", no one" %}
+                <h6 class="card-title">{{ event_occurence.occurence_name }} led by {{ ride.ride_leader_name|yesno:yesno_args }}</h6>
                 {% endwith %}
-                <div class="row mb-3 d-flex align-items-center">
-                    <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-mountain"></i></div>
-                    <div class="col-lg-8 col-9">{{ event_occurence.route.elevation }}ft</div>
-                </div>
-                <div class="row mb-3 d-flex align-items-center">
-                    <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-location-dot"></i></div>
-                    <div class="col-lg-8 col-9">{{ event_occurence.route.start_location_name }}</div>
-                </div>
-                <div class="row mb-3 d-flex align-items-center">
-                    <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-route"></i></div>
-                    <div class="col-lg-8 col-9">Route URL Here</div>
-                </div>
-                {% with num_riders=event_occurence.number_of_riders %}
-                <div class="row mb-3 d-flex align-items-center">
-                    <div class="col-lg-1 col-3 d-flex justify-content-center"><i class="fa-solid fa-person-circle-plus"></i></div>
-                    <div class="col-lg-3 col-9">
-                        {{ num_riders }} rider{{ num_riders|pluralize }} of max {{ event_occurence.max_riders }} signed up
-                        <div class="progress">
-                            <div class="{{ event_occurence.progress_bar_class }}" role="progressbar" style="width: {{ event_occurence.percentage_full }}%" aria-valuenow={{ num_riders }} aria-valuemin="0" aria-valuemax={{ event_occurence.max_riders }}></div>
+                <div class="row">
+                    <div class="col-lg-4 col-sm-12">
+                        <div class="row mb-3 d-flex align-items-center">
+                            <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-gauge-high"></i></div>
+                            <div class="col-lg-9 col-9"><span class="fw-bolder group-class-{{ event_occurence.group_classification_name }}">{{ event_occurence.group_classification_name }}</span> / {{ event_occurence.lower_pace_range }} - {{ event_occurence.upper_pace_range }}mph</div>
+                        </div>
+                        {% with distance=ride.event_occurence.route.distance %}
+                        <div class="row mb-3 d-flex align-items-center">
+                            <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-ruler-horizontal"></i></div>
+                            <div class="col-lg-9 col-9">{{ distance }} mile{{ distance|pluralize }}</div>
+                        </div>
+                        {% endwith %}
+                        <div class="row mb-3 d-flex align-items-center">
+                            <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-mountain"></i></div>
+                            <div class="col-lg-9 col-9">{{ event_occurence.route.elevation }}ft</div>
                         </div>
                     </div>
+                    <div class="col-lg-4 col-sm-12">
+                        <div class="row mb-3 d-flex align-items-center">
+                            <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-location-dot"></i></div>
+                            <div class="col-lg-9 col-9">{{ event_occurence.route.start_location_name }}</div>
+                        </div>
+                        <div class="row mb-3 d-flex align-items-center">
+                            <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-route"></i></div>
+                            <div class="col-lg-9 col-9">Route URL Here</div>
+                        </div>
+                        {% with num_riders=event_occurence.number_of_riders %}
+                        <div class="row mb-3 d-flex align-items-center">
+                            <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-person-circle-plus"></i></div>
+                            <div class="col-lg-9 col-9">
+                                <div class="progress">
+                                    <div class="{{ event_occurence.progress_bar_class }}" role="progressbar" style="width: {{ event_occurence.percentage_full }}%" aria-valuenow={{ num_riders }} aria-valuemin="0" aria-valuemax={{ event_occurence.max_riders }}>
+                                        {{ num_riders }} / {{ event_occurence.max_riders }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    </div>
                 </div>
-                {% endwith %}
                 <div class="row">
                     <div class="col-lg-4 col-xs-12 mt-1 mb-1">
                         <button href="#" class="btn btn-primary w-100" type="button">Ride discussion</button>
@@ -53,11 +83,9 @@
                         <button href="#" class="btn btn-primary w-100" type="button">View Attendees</button>
                     </div>
                     <div class="col-lg-4 col-xs-12 mt-1 mb-1">
-                        <form method="post" action="{% url 'delete_registration' ride.id%}">
-                        {% csrf_token %}
-
-                            <button class="btn btn-danger w-100" type="submit">Cancel Reservation</button>,
-                        </form>
+                        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ ride.id }}">
+                            Cancel Reservation
+                        </button>
                     </div>
                 </div>
             </div>

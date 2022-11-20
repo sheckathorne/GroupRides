@@ -1,4 +1,6 @@
 {% extends "groupridesapp/header.html" %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'groupridesapp/main.css' %}">
 {% block content %}
     {% include 'groupridesapp/includes/my_rides.html' with my_upcoming_rides=my_upcoming_rides %}
     <div class="card border-primary mt-2">
