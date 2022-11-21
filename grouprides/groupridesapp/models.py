@@ -274,7 +274,7 @@ class EventOccurenceMember(models.Model):
         Leader = (1, "Ride Leader")
         Rider = (2, "Rider")
 
-    event_occurence = models.ForeignKey(EventOccurence, on_delete=models.CASCADE)
+    event_occurence = models.ForeignKey(EventOccurence, related_name="event_occurence_member", on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     role = models.IntegerField("Role", choices=RoleType.choices, default=2)
 

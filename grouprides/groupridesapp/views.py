@@ -1,7 +1,7 @@
 import datetime
 
 from django.shortcuts import render, get_object_or_404
-from .models import Club, EventOccurence, EventOccurenceMember
+from .models import Club, EventOccurence, EventOccurenceMember, ClubMembership
 from django.db.models import Q
 from .forms import DeleteRideRegistrationForm
 from django.contrib.auth.decorators import login_required
@@ -11,16 +11,45 @@ from django.http import HttpResponseRedirect
 
 @login_required(login_url='/login')
 def homepage(request):
-    next_week = datetime.date.today() + datetime.timedelta(days=22)
+    next_ten_days = datetime.date.today() + datetime.timedelta(days=11)
+
     my_upcoming_rides = EventOccurenceMember.objects.filter(
         user=request.user,
-        event_occurence__ride_date__lte=next_week,
+        event_occurence__ride_date__lte=next_ten_days,
         event_occurence__ride_date__gte=datetime.date.today()
     ).order_by('event_occurence__ride_date')
+
+    available_rides = EventOccurence.objects.exclude(
+        # Exclude rides which I'm already subscribed to
+        pk__in=EventOccurenceMember.objects.filter(
+            user=request.user
+        )
+    ).filter(
+        # Club rides which are private and I am a member
+        Q(
+            Q(privacy=EventOccurence.EventMemberType.Members),
+            Q(club__in=ClubMembership.objects.filter(
+                user=request.user,
+                membership_type__lte=3).values('club'))
+        ) |
+        # Club rides which are open, but I am not a member
+        Q(
+            Q(privacy=EventOccurence.EventMemberType.Members),
+            Q(club__in=ClubMembership.objects.filter(
+                user=request.user,
+                membership_type__lte=4).values('club'))
+        )
+    ).filter(
+        # only show rides in the available window
+        ride_date__lte=next_ten_days,
+        ride_date__gte=datetime.date.today()
+    )
 
     my_clubs = Club.objects.filter(
         clubmembership__user=request.user
     )
+
+    print (available_rides)
 
     return render(request=request,
                   template_name="groupridesapp/home.html",
@@ -36,6 +65,8 @@ def club_home(request, club_id):
     return render(request=request,
                   template_name="groupridesapp/club_home.html",
                   context={"event_occurences": event_occurences})
+
+
 
 
 @login_required
