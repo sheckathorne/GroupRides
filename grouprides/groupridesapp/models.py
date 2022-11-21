@@ -76,7 +76,7 @@ class Club(models.Model):
 class Route(models.Model):
     name = models.CharField("Route Name", max_length=240)
     start_location_name = models.CharField("Start Location", max_length=240)
-    route_url = models.CharField("Route URL", max_length=255)
+    url = models.CharField("Route URL", max_length=255)
     distance = models.DecimalField("Distance", max_digits=7, decimal_places=2)
     elevation = models.IntegerField("Elevation")
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -267,6 +267,9 @@ class EventOccurence(models.Model):
 
 
 class EventOccurenceMember(models.Model):
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['event_occurence', 'user'], name='unique_event_user')]
+
     class RoleType(models.IntegerChoices):
         Leader = (1, "Ride Leader")
         Rider = (2, "Rider")
@@ -312,6 +315,7 @@ class EventOccurenceMember(models.Model):
     def clean(self, *args, **kwargs):
         ride_is_full(self.event_occurence.max_riders, self.event_occurence.number_of_riders)
 
+        # prevent non-members from joining members-only ride
         if EventOccurence.EventMemberType(self.event_occurence.privacy) is self.event_occurence.EventMemberType.Members:
             occurence_club = self.event_occurence.club
             club_membership_exists = ClubMembership.objects.filter(user=self.user, club=occurence_club).exists()
