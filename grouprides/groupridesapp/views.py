@@ -25,25 +25,14 @@ def homepage(request):
             user=request.user
         )
     ).filter(
-        # Club rides which are private and I am a member
-        Q(
-            Q(privacy=EventOccurence.EventMemberType.Members),
-            Q(club__in=ClubMembership.objects.filter(
-                user=request.user,
-                membership_type__lte=3).values('club'))
-        ) |
-        # Club rides which are open, but I am not a member
-        Q(
-            Q(privacy=EventOccurence.EventMemberType.Members),
-            Q(club__in=ClubMembership.objects.filter(
-                user=request.user,
-                membership_type__lte=4).values('club'))
-        )
+        # Rides where I have joined the club regardless of membership level
+        privacy__lte=EventOccurence.EventMemberType.Open,
+        club__in=ClubMembership.objects.filter(
+            user=request.user).values('club')
     ).filter(
-        # only show rides in the available window
         ride_date__lte=next_ten_days,
         ride_date__gte=datetime.date.today()
-    )
+    ).order_by('ride_date')
 
     my_clubs = Club.objects.filter(
         clubmembership__user=request.user
@@ -54,7 +43,8 @@ def homepage(request):
                   context={
                     "my_clubs": my_clubs,
                     "my_upcoming_rides": my_upcoming_rides,
-                    "available_rides": available_rides
+                    "available_rides": available_rides,
+                    "user": request.user
                   })
 
 

@@ -2,38 +2,10 @@
     <h5 class="card-header bg-primary bg-gradient text-light">My Upcoming Rides</h5>
     <div class="card-body">
     {% for ride in my_upcoming_rides %}
-        <div class="card mb-3 border-dark">
-            <div class="modal fade" id="deleteModal-{{ ride.id }}" tabindex="-1" aria-labelledby="deleteModal-{{ ride.id }}-label" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Cancel Reservation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    Are you sure you want to cancel your registration for this ride?
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <form method="post" action="{% url 'delete_registration' ride.id%}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Confirm</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {% with event_occurence=ride.event_occurence %}
-            {% include 'groupridesapp/ride_card.html' with ride=ride event_occurence=event_occurence %}
-            <div class="card-footer">
-                {% if event_occurence.club is not None %}
-                <small>{{ event_occurence.club.name}}</small>
-                {% else %}
-                <small>No club affiliation</small>
-                {% endif %}
-            </div>
-            {% endwith %}
-        </div>
+        {% with event_occurence=ride.event_occurence %}
+            {% include 'groupridesapp/ride_card/delete_confirm_modal.html' with ride=ride %}
+            {% include 'groupridesapp/ride_card/ride_card.html' with ride=ride event_occurence=event_occurence is_registered=True user=user %}
+        {% endwith %}
     {% empty %}
         Not currently registered for any rides in the next week. (button to find/view rides)
     {% endfor %}

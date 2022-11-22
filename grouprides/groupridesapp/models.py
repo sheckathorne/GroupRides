@@ -6,6 +6,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from users.models import CustomUser
 from dateutil.relativedelta import relativedelta
+from django.db.models import Q
 
 
 def length_of_five(value):
@@ -119,8 +120,8 @@ class Event(models.Model):
         NonMember = (4, "Non-Member")
 
     class EventMemberType(models.IntegerChoices):
-        Members = (1, "Current Members")
-        Open = (2, "Open")
+        Members = (3, "Current Members")
+        Open = (4, "Open")
 
     name = models.CharField("Event Name", max_length=100)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -184,8 +185,8 @@ class EventOccurence(models.Model):
         zip(pytz.all_timezones, pytz.all_timezones)
 
     class EventMemberType(models.IntegerChoices):
-        Members = (1, "Current Members")
-        Open = (2, "Open")
+        Members = (3, "Current Members")
+        Open = (4, "Open")
 
     event = models.ForeignKey(Event, null=True, blank=True, on_delete=models.CASCADE)
     occurence_name = models.CharField("Event Name", max_length=100)
@@ -249,6 +250,21 @@ class EventOccurence(models.Model):
                 leader_name = leader_name + f" + {leader.first_name} {leader.last_name}"
 
         return leader_name
+
+    def can_be_joined_by(self, user):
+        return EventOccurence.objects.filter(
+            Q(
+                Q(privacy=EventOccurence.EventMemberType.Members),
+                Q(club__in=ClubMembership.objects.filter(
+                    user=user,
+                    membership_type__lte=EventOccurence.EventMemberType.Members.value).values('club'))
+            ) |
+            Q(
+                Q(privacy=EventOccurence.EventMemberType.Open),
+                Q(club__in=ClubMembership.objects.filter(
+                    user=user,
+                    membership_type__lte=EventOccurence.EventMemberType.Open.value).values('club'))
+            )).filter(pk=self.pk).exists()
 
     @property
     def number_of_riders(self):

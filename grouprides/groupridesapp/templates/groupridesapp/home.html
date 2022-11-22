@@ -1,6 +1,6 @@
 {% extends "groupridesapp/header.html" %}
 {% block content %}
-    {% include 'groupridesapp/my_rides.html' with my_upcoming_rides=my_upcoming_rides %}
+    {% include 'groupridesapp/my_rides.html' with my_upcoming_rides=my_upcoming_rides user=user %}
     <div class="card border-primary mt-2">
         <h5 class="card-header bg-primary bg-gradient text-light">My Clubs</h5>
         {% for club in my_clubs %}
@@ -10,10 +10,5 @@
             </div>
         {% endfor %}
     </div>
-    <div class="card border-primary mt-2">
-        <h5 class="card-header bg-primary bg-gradient text-light">Available Rides</h5>
-        {% for event_occurence in available_rides %}
-
-        {% endfor %}
-    </div>
+    {% include 'groupridesapp/available_rides.html' with available_rides=available_rides user=user %}
 {% endblock content %}
