@@ -203,6 +203,15 @@ class EventOccurence(models.Model):
     upper_pace_range = models.PositiveIntegerField("Upper Pace Range")
 
     @property
+    def ride_leader_users(self):
+        leaders = EventOccurenceMember.objects.filter(
+            event_occurence=self,
+            role=EventOccurenceMember.RoleType.Leader
+        )
+
+        return list(leaders)
+
+    @property
     def time_until_ride(self):
         tz = pytz.timezone(self.time_zone)
 
@@ -212,9 +221,34 @@ class EventOccurence(models.Model):
         rd = relativedelta(aware_ride_datetime, current_datetime)
 
         time_diff = (
-            f"{rd.days} day{'s'[:rd.days^1]} and {rd.hours} hour{'s'[:rd.hours^1]}" if rd.days > 0 else
-            f"{rd.hours} hour{'s'[:rd.hours^1]}")
-        return time_diff
+            f"{abs(rd.days)} day{'s'[:abs(rd.days)^1]} and {abs(rd.hours)} hour{'s'[:abs(rd.hours)^1]}" if abs(rd.days) > 0 else
+            f"{abs(rd.hours)} hour{'s'[:abs(rd.hours)^1]}")
+
+        if rd.days + rd.hours == 0:
+            return "Now"
+        elif rd.days + rd.hours > 0:
+            return f"(in {time_diff})"
+        else:
+            return f"({time_diff} ago)"
+
+    @property
+    def is_private(self):
+        return self.privacy == self.EventMemberType.Members
+
+    @property
+    def ride_leader_name(self):
+        leader_name = ""
+
+        if len(self.ride_leader_users) == 1:
+            leader = self.ride_leader_users[0].user
+            leader_name = f"{leader.first_name} {leader.last_name}"
+        elif len(self.ride_leader_users) > 1:
+            leader = self.ride_leader_users[0].user
+            leader_name = f"{leader.first_name} {leader.last_name}"
+            for i in range(1, len(self.ride_leader_users)):
+                leader_name = leader_name + f" + {leader.first_name} {leader.last_name}"
+
+        return leader_name
 
     @property
     def number_of_riders(self):
@@ -252,7 +286,6 @@ class EventOccurence(models.Model):
         max_is_fewer_than_riders(self.max_riders, self.number_of_riders)
 
     def save(self, *args, **kwargs):
-        print('save is being called')
         created = self.pk is None
         super().save(*args, **kwargs)
         if created:
@@ -281,32 +314,6 @@ class EventOccurenceMember(models.Model):
     @property
     def is_ride_leader(self):
         return self.role == self.RoleType.Leader
-
-    @property
-    def ride_leader_users(self):
-        leaders = EventOccurenceMember.objects.filter(
-            event_occurence=self.event_occurence,
-            role=EventOccurenceMember.RoleType.Leader
-        )
-
-        return list(leaders)
-
-    @property
-    def ride_leader_name(self):
-        leader_name = ""
-
-        if len(self.ride_leader_users) == 1:
-            leader = self.ride_leader_users[0].user
-            leader_name = f"{leader.first_name} {leader.last_name}"
-        elif len(self.ride_leader_users) > 1:
-            leader = self.ride_leader_users[0].user
-            print(leader.first_name)
-            leader_name = f"{leader.first_name} {leader.last_name}"
-            for i in range(1, len(self.ride_leader_users)):
-                leader = self.ride_leader_users[i].user
-                leader_name = leader_name + f" + {leader.first_name} {leader.last_name}"
-
-        return leader_name
 
     @property
     def is_private(self):

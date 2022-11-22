@@ -53,8 +53,9 @@ def homepage(request):
                   template_name="groupridesapp/home.html",
                   context={
                     "my_clubs": my_clubs,
-                    "my_upcoming_rides": my_upcoming_rides}
-                  )
+                    "my_upcoming_rides": my_upcoming_rides,
+                    "available_rides": available_rides
+                  })
 
 
 def club_home(request, club_id):
@@ -63,8 +64,6 @@ def club_home(request, club_id):
     return render(request=request,
                   template_name="groupridesapp/club_home.html",
                   context={"event_occurences": event_occurences})
-
-
 
 
 @login_required

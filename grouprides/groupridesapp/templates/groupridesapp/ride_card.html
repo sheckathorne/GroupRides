@@ -1,18 +1,18 @@
-{% with ride_is_canceled=ride.event_occurence.is_canceled canceled=ride.event_occurence.is_canceled|yesno:" canceled,," %}
+{% with ride_is_canceled=event_occurence.is_canceled canceled=event_occurence.is_canceled|yesno:" canceled,," %}
 <h6 class="card-header{{ canceled }}">
     <div class="row d-flex align-items-center">
-        <div class="col-10">{{ event_occurence.ride_date|date:"M d, Y" }} - {{ event_occurence.ride_time|time:"g:i A" }} (in {{ event_occurence.time_until_ride }})
+        <div class="col-10">{{ event_occurence.ride_date|date:"M d, Y" }} - {{ event_occurence.ride_time|time:"g:i A" }} {{ event_occurence.time_until_ride }}
             {% if ride_is_canceled %}
                 <span class="badge rounded-pill bg-danger">
                     <span class="visually-hidden"></span>
                     Ride Canceled
                 </span>
             {% else %}
-                {% with bgclass=ride.is_private|yesno:"bg-primary,bg-success" %}
+                {% with bgclass=event_occurence.is_private|yesno:"bg-primary,bg-success" %}
                 <span class="badge rounded-pill {{ bgclass }}">
                 {% endwith %}
                 {{ ride.is_private|yesno:"Private Ride,Open Ride"}}
-                    <span class="visually-hidden">{{ ride.is_private|yesno:"Private Ride,Open Ride"}}</span>
+                    <span class="visually-hidden">{{ event_occurence.is_private|yesno:"Private Ride,Open Ride"}}</span>
                 </span>
             {% endif %}
         </div>
@@ -32,8 +32,8 @@
     </div>
 </h6>
 <div class="card-body">
-{% with yesno_args=ride.ride_leader_name|add:", no one" %}
-    <h6 class="card-title{{ canceled }}">{{ event_occurence.occurence_name }} led by {{ ride.ride_leader_name|yesno:yesno_args }}</h6>
+{% with yesno_args=event_occurence.ride_leader_name|add:", no one" %}
+    <h6 class="card-title{{ canceled }}">{{ event_occurence.occurence_name }} led by {{ event_occurence.ride_leader_name|yesno:yesno_args }}</h6>
     {% endwith %}
     <div class="row">
         <div class="col-lg-4 col-sm-12">
@@ -51,7 +51,7 @@
             </div>
             {% endwith %}
             <div class="row mb-3 d-flex align-items-center">
-                {% if ride.event_occurence.is_canceled %}
+                {% if event_occurence.is_canceled %}
                 <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-gauge-high canceled"></i></div>
                 {% else %}
                 <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-gauge-high group-class-{{ event_occurence.group_classification_name }}"></i></div>
@@ -60,7 +60,7 @@
             </div>
         </div>
         <div class="col-lg-4 col-sm-12">
-            {% with distance=ride.event_occurence.route.distance %}
+            {% with distance=event_occurence.route.distance %}
             <div class="row mb-3 d-flex align-items-center">
                 <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-ruler-horizontal{{ canceled }}"></i></div>
                 <div class="col-lg-9 col-9{{ canceled }}">{{ distance }} mile{{ distance|pluralize }}</div>
@@ -78,7 +78,7 @@
             </div>
             <div class="row mb-3 d-flex align-items-center">
                 <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-route{{ canceled }}"></i></div>
-                <div class="col-lg-9 col-9{{ canceled }}"><a class="{{ canceled }}" href="{{ event_occurence.route.url }}">{{ event_occurence.route.name }}</a></div>
+                <div class="col-lg-9 col-9{{ canceled }}"><a class="{{ canceled }}" href="{{ event_occurence.route.url }}" target="_blank">{{ event_occurence.route.name }}</a></div>
             </div>
         </div>
     </div>

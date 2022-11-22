@@ -24,7 +24,7 @@
               </div>
             </div>
             {% with event_occurence=ride.event_occurence %}
-            {% include 'groupridesapp/subscribed_ride_card.html' with ride=ride %}
+            {% include 'groupridesapp/ride_card.html' with ride=ride event_occurence=event_occurence %}
             <div class="card-footer">
                 {% if event_occurence.club is not None %}
                 <small>{{ event_occurence.club.name}}</small>
