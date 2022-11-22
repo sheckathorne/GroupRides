@@ -3,8 +3,8 @@
     <div class="card-body">
     {% for ride in my_upcoming_rides %}
         {% with event_occurence=ride.event_occurence %}
-            {% include 'groupridesapp/ride_card/delete_confirm_modal.html' with ride=ride %}
-            {% include 'groupridesapp/ride_card/ride_card.html' with ride=ride event_occurence=event_occurence is_registered=True user=user %}
+            {% include 'groupridesapp/ride_card/delete_confirm_modal.html' %}
+            {% include 'groupridesapp/ride_card/ride_card.html' with is_registered=True user=user %}
         {% endwith %}
     {% empty %}
         Not currently registered for any rides in the next week. (button to find/view rides)
