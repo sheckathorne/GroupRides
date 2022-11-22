@@ -24,27 +24,7 @@
               </div>
             </div>
             {% with event_occurence=ride.event_occurence %}
-                {% if ride.event_occurence.is_canceled %}
-                    {% include 'groupridesapp/includes/canceled_ride.html' with ride=ride %}
-                {% else %}
-                    {% include 'groupridesapp/includes/active_ride.html' with ride=ride %}
-                {% endif %}
-                <div class="row">
-                    <div class="col-lg-4 col-xs-12 mt-1 mb-1">
-                        <button href="#" class="btn btn-primary w-100" type="button">Ride Discussion</button>
-                    </div>
-                    <div class="col-lg-4 col-xs-12 mt-1 mb-1">
-                        <a href="{% url 'ride_attendees' ride.id%}">
-                            <button  class="btn btn-primary w-100" type="button">View Attendees</button>
-                        </a>
-                    </div>
-                    <div class="col-lg-4 col-xs-12 mt-1 mb-1">
-                        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ ride.id }}">
-                            Cancel Reservation
-                        </button>
-                    </div>
-                </div>
-            </div>
+            {% include 'groupridesapp/subscribed_ride_card.html' with ride=ride %}
             <div class="card-footer">
                 {% if event_occurence.club is not None %}
                 <small>{{ event_occurence.club.name}}</small>

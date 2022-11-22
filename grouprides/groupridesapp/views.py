@@ -49,8 +49,6 @@ def homepage(request):
         clubmembership__user=request.user
     )
 
-    print (available_rides)
-
     return render(request=request,
                   template_name="groupridesapp/home.html",
                   context={
@@ -101,16 +99,11 @@ def delete_ride_reigstration(request, registration_id):
 
 @login_required
 def ride_attendees(request, event_occurence_member_id):
-
     event_occurence = get_object_or_404(EventOccurenceMember, id=event_occurence_member_id).event_occurence
-    print(event_occurence)
 
     event_members = EventOccurenceMember.objects.filter(
         event_occurence=event_occurence
     ).order_by('role')
-
-    for member in event_members:
-        print(f"{EventOccurenceMember.RoleType(member.role).label} - {member.user.first_name} {member.user.last_name}")
 
     return render(request=request,
                   template_name="groupridesapp/ride_attendees.html",

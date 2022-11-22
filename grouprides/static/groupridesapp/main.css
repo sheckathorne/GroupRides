@@ -186,5 +186,9 @@ a.article-title:hover {
 }
 
 .canceled {
-    color: red !important;
+    color: #9c9a9a !important;
+}
+
+.dropdown-toggle::after {
+    display: none;
 }
