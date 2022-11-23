@@ -6,3 +6,9 @@ class DeleteRideRegistrationForm(forms.ModelForm):
     class Meta:
         model = EventOccurenceMember
         fields = []
+
+
+class CreateRideRegistrationForm(forms.ModelForm):
+    class Meta:
+        model = EventOccurenceMember
+        fields = []

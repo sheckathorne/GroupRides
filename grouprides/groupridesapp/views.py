@@ -3,7 +3,7 @@ import datetime
 from django.shortcuts import render, get_object_or_404
 from .models import Club, EventOccurence, EventOccurenceMember, ClubMembership
 from django.db.models import Q
-from .forms import DeleteRideRegistrationForm
+from .forms import DeleteRideRegistrationForm, CreateRideRegistrationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -23,7 +23,7 @@ def homepage(request):
         # Exclude rides which I'm already subscribed to
         pk__in=EventOccurenceMember.objects.filter(
             user=request.user
-        )
+        ).values('event_occurence')
     ).filter(
         # Rides where I have joined the club regardless of membership level
         privacy__lte=EventOccurence.EventMemberType.Open,
@@ -57,13 +57,13 @@ def club_home(request, club_id):
 
 
 @login_required
-def delete_ride_reigstration(request, registration_id):
+def delete_ride_reigstration(request, event_occurence_id):
     event_occurences = EventOccurenceMember.objects.filter(
         Q(event_occurence__ride_date__gte=datetime.date.today()),
         Q(event_occurence__created_by=request.user) | Q(user=request.user)
     )
 
-    registration_to_delete = get_object_or_404(event_occurences, id=registration_id)
+    registration_to_delete = get_object_or_404(event_occurences, id=event_occurence_id)
 
     if request.method == 'POST':
         form = DeleteRideRegistrationForm(request.POST, instance=registration_to_delete)
@@ -79,11 +79,27 @@ def delete_ride_reigstration(request, registration_id):
             form = DeleteRideRegistrationForm(instance=registration_to_delete)
 
         template_vars = {'form': form}
+
         return render(
             request=request,
-            template_name='confirm_ride_deregistration.html',
             context=template_vars
         )
+
+
+@login_required
+def create_ride_registration(request, event_occurence_id):
+    if request.method == 'POST':
+        event_occurence = get_object_or_404(EventOccurence, id=event_occurence_id)
+
+        data = {
+            'user': request.user,
+            'event_occurence': event_occurence,
+            'role': 2
+        }
+
+        EventOccurenceMember.objects.create(**data)
+        messages.success(request, "Successfully registered to ride.")
+        return HttpResponseRedirect("/")
 
 
 @login_required

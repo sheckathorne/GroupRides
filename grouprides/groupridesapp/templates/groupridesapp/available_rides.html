@@ -1,8 +1,13 @@
+{% load groupridesapp_extras %}
 <div class="card border-primary mt-2">
     <h5 class="card-header bg-primary bg-gradient text-light">Available Rides</h5>
     <div class="card-body">
     {% for event_occurence in available_rides %}
-        {% include 'groupridesapp/ride_card/ride_card.html' with event_occurence=event_occurence is_registered=False %}
+        {% can_register_to_ride user=user event_occurence=event_occurence as user_can_register %}
+            {% if user_can_register %}
+                {% include 'groupridesapp/ride_card/create_confirm_modal.html' %}
+            {% endif %}
+            {% include 'groupridesapp/ride_card/ride_card.html' with event_occurence=event_occurence is_registered=False %}
     {% empty %}
         No rides available for you to join
     {% endfor %}
