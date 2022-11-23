@@ -2,7 +2,7 @@
 <div class="card mb-3 border-dark">
     <h6 class="card-header{{ canceled }}">
         <div class="row d-flex align-items-center">
-            <div class="col">
+            <div class="col-auto">
                 {% if is_registered %}
                 <div class="btn-group dropleft">
                     <button type="button" class="btn btn-transparent dropdown-toggle no-dropdown-arrow" data-bs-toggle="dropdown" aria-expanded="false">
@@ -16,7 +16,6 @@
                     </div>
                 </div>
                 {% else %}
-
                     {% if user_can_register %}
                         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createModal-{{ event_occurence.id }}">
                             <i class="bi bi-plus-lg"></i>
@@ -27,6 +26,8 @@
                         </button>
                     {% endif %}
                 {% endif %}
+            </div>
+            <div class="col">
                 <span>
                     {{ event_occurence.ride_date|date:"M d, Y" }} - {{ event_occurence.ride_time|time:"g:i A" }} {{ event_occurence.time_until_ride }}
                 </span>
