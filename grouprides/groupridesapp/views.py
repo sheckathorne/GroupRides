@@ -8,8 +8,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 
+
 def days_from_today(n):
     return datetime.date.today() + datetime.timedelta(days=n)
+
 
 @login_required(login_url='/login')
 def homepage(request):
@@ -20,21 +22,6 @@ def homepage(request):
         event_occurence__ride_date__lte=days_in_the_future,
         event_occurence__ride_date__gte=datetime.date.today()
     ).order_by('event_occurence__ride_date')
-
-    available_rides = EventOccurence.objects.exclude(
-        # Exclude rides which I'm already subscribed to
-        pk__in=EventOccurenceMember.objects.filter(
-            user=request.user
-        ).values('event_occurence')
-    ).filter(
-        # Rides where I have joined the club regardless of membership level
-        privacy__lte=EventOccurence.EventMemberType.Open,
-        club__in=ClubMembership.objects.filter(
-            user=request.user).values('club')
-    ).filter(
-        ride_date__lte=days_in_the_future,
-        ride_date__gte=datetime.date.today()
-    ).order_by('ride_date')
 
     my_clubs = Club.objects.filter(
         clubmembership__user=request.user
@@ -61,13 +48,41 @@ def my_rides(request):
     ).order_by('event_occurence__ride_date')
 
     return render(request=request,
-                  template_name="groupridesapp/my_rides.html",
+                  template_name="groupridesapp/rides/my_rides.html",
                   context={
                     "my_upcoming_rides": my_upcoming_rides,
                     "user": request.user
                   })
 
 
+@login_required(login_url='/login')
+def available_rides(request):
+    days_in_the_future = days_from_today(11)
+
+    available_rides_queryset = EventOccurence.objects.exclude(
+        # Exclude rides which I'm already subscribed to
+        pk__in=EventOccurenceMember.objects.filter(
+            user=request.user
+        ).values('event_occurence')
+    ).filter(
+        # Rides where I have joined the club regardless of membership level
+        privacy__lte=EventOccurence.EventMemberType.Open,
+        club__in=ClubMembership.objects.filter(
+            user=request.user).values('club')
+    ).filter(
+        ride_date__lte=days_in_the_future,
+        ride_date__gte=datetime.date.today()
+    ).order_by('ride_date')
+
+    return render(request=request,
+                  template_name="groupridesapp/rides/available_rides.html",
+                  context={
+                    "available_rides": available_rides_queryset,
+                    "user": request.user
+                  })
+
+
+@login_required(login_url='/login')
 def club_home(request, club_id):
     event_occurences = EventOccurence.objects.filter(event__club__pk=club_id)
 
@@ -131,7 +146,7 @@ def ride_attendees(request, event_occurence_member_id):
     ).order_by('role')
 
     return render(request=request,
-                  template_name="groupridesapp/ride_attendees.html",
+                  template_name="groupridesapp/rides/ride_attendees.html",
                   context={
                       "event_occurence": event_occurence,
                       "event_members": event_members})
