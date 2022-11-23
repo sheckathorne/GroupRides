@@ -189,6 +189,8 @@ a.article-title:hover {
     color: #9c9a9a !important;
 }
 
-.dropdown-toggle::after {
-    display: none;
+.btn-transparent {
+    background-color: transparent;
+    color: black;
+    border: none;
 }

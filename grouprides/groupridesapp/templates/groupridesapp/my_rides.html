@@ -1,6 +1,6 @@
-<div class="card border-primary mt-2">
-    <h5 class="card-header bg-primary bg-gradient text-light">My Upcoming Rides</h5>
-    <div class="card-body">
+{% extends "groupridesapp/header.html" %}
+{% block content %}
+    <h5  class="card-header bg-primary bg-gradient text-light mt-2 mb-2">My Upcoming Rides</h5>
     {% for ride in my_upcoming_rides %}
         {% with event_occurence=ride.event_occurence %}
             {% include 'groupridesapp/ride_card/delete_confirm_modal.html' %}
@@ -9,5 +9,4 @@
     {% empty %}
         Not currently registered for any rides in the next week. (button to find/view rides)
     {% endfor %}
-    </div>
-</div>
+{% endblock content %}

@@ -189,7 +189,7 @@ a.article-title:hover {
     color: #9c9a9a !important;
 }
 
-.dropdown-toggle::after {
+.no-dropdown-arrow.dropdown-toggle::after {
     display: none;
 }
 

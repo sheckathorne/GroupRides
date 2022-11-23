@@ -8,14 +8,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 
+def days_from_today(n):
+    return datetime.date.today() + datetime.timedelta(days=n)
 
 @login_required(login_url='/login')
 def homepage(request):
-    next_ten_days = datetime.date.today() + datetime.timedelta(days=11)
+    days_in_the_future = days_from_today(11)
 
     my_upcoming_rides = EventOccurenceMember.objects.filter(
         user=request.user,
-        event_occurence__ride_date__lte=next_ten_days,
+        event_occurence__ride_date__lte=days_in_the_future,
         event_occurence__ride_date__gte=datetime.date.today()
     ).order_by('event_occurence__ride_date')
 
@@ -30,7 +32,7 @@ def homepage(request):
         club__in=ClubMembership.objects.filter(
             user=request.user).values('club')
     ).filter(
-        ride_date__lte=next_ten_days,
+        ride_date__lte=days_in_the_future,
         ride_date__gte=datetime.date.today()
     ).order_by('ride_date')
 
@@ -48,6 +50,24 @@ def homepage(request):
                   })
 
 
+@login_required(login_url='/login')
+def my_rides(request):
+    days_in_the_future = days_from_today(11)
+
+    my_upcoming_rides = EventOccurenceMember.objects.filter(
+        user=request.user,
+        event_occurence__ride_date__lte=days_in_the_future,
+        event_occurence__ride_date__gte=datetime.date.today()
+    ).order_by('event_occurence__ride_date')
+
+    return render(request=request,
+                  template_name="groupridesapp/my_rides.html",
+                  context={
+                    "my_upcoming_rides": my_upcoming_rides,
+                    "user": request.user
+                  })
+
+
 def club_home(request, club_id):
     event_occurences = EventOccurence.objects.filter(event__club__pk=club_id)
 
@@ -56,7 +76,7 @@ def club_home(request, club_id):
                   context={"event_occurences": event_occurences})
 
 
-@login_required
+@login_required(login_url='/login')
 def delete_ride_reigstration(request, event_occurence_id):
     event_occurences = EventOccurenceMember.objects.filter(
         Q(event_occurence__ride_date__gte=datetime.date.today()),
@@ -86,7 +106,7 @@ def delete_ride_reigstration(request, event_occurence_id):
         )
 
 
-@login_required
+@login_required(login_url='/login')
 def create_ride_registration(request, event_occurence_id):
     if request.method == 'POST':
         event_occurence = get_object_or_404(EventOccurence, id=event_occurence_id)
@@ -102,7 +122,7 @@ def create_ride_registration(request, event_occurence_id):
         return HttpResponseRedirect("/")
 
 
-@login_required
+@login_required(login_url='/login')
 def ride_attendees(request, event_occurence_member_id):
     event_occurence = get_object_or_404(EventOccurenceMember, id=event_occurence_member_id).event_occurence
 
