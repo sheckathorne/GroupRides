@@ -57,6 +57,7 @@ class Club(models.Model):
     private = models.BooleanField("Private")
     create_date = models.DateField("Date Created", auto_now_add=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    slug = models.SlugField()
 
     def save(self, *args, **kwargs):
         created = self.pk is None

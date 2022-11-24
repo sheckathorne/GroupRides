@@ -1,14 +1,34 @@
 {% extends "groupridesapp/header.html" %}
 {% block content %}
-{% load groupridesapp_extras %}
 <h5 class="card-header navbar-color text-light mt-2 mb-2">Available Rides</h5>
-{% for event_occurence in available_rides %}
-    {% can_register_to_ride user=user event_occurence=event_occurence as user_can_register %}
-        {% if user_can_register %}
-            {% include 'groupridesapp/rides/ride_card/create_confirm_modal.html' %}
-        {% endif %}
-        {% include 'groupridesapp/rides/ride_card/ride_card.html' with event_occurence=event_occurence is_registered=False %}
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Club Name</th>
+            <th scope="col">Total</th>
+            <th scope="col">A</th>
+            <th scope="col">B</th>
+            <th scope="col">C</th>
+            <th scope="col">D</th>
+            <th scope="col">Novice</th>
+            <th scope="col">No Class</th>
+        </tr>
+    </thead>
+    <tbody>
+{% for club in available_rides_clubs %}
+        <tr>
+            <td><a href="{% url 'available_rides' club_id=club.id slug=club.slug %}">{{club.name}}</a></td>
+            <td><a href="{% url 'available_rides' club_id=club.id slug=club.slug %}">{{club.total}}</a></td>
+            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='A' slug=club.slug %}">{{club.A}}</a></td>
+            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='B' slug=club.slug %}">{{club.B}}</a></td>
+            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='C' slug=club.slug %}">{{club.C}}</a></td>
+            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='D' slug=club.slug %}">{{club.D}}</a></td>
+            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='N' slug=club.slug %}">{{club.N}}</a></td>
+            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='NA' slug=club.slug %}">{{club.NA}}</a></td>
+        </tr>
 {% empty %}
-    No rides available for you to join
+      No rides available for you to join
 {% endfor %}
+    </tbody>
+</table>
 {% endblock content %}

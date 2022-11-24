@@ -13,19 +13,27 @@ def days_from_today(n):
     return datetime.date.today() + datetime.timedelta(days=n)
 
 
-def gather_available_rides(request, num_days):
-    days_in_the_future = days_from_today(num_days)
+def club_total_from(qs, club_name):
+    return qs.get(club__name=club_name)['total']
+
+
+def club_ride_count(qs, club_name):
+    return 0 if not qs.exists() else club_total_from(qs, club_name)
+
+
+def gather_available_rides(user):
+    days_in_the_future = days_from_today(11)
 
     return EventOccurence.objects.exclude(
         # Exclude rides which I'm already subscribed to
         pk__in=EventOccurenceMember.objects.filter(
-            user=request.user
+            user=user
         ).values('event_occurence')
     ).filter(
         # Rides where I have joined the club regardless of membership level
         privacy__lte=EventOccurence.EventMemberType.Open,
         club__in=ClubMembership.objects.filter(
-            user=request.user).values('club')
+            user=user).values('club')
     ).filter(
         ride_date__lte=days_in_the_future,
         ride_date__gte=datetime.date.today()
@@ -41,8 +49,8 @@ def homepage(request):
     return render(request=request,
                   template_name="groupridesapp/home.html",
                   context={
-                    "my_clubs": my_clubs,
-                    "user": request.user
+                      "my_clubs": my_clubs,
+                      "user": request.user
                   })
 
 
@@ -59,37 +67,82 @@ def my_rides(request):
     return render(request=request,
                   template_name="groupridesapp/rides/my_rides.html",
                   context={
-                    "my_upcoming_rides": my_upcoming_rides,
-                    "user": request.user
+                      "my_upcoming_rides": my_upcoming_rides,
+                      "user": request.user
                   })
 
 
 @login_required(login_url='/login')
 def available_rides_clubs(request):
-    arq = gather_available_rides(request=request, num_days=11)
-    available_rides_queryset = arq.values('club__name').annotate(total=Count('club__name'))
+    arq = gather_available_rides(user=request.user)
 
-    for club in available_rides_queryset:
-        print(club['club__name'], club['total'])
+    available_rides_club = arq.values('club__name', 'club__id', 'club__slug').annotate(total=Count('club__id'))
+
+    available_rides_A = (arq.filter(group_classification=EventOccurence.GroupClassification.A)
+                         .values('club__name', 'club__id', 'club__slug')
+                         .annotate(total=Count('club__id')))
+
+    available_rides_B = (arq.filter(group_classification=EventOccurence.GroupClassification.B)
+                         .values('club__name', 'club__id', 'club__slug')
+                         .annotate(total=Count('club__id')))
+
+    available_rides_C = (arq.filter(group_classification=EventOccurence.GroupClassification.C)
+                         .values('club__name', 'club__id', 'club__slug')
+                         .annotate(total=Count('club__id')))
+
+    available_rides_D = (arq.filter(group_classification=EventOccurence.GroupClassification.D)
+                         .values('club__name', 'club__id', 'club__slug')
+                         .annotate(total=Count('club__id')))
+
+    available_rides_N = (arq.filter(group_classification=EventOccurence.GroupClassification.N)
+                         .values('club__name', 'club__id', 'club__slug')
+                         .annotate(total=Count('club__id')))
+
+    available_rides_NA = (arq.filter(group_classification=EventOccurence.GroupClassification.NA)
+                          .values('club__name', 'club__id', 'club__slug')
+                          .annotate(total=Count('club__id')))
+
+    clubs = []
+    for club in available_rides_club:
+
+        club_name = club['club__name']
+        new_club = {
+            'name': club_name,
+            'slug': club['club__slug'],
+            'id': club['club__id'],
+            'total': club['total'],
+            'A': club_ride_count(available_rides_A, club_name),
+            'B': club_ride_count(available_rides_B, club_name),
+            'C': club_ride_count(available_rides_C, club_name),
+            'D': club_ride_count(available_rides_D, club_name),
+            'N': club_ride_count(available_rides_N, club_name),
+            'NA': club_ride_count(available_rides_NA, club_name)
+        }
+
+        clubs.append(new_club)
 
     return render(request=request,
                   template_name="groupridesapp/rides/available_rides_clubs.html",
                   context={
-                    "available_rides": available_rides_queryset,
-                    "user": request.user
+                      "available_rides_clubs": clubs,
+                      "user": request.user
                   })
 
 
 @login_required(login_url='/login')
-def available_rides(request):
-    arq = gather_available_rides(request=request, num_days=11)
+def available_rides(request, club_id, group_classification="", **kwargs):
+    if len(group_classification) > 0:
+        arq = gather_available_rides(user=request.user).filter(club=club_id).filter(group_classification=group_classification)
+    else:
+        arq = gather_available_rides(user=request.user).filter(club=club_id)
+
     available_rides_queryset = arq.order_by('ride_date')
 
     return render(request=request,
                   template_name="groupridesapp/rides/available_rides.html",
                   context={
-                    "available_rides": available_rides_queryset,
-                    "user": request.user
+                      "available_rides": available_rides_queryset,
+                      "user": request.user
                   })
 
 
