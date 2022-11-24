@@ -2,7 +2,7 @@ import datetime
 
 from django.shortcuts import render, get_object_or_404
 from .models import Club, EventOccurence, EventOccurenceMember, ClubMembership
-from django.db.models import Q
+from django.db.models import Q, Count
 from .forms import DeleteRideRegistrationForm, CreateRideRegistrationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -13,16 +13,27 @@ def days_from_today(n):
     return datetime.date.today() + datetime.timedelta(days=n)
 
 
+def gather_available_rides(request, num_days):
+    days_in_the_future = days_from_today(num_days)
+
+    return EventOccurence.objects.exclude(
+        # Exclude rides which I'm already subscribed to
+        pk__in=EventOccurenceMember.objects.filter(
+            user=request.user
+        ).values('event_occurence')
+    ).filter(
+        # Rides where I have joined the club regardless of membership level
+        privacy__lte=EventOccurence.EventMemberType.Open,
+        club__in=ClubMembership.objects.filter(
+            user=request.user).values('club')
+    ).filter(
+        ride_date__lte=days_in_the_future,
+        ride_date__gte=datetime.date.today()
+    )
+
+
 @login_required(login_url='/login')
 def homepage(request):
-    days_in_the_future = days_from_today(11)
-
-    my_upcoming_rides = EventOccurenceMember.objects.filter(
-        user=request.user,
-        event_occurence__ride_date__lte=days_in_the_future,
-        event_occurence__ride_date__gte=datetime.date.today()
-    ).order_by('event_occurence__ride_date')
-
     my_clubs = Club.objects.filter(
         clubmembership__user=request.user
     )
@@ -31,8 +42,6 @@ def homepage(request):
                   template_name="groupridesapp/home.html",
                   context={
                     "my_clubs": my_clubs,
-                    "my_upcoming_rides": my_upcoming_rides,
-                    "available_rides": available_rides,
                     "user": request.user
                   })
 
@@ -56,23 +65,25 @@ def my_rides(request):
 
 
 @login_required(login_url='/login')
-def available_rides(request):
-    days_in_the_future = days_from_today(11)
+def available_rides_clubs(request):
+    arq = gather_available_rides(request=request, num_days=11)
+    available_rides_queryset = arq.values('club__name').annotate(total=Count('club__name'))
 
-    available_rides_queryset = EventOccurence.objects.exclude(
-        # Exclude rides which I'm already subscribed to
-        pk__in=EventOccurenceMember.objects.filter(
-            user=request.user
-        ).values('event_occurence')
-    ).filter(
-        # Rides where I have joined the club regardless of membership level
-        privacy__lte=EventOccurence.EventMemberType.Open,
-        club__in=ClubMembership.objects.filter(
-            user=request.user).values('club')
-    ).filter(
-        ride_date__lte=days_in_the_future,
-        ride_date__gte=datetime.date.today()
-    ).order_by('ride_date')
+    for club in available_rides_queryset:
+        print(club['club__name'], club['total'])
+
+    return render(request=request,
+                  template_name="groupridesapp/rides/available_rides_clubs.html",
+                  context={
+                    "available_rides": available_rides_queryset,
+                    "user": request.user
+                  })
+
+
+@login_required(login_url='/login')
+def available_rides(request):
+    arq = gather_available_rides(request=request, num_days=11)
+    available_rides_queryset = arq.order_by('ride_date')
 
     return render(request=request,
                   template_name="groupridesapp/rides/available_rides.html",
