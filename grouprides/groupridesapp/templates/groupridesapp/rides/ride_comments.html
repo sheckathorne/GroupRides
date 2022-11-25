@@ -13,16 +13,16 @@
                         <span class="fw-bolder">
                             {{ comment.event_occurence_member.user.first_name }}
                             {{ comment.event_occurence_member.user.last_name }} -
-                            {{ comment.time_since_message }} </span>
-                         {{ comment.message }}
+                            {{ comment.time_since_message }}</span>
+                         {{ comment.message|safe }}
                     </li>
                 {% else %}
                     <li class="list-group-item fw-bold" style="background-color: #cccccc;">
                         <span class="fw-bolder">
                             {{ comment.event_occurence_member.user.first_name }}
                             {{ comment.event_occurence_member.user.last_name }} -
-                            {{ comment.time_since_message }} </span>
-                        {{ comment.message }}
+                            {{ comment.time_since_message }}</span>
+                        {{ comment.message|safe }}
                     </li>
                 {% endif %}
             {% empty %}
