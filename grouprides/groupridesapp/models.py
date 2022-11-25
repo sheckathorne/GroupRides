@@ -3,10 +3,11 @@ import pytz
 
 from django.utils import timezone
 from django.db import models
-from django.core.exceptions import ValidationError
 from users.models import CustomUser
 from dateutil.relativedelta import relativedelta
 from django.db.models import Q
+from tinymce.models import HTMLField
+from django.core.exceptions import ValidationError
 
 
 def length_of_five(value):
@@ -360,7 +361,26 @@ class EventOccurenceMember(models.Model):
 
 class EventOccurenceMessage(models.Model):
     event_occurence_member = models.ForeignKey(EventOccurenceMember, on_delete=models.CASCADE)
-    message = models.CharField("Message", max_length=255)
+    message = HTMLField(blank=True, default="")
+    create_date = models.DateTimeField("Date Created", auto_now_add=True)
+
+    @property
+    def time_since_message(self):
+        tz = pytz.timezone(self.event_occurence_member.event_occurence.time_zone)
+
+        current_datetime = datetime.datetime.now(tz)
+        rd = relativedelta(self.create_date, current_datetime)
+
+        datetime_string = self.create_date.strftime("%-m/%-d/%Y - %I:%M%p")
+        mins_since_comment = abs(rd.hours) * 60 + abs(rd.minutes)
+        TWENTY_THREE_HOURS_FIFTY_NINE_MINUTES = 1439
+
+        if mins_since_comment > TWENTY_THREE_HOURS_FIFTY_NINE_MINUTES:
+            return f"{datetime_string}"
+        elif mins_since_comment > 60:
+            return f"{abs(rd.hours)} hour{'s'[:abs(rd.hours)^1]} ago"
+        else:
+            return f"{abs(rd.minutes)} minute{'s'[:abs(rd.minutes) ^ 1]} ago"
 
     def __str__(self):
         first_name = self.event_occurence_member.user.first_name

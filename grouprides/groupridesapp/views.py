@@ -1,13 +1,15 @@
 import datetime
 
-from django.shortcuts import render, get_object_or_404
-from .models import Club, EventOccurence, EventOccurenceMember
-from django.db.models import Q, Count
-from .forms import DeleteRideRegistrationForm, CreateRideRegistrationForm
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Club, EventOccurence, EventOccurenceMember, EventOccurenceMessage
+from django.db.models import Q, F, Count
+from django.urls import reverse
+from .forms import DeleteRideRegistrationForm
 from .utils import days_from_today, club_ride_count, gather_available_rides
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+from .decorators import user_is_ride_member
 
 
 @login_required(login_url='/login')
@@ -149,7 +151,7 @@ def create_ride_registration(request, event_occurence_id):
 
         EventOccurenceMember.objects.create(**data)
         messages.success(request, "Successfully registered to ride.")
-        return HttpResponseRedirect("/")
+        return HttpResponseRedirect(reverse('my_rides'))
 
 
 @login_required(login_url='/login')
@@ -165,3 +167,29 @@ def ride_attendees(request, event_occurence_member_id):
                   context={
                       "event_occurence": event_occurence,
                       "event_members": event_members})
+
+
+@user_is_ride_member
+def event_occurence_comments(request, event_occurence_id):
+    event = EventOccurence.objects.get(pk=event_occurence_id)
+
+    event_comments = (EventOccurenceMessage.objects
+                      .filter(
+                            event_occurence_member__event_occurence__id=50)
+                      #.values(
+                       #     first_name=F('event_occurence_member__user__first_name'),
+                        #    last_name=F('event_occurence_member__user__last_name'),
+                         #   message_html=F('message'),
+                          #  comment_date=F('create_date'))
+                      .order_by('create_date'))
+
+    return render(request=request,
+                  template_name="groupridesapp/rides/ride_comments.html",
+                  context={
+                    "event_comments": event_comments,
+                    "event": event})
+
+
+@user_is_ride_member
+def create_event_occurence_message(request, event_occurence_id):
+    return redirect('/')

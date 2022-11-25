@@ -1,0 +1,35 @@
+{% extends "groupridesapp/header.html" %}
+{% block content %}
+<div class="card border-primary mt-2">
+    <h5 class="card-header bg-primary bg-gradient text-light">
+        Comments for {{ event.occurence_name }} on {{ event.ride_date|date:"M d, Y" }}
+    </h5>
+    <div class="card-body">
+        <div class="row">
+            <ul class="list-group list-group-flush">
+            {% for comment in event_comments %}
+                {% if forloop.counter|divisibleby:2 %}
+                    <li class="list-group-item fw-bold">
+                        <span class="fw-bolder">
+                            {{ comment.event_occurence_member.user.first_name }}
+                            {{ comment.event_occurence_member.user.last_name }} -
+                            {{ comment.time_since_message }} </span>
+                         {{ comment.message }}
+                    </li>
+                {% else %}
+                    <li class="list-group-item fw-bold" style="background-color: #cccccc;">
+                        <span class="fw-bolder">
+                            {{ comment.event_occurence_member.user.first_name }}
+                            {{ comment.event_occurence_member.user.last_name }} -
+                            {{ comment.time_since_message }} </span>
+                        {{ comment.message }}
+                    </li>
+                {% endif %}
+            {% empty %}
+                No comments for this ride
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock content %}
