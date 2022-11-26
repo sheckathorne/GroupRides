@@ -197,10 +197,10 @@ def event_occurence_comments_click(request, event_occurence_id):
 
         data = {
             'user': request.user,
-            'event_occurence': event_occurence
+            'event_occurence': event_occurence,
         }
 
-        EventOccurenceMessageVisit.objects.create(**data)
+        EventOccurenceMessageVisit.objects.update_or_create(**data, defaults={'last_visit': timezone.now()})
         return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
 
 

@@ -335,12 +335,14 @@ class EventOccurenceMember(models.Model):
 
         last_comment_visit_ride = (EventOccurenceMessageVisit.objects.filter(
             user=user
-        )
-                                   .order_by('event_occurence', '-last_visit')
-                                   .values('event_occurence_id', 'last_visit')
-                                   .distinct('event_occurence')
-                                   .filter(
-                                       event_occurence_id=ride_id))
+        ).order_by(
+            'event_occurence', '-last_visit'
+        ).values(
+            'event_occurence_id', 'last_visit'
+        ).distinct(
+            'event_occurence'
+        ).filter(
+            event_occurence_id=ride_id))
 
         last_visit = (
             datetime.datetime(1900, 1, 1, tzinfo=timezone.utc) if not last_comment_visit_ride.exists()
