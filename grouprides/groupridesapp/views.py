@@ -2,7 +2,7 @@ import datetime
 
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Club, EventOccurence, EventOccurenceMember, EventOccurenceMessage, EventOccurenceMessageVisit
-from django.db.models import Q, F, Count
+from django.db.models import Q, F, Count, Value
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm
 from .utils import days_from_today, club_ride_count, gather_available_rides
@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from .decorators import user_is_ride_member
+from django.utils import timezone
 
 
 @login_required(login_url='/login')
@@ -36,29 +37,15 @@ def my_rides(request):
         event_occurence__ride_date__gte=datetime.date.today()
     ).order_by('event_occurence__ride_date')
 
-    last_comment_visit = (EventOccurenceMessageVisit.objects
-                          .filter(event_occurence__in=my_upcoming_rides.values('event_occurence'))
-                          .order_by('event_occurence', '-last_visit')
-                          .values('event_occurence_id',
-                                  'last_visit')
-                          .distinct('event_occurence'))
-
-    total_comments_per_ride = (EventOccurenceMessage.objects.filter(
-        event_occurence__in=my_upcoming_rides.values('event_occurence')
-    )
-       .values('event_occurence')
-       .annotate(total=Count('event_occurence')))
-
-    # Next. query the total comments that have taken place after the last visit for each event occurence
-
-    print(total_comments_per_ride)
+    # add comment counts for each ride in new property called comments {"total": 0, "new": 0}
+    for ride in my_upcoming_rides:
+        ride.comments = ride.num_comments(user=request.user)
 
     return render(request=request,
                   template_name="groupridesapp/rides/my_rides.html",
                   context={
                       "my_upcoming_rides": my_upcoming_rides,
-                      "user": request.user,
-                      "last_comment_visit": last_comment_visit,
+                      "user": request.user
                   })
 
 

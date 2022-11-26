@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.db import models
 from users.models import CustomUser
 from dateutil.relativedelta import relativedelta
-from django.db.models import Q
+from django.db.models import Q, Count, F
 from tinymce.models import HTMLField
 from django.core.exceptions import ValidationError
 
@@ -224,8 +224,9 @@ class EventOccurence(models.Model):
         rd = relativedelta(aware_ride_datetime, current_datetime)
 
         time_diff = (
-            f"{abs(rd.days)} day{'s'[:abs(rd.days)^1]} and {abs(rd.hours)} hour{'s'[:abs(rd.hours)^1]}" if abs(rd.days) > 0 else
-            f"{abs(rd.hours)} hour{'s'[:abs(rd.hours)^1]}")
+            f"{abs(rd.days)} day{'s'[:abs(rd.days) ^ 1]} and {abs(rd.hours)} hour{'s'[:abs(rd.hours) ^ 1]}" if abs(
+                rd.days) > 0 else
+            f"{abs(rd.hours)} hour{'s'[:abs(rd.hours) ^ 1]}")
 
         if rd.days + rd.hours == 0:
             return "Now"
@@ -280,11 +281,11 @@ class EventOccurence(models.Model):
     def nearly_full(self):
         open_slots = self.max_riders - self.number_of_riders
         nearly_full = ((
-            self.max_riders >= 30 and self.percentage_full >= 90) or (
-            30 > self.max_riders >= 15 and self.percentage_full >= 80) or (
-            self.max_riders < 15 and self.percentage_full >= 70) or (
-            open_slots <= 2
-        ))
+                               self.max_riders >= 30 and self.percentage_full >= 90) or (
+                               30 > self.max_riders >= 15 and self.percentage_full >= 80) or (
+                               self.max_riders < 15 and self.percentage_full >= 70) or (
+                               open_slots <= 2
+                       ))
         return nearly_full
 
     @property
@@ -328,6 +329,50 @@ class EventOccurenceMember(models.Model):
     event_occurence = models.ForeignKey(EventOccurence, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     role = models.IntegerField("Role", choices=RoleType.choices, default=2)
+
+    def num_comments(self, user):
+        ride_id = self.event_occurence.id
+
+        last_comment_visit_ride = (EventOccurenceMessageVisit.objects.filter(
+            user=user
+        )
+                                   .order_by('event_occurence', '-last_visit')
+                                   .values('event_occurence_id', 'last_visit')
+                                   .distinct('event_occurence')
+                                   .filter(
+                                       event_occurence_id=ride_id))
+
+        last_visit = (
+            datetime.datetime(1900, 1, 1, tzinfo=timezone.utc) if not last_comment_visit_ride.exists()
+            else last_comment_visit_ride.get(event_occurence_id=ride_id)["last_visit"])
+
+        new_messages = (EventOccurenceMessage.objects.filter(
+            event_occurence=ride_id,
+            create_date__gte=last_visit
+        ).values(
+            'event_occurence'
+        ).annotate(
+            total=Count('event_occurence')))
+
+        total_messages = EventOccurenceMessage.objects.filter(
+            event_occurence__id=self.event_occurence.id
+        ).values(
+            'event_occurence__id'
+        ).annotate(
+            total=Count('event_occurence__id'))
+
+        total_message_count = (
+            0 if not total_messages.exists()
+            else total_messages.get(event_occurence_id=ride_id)["total"])
+
+        new_message_count = (
+            0 if not new_messages.exists()
+            else new_messages.get(event_occurence_id=ride_id)["total"])
+
+        return {
+            "total": total_message_count,
+            "new": new_message_count
+        }
 
     @property
     def is_ride_leader(self):
@@ -379,7 +424,9 @@ class EventOccurenceMessage(models.Model):
         if mins_since_comment > TWENTY_THREE_HOURS_FIFTY_NINE_MINUTES:
             return f"{datetime_string}"
         elif mins_since_comment > 60:
-            return f"{abs(rd.hours)} hour{'s'[:abs(rd.hours)^1]} ago"
+            return f"{abs(rd.hours)} hour{'s'[:abs(rd.hours) ^ 1]} ago"
+        elif mins_since_comment == 0:
+            return "just now"
         else:
             return f"{abs(rd.minutes)} minute{'s'[:abs(rd.minutes) ^ 1]} ago"
 
@@ -431,7 +478,7 @@ class ClubMembership(models.Model):
 
     def __str__(self):
         return (
-            self.club.name + " - " +
-            self.user.last_name + ", " +
-            self.user.first_name + " - " + ClubMembership.MemberType(self.membership_type).label
+                self.club.name + " - " +
+                self.user.last_name + ", " +
+                self.user.first_name + " - " + ClubMembership.MemberType(self.membership_type).label
         )

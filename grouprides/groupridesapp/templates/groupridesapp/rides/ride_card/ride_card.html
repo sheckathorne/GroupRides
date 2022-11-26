@@ -5,20 +5,27 @@
             <div class="col-auto">
                 {% if is_registered %}
                 <div class="btn-group dropleft">
-                    <button type="button" class="btn btn-transparent dropdown-toggle no-dropdown-arrow" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa-solid fa-ellipsis-vertical"></i>
-                    </button>
+                    {% load groupridesapp_extras %}
+                    {% with new_message_count=ride.comments|get_item:"new" %}
+                    {% if new_message_count > 0 %}
+                        <button type="button" class="btn btn-transparent dropdown-toggle no-dropdown-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                <span class="visually-hidden">New alerts</span>
+                            </span>
+                        </button>
+                    {% else %}
+                        <button type="button" class="btn btn-transparent dropdown-toggle no-dropdown-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                    {% endif %}
                     <div class="dropdown-menu">
-                        <form method="post" action="{% url 'ride_comments_click' event_occurence_id=event_occurence.id %}">
-                            {% csrf_token %}
-                            <li><button class="btn-transparent dropdown-item" type="submit" href="{% url 'ride_comments' ride.id %}">
-                                Ride Discussion
-                            </button></li>
-                        </form>
+                        {% include 'groupridesapp/rides/ride_card/discussion_menu_item.html' %}
                         <li><a class="dropdown-item" href="{% url 'ride_attendees' ride.id %}">View Attendees</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item link-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ ride.id }}">Cancel Registration</a></li>
                     </div>
+                    {% endwith %}
                 </div>
                 {% else %}
                     {% if user_can_register %}
