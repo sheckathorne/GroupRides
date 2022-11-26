@@ -1,14 +1,14 @@
 import datetime
 
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Club, EventOccurence, EventOccurenceMember, EventOccurenceMessage
+from .models import Club, EventOccurence, EventOccurenceMember, EventOccurenceMessage, EventOccurenceMessageVisit
 from django.db.models import Q, F, Count
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm
 from .utils import days_from_today, club_ride_count, gather_available_rides
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from .decorators import user_is_ride_member
 
 
@@ -36,11 +36,29 @@ def my_rides(request):
         event_occurence__ride_date__gte=datetime.date.today()
     ).order_by('event_occurence__ride_date')
 
+    last_comment_visit = (EventOccurenceMessageVisit.objects
+                          .filter(event_occurence__in=my_upcoming_rides.values('event_occurence'))
+                          .order_by('event_occurence', '-last_visit')
+                          .values('event_occurence_id',
+                                  'last_visit')
+                          .distinct('event_occurence'))
+
+    total_comments_per_ride = (EventOccurenceMessage.objects.filter(
+        event_occurence__in=my_upcoming_rides.values('event_occurence')
+    )
+       .values('event_occurence')
+       .annotate(total=Count('event_occurence')))
+
+    # Next. query the total comments that have taken place after the last visit for each event occurence
+
+    print(total_comments_per_ride)
+
     return render(request=request,
                   template_name="groupridesapp/rides/my_rides.html",
                   context={
                       "my_upcoming_rides": my_upcoming_rides,
-                      "user": request.user
+                      "user": request.user,
+                      "last_comment_visit": last_comment_visit,
                   })
 
 
@@ -139,22 +157,6 @@ def delete_ride_reigstration(request, event_occurence_id):
 
 
 @login_required(login_url='/login')
-def create_ride_registration(request, event_occurence_id):
-    if request.method == 'POST':
-        event_occurence = get_object_or_404(EventOccurence, id=event_occurence_id)
-
-        data = {
-            'user': request.user,
-            'event_occurence': event_occurence,
-            'role': 2
-        }
-
-        EventOccurenceMember.objects.create(**data)
-        messages.success(request, "Successfully registered to ride.")
-        return HttpResponseRedirect(reverse('my_rides'))
-
-
-@login_required(login_url='/login')
 def ride_attendees(request, event_occurence_member_id):
     event_occurence = get_object_or_404(EventOccurenceMember, id=event_occurence_member_id).event_occurence
 
@@ -175,12 +177,7 @@ def event_occurence_comments(request, event_occurence_id):
 
     event_comments = (EventOccurenceMessage.objects
                       .filter(
-                            event_occurence_member__event_occurence__id=50)
-                      #.values(
-                       #     first_name=F('event_occurence_member__user__first_name'),
-                        #    last_name=F('event_occurence_member__user__last_name'),
-                         #   message_html=F('message'),
-                          #  comment_date=F('create_date'))
+                            event_occurence__id=event_occurence_id)
                       .order_by('create_date'))
 
     return render(request=request,
@@ -188,6 +185,36 @@ def event_occurence_comments(request, event_occurence_id):
                   context={
                     "event_comments": event_comments,
                     "event": event})
+
+
+@login_required(login_url='/login')
+def create_ride_registration(request, event_occurence_id):
+    if request.method == "POST":
+        event_occurence = get_object_or_404(EventOccurence, id=event_occurence_id)
+
+        data = {
+            'user': request.user,
+            'event_occurence': event_occurence,
+            'role': 2
+        }
+
+        EventOccurenceMember.objects.create(**data)
+        messages.success(request, "Successfully registered to ride.")
+        return HttpResponseRedirect(reverse('my_rides'))
+
+
+@login_required(login_url='/login')
+def event_occurence_comments_click(request, event_occurence_id):
+    if request.method == "POST":
+        event_occurence = get_object_or_404(EventOccurence, id=event_occurence_id)
+
+        data = {
+            'user': request.user,
+            'event_occurence': event_occurence
+        }
+
+        EventOccurenceMessageVisit.objects.create(**data)
+        return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
 
 
 @user_is_ride_member

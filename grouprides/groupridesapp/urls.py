@@ -19,5 +19,9 @@ urlpatterns = [
         name="delete_registration"),
     path('<int:event_occurence_id>/ride_registration/create/', views.create_ride_registration, name="create_registration"),
     path('<int:event_occurence_member_id>/ride/attendees', views.ride_attendees, name="ride_attendees"),
-    path('<int:event_occurence_id>/ride/comments', views.event_occurence_comments, name="ride_comments")
+    path('<int:event_occurence_id>/ride/comments', views.event_occurence_comments, name="ride_comments"),
+    path(
+        '<int:event_occurence_id>/ride/comments/click',
+        views.event_occurence_comments_click,
+        name="ride_comments_click")
 ]

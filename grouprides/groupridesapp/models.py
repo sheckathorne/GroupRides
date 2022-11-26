@@ -360,13 +360,14 @@ class EventOccurenceMember(models.Model):
 
 
 class EventOccurenceMessage(models.Model):
-    event_occurence_member = models.ForeignKey(EventOccurenceMember, on_delete=models.CASCADE)
+    event_occurence = models.ForeignKey(EventOccurence, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     message = HTMLField(blank=True, default="")
     create_date = models.DateTimeField("Date Created", auto_now_add=True)
 
     @property
     def time_since_message(self):
-        tz = pytz.timezone(self.event_occurence_member.event_occurence.time_zone)
+        tz = pytz.timezone(self.event_occurence.time_zone)
 
         current_datetime = datetime.datetime.now(tz)
         rd = relativedelta(self.create_date, current_datetime)
@@ -383,10 +384,20 @@ class EventOccurenceMessage(models.Model):
             return f"{abs(rd.minutes)} minute{'s'[:abs(rd.minutes) ^ 1]} ago"
 
     def __str__(self):
-        first_name = self.event_occurence_member.user.first_name
-        last_name = self.event_occurence_member.user.last_name
-        message = self.message
-        return f"{first_name} {last_name} - {message}"
+        first_name = self.user.first_name
+        last_name = self.user.last_name
+        create_date_string = self.create_date.strftime("%-m/%-d/%Y - %I:%M%p")
+        return f"{first_name} {last_name} - {create_date_string}"
+
+
+class EventOccurenceMessageVisit(models.Model):
+    event_occurence = models.ForeignKey(EventOccurence, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    last_visit = models.DateTimeField("Date Created", auto_now_add=True)
+
+    def __str__(self):
+        last_visit_string = self.last_visit.strftime("%-m/%-d/%Y - %I:%M%p")
+        return f"{self.event_occurence.occurence_name} - {last_visit_string}"
 
 
 class UserRoute(models.Model):

@@ -9,7 +9,12 @@
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                     <div class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'ride_comments' ride.id %}">Ride Discussion</a></li>
+                        <form method="post" action="{% url 'ride_comments_click' event_occurence_id=event_occurence.id %}">
+                            {% csrf_token %}
+                            <li><button class="btn-transparent dropdown-item" type="submit" href="{% url 'ride_comments' ride.id %}">
+                                Ride Discussion
+                            </button></li>
+                        </form>
                         <li><a class="dropdown-item" href="{% url 'ride_attendees' ride.id %}">View Attendees</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item link-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ ride.id }}">Cancel Registration</a></li>
