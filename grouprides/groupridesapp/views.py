@@ -212,19 +212,23 @@ class EventComments(TemplateView):
         event = EventOccurence.objects.get(pk=event_occurence_id)
         if request.method == 'POST':
             form_data = CreateEventOccurenceMessageForm(request.POST)
-            data = {
-                'message': f"<p>{form_data['message'].value()}<p>",
-                'user': request.user,
-                'event_occurence': event
-            }
+            if form_data.is_valid():
+                print('message:', form_data['message'].value())
+                data = {
+                    'message': form_data['message'].value(),
+                    'user': request.user,
+                    'event_occurence': event
+                }
 
-            click_data = {
-                'user': request.user,
-                'event_occurence': event,
-            }
+                click_data = {
+                    'user': request.user,
+                    'event_occurence': event,
+                }
 
-            EventOccurenceMessage.objects.create(**data)
-            EventOccurenceMessageVisit.objects.update_or_create(**click_data, defaults={'last_visit': timezone.now()})
-            return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
+                EventOccurenceMessage.objects.create(**data)
+                EventOccurenceMessageVisit.objects.update_or_create(**click_data, defaults={'last_visit': timezone.now()})
+                return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
+            else:
+                messages.error(request, 'Comment cannot be blank.')
 
         return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))

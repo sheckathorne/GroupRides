@@ -409,7 +409,7 @@ class EventOccurenceMember(models.Model):
 class EventOccurenceMessage(models.Model):
     event_occurence = models.ForeignKey(EventOccurence, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    message = HTMLField(blank=True, default="")
+    message = HTMLField(blank=False)
     create_date = models.DateTimeField("Date Created", auto_now_add=True)
 
     @property

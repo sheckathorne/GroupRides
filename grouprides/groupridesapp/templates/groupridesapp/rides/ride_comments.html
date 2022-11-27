@@ -16,7 +16,7 @@
                             {{ comment.user.first_name }}
                             {{ comment.user.last_name }} -
                             {{ comment.time_since_message }}</span>
-                         {{ comment.message|safe }}
+                         <p>{{ comment.message|safe }}</p>
                     </li>
                 {% else %}
                     <li class="list-group-item fw-bold" style="background-color: #cccccc;">
@@ -24,7 +24,7 @@
                             {{ comment.user.first_name }}
                             {{ comment.user.last_name }} -
                             {{ comment.time_since_message }}</span>
-                        {{ comment.message|safe }}
+                        <p>{{ comment.message|safe }}</p>
                     </li>
                 {% endif %}
             {% empty %}
@@ -33,6 +33,7 @@
             </ul>
         </div>
         <hr/>
+        <h5>Add your comment below:</h5>
         <form method="POST" action="{% url 'ride_comments' event.id %}">
             {% csrf_token %}
             <div class="mb-2">

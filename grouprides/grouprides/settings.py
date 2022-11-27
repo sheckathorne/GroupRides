@@ -157,5 +157,6 @@ TINYMCE_DEFAULT_CONFIG = {
     'image_class_list': [{'title': 'Fluid', 'value': 'img-fluid', 'style': {} }],
     'width': 'auto',
     "height": "600px",
+    'theme': 'silver',
     'image_caption': True,
 }
