@@ -2,7 +2,7 @@ import datetime
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
-from .models import Club, ClubMembership
+from .models import Club, ClubMembership, EventOccurence
 from users.models import CustomUser
 
 
@@ -13,7 +13,7 @@ def create_user(**kwargs):
     return CustomUser.objects.create(username=user_name, email=email_address, zip_code=zip_code)
 
 
-def create_group(**kwargs):
+def create_club(**kwargs):
     zip_code = kwargs['zip_code'] if 'zip_code' in kwargs else '12345'
     user = kwargs['user'] if 'user' in kwargs else create_user()
 
@@ -50,21 +50,21 @@ class UserModelTests(TestCase):
 
 class GroupModelTests(TestCase):
     def test_zip_code_is_numeric_length_five(self):
-        club = create_group(zip_code="12345")
+        club = create_club(zip_code="12345")
         self.assertIsInstance(club, Club)
 
     def test_zip_code_is_less_than_five_digits(self):
-        club = create_group(zip_code="1234")
+        club = create_club(zip_code="1234")
         with self.assertRaises(ValidationError):
             club.full_clean()
 
     def test_zip_code_is_more_than_five_digits(self):
-        club = create_group(zip_code="123456")
+        club = create_club(zip_code="123456")
         with self.assertRaises(ValidationError):
             club.full_clean()
 
     def test_zip_code_is_not_numeric(self):
-        club = create_group(zip_code="AAAAA")
+        club = create_club(zip_code="AAAAA")
         with self.assertRaises(ValidationError):
             club.full_clean()
 
@@ -72,28 +72,32 @@ class GroupModelTests(TestCase):
 class GroupMembershipModelTests(TestCase):
     def test_membership_is_inactive(self):
         user = create_user()
-        create_group(user=user)
-        club_membership = ClubMembership.objects.get(pk=1)
+        create_club(user=user)
+        club_membership = ClubMembership.objects.first()
         club_membership.active = False
-        print('membership:', club_membership.is_inactive())
         self.assertEquals(club_membership.is_inactive(), True)
 
     def test_membership_is_active(self):
         user = create_user()
-        create_group(user=user)
-        club_membership = ClubMembership.objects.get(pk=1)
+        create_club(user=user)
+        club_membership = ClubMembership.objects.first()
         self.assertEquals(club_membership.is_inactive(), False)
 
     def test_membership_is_expired(self):
+        print('creating bad user')
         user = create_user()
-        create_group(user=user)
-        club_membership = ClubMembership.objects.get(pk=1)
+        create_club(user=user)
+        club_membership = ClubMembership.objects.first()
         club_membership.membership_expires = timezone.now() - datetime.timedelta(days=1)
         self.assertEquals(club_membership.is_expired(), True)
 
     def test_membership_is_not_expired(self):
         user = create_user()
-        create_group(user=user)
-        club_membership = ClubMembership.objects.get(pk=1)
+        create_club(user=user)
+        club_membership = ClubMembership.objects.first()
         club_membership.membership_expires = timezone.now() + datetime.timedelta(days=1)
         self.assertEquals(club_membership.is_expired(), False)
+
+
+
+

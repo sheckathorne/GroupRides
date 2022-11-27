@@ -1,14 +1,15 @@
 import datetime
 
-from django.shortcuts import render, get_object_or_404, redirect
+from django.views.generic import TemplateView
+from django.shortcuts import render, get_object_or_404
 from .models import Club, EventOccurence, EventOccurenceMember, EventOccurenceMessage, EventOccurenceMessageVisit
-from django.db.models import Q, F, Count, Value
+from django.db.models import Q, Count
 from django.urls import reverse
-from .forms import DeleteRideRegistrationForm
+from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm
 from .utils import days_from_today, club_ride_count, gather_available_rides
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from .decorators import user_is_ride_member
 from django.utils import timezone
 
@@ -158,22 +159,6 @@ def ride_attendees(request, event_occurence_member_id):
                       "event_members": event_members})
 
 
-@user_is_ride_member
-def event_occurence_comments(request, event_occurence_id):
-    event = EventOccurence.objects.get(pk=event_occurence_id)
-
-    event_comments = (EventOccurenceMessage.objects
-                      .filter(
-                            event_occurence__id=event_occurence_id)
-                      .order_by('create_date'))
-
-    return render(request=request,
-                  template_name="groupridesapp/rides/ride_comments.html",
-                  context={
-                    "event_comments": event_comments,
-                    "event": event})
-
-
 @login_required(login_url='/login')
 def create_ride_registration(request, event_occurence_id):
     if request.method == "POST":
@@ -204,6 +189,42 @@ def event_occurence_comments_click(request, event_occurence_id):
         return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
 
 
-@user_is_ride_member
-def create_event_occurence_message(request, event_occurence_id):
-    return redirect('/')
+class EventComments(TemplateView):
+    def get(self, request, **kwargs):
+        event_occurence_id = kwargs["event_occurence_id"]
+        form = CreateEventOccurenceMessageForm()
+        event = EventOccurence.objects.get(pk=event_occurence_id)
+
+        event_comments = (EventOccurenceMessage.objects
+                          .filter(
+                              event_occurence__id=event_occurence_id)
+                          .order_by('create_date'))
+
+        return render(request=request,
+                      template_name="groupridesapp/rides/ride_comments.html",
+                      context={
+                          "event_comments": event_comments,
+                          "event": event,
+                          "form": form})
+
+    def post(self, request, **kwargs):
+        event_occurence_id = kwargs["event_occurence_id"]
+        event = EventOccurence.objects.get(pk=event_occurence_id)
+        if request.method == 'POST':
+            form_data = CreateEventOccurenceMessageForm(request.POST)
+            data = {
+                'message': f"<p>{form_data['message'].value()}<p>",
+                'user': request.user,
+                'event_occurence': event
+            }
+
+            click_data = {
+                'user': request.user,
+                'event_occurence': event,
+            }
+
+            EventOccurenceMessage.objects.create(**data)
+            EventOccurenceMessageVisit.objects.update_or_create(**click_data, defaults={'last_visit': timezone.now()})
+            return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
+
+        return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))

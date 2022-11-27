@@ -17,7 +17,8 @@ class CreateRideRegistrationForm(forms.ModelForm):
 class CreateEventOccurenceMessageForm(forms.ModelForm):
     class Meta:
         model = EventOccurenceMessage
+        fields = ['message']
 
-        fields = [
-            "message"
-        ]
+    def __init__(self, *args, **kwargs):
+        super(CreateEventOccurenceMessageForm, self).__init__(*args, **kwargs)
+        self.fields['message'].label = ''

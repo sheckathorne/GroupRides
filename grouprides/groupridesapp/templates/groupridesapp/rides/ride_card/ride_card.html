@@ -8,15 +8,15 @@
                     {% load groupridesapp_extras %}
                     {% with new_message_count=ride.comments|get_item:"new" %}
                     {% if new_message_count > 0 %}
-                        <button type="button" class="btn btn-transparent dropdown-toggle no-dropdown-arrow" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-ellipsis-vertical"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                        <button type="button" class="btn btn-outline-dark dropdown-toggle no-dropdown-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-bars fa-xl"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle" style="font-size: .5em;">
                                 <span class="visually-hidden">New alerts</span>
                             </span>
                         </button>
                     {% else %}
-                        <button type="button" class="btn btn-transparent dropdown-toggle no-dropdown-arrow" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        <button type="button" class="btn btn-outline-dark dropdown-toggle no-dropdown-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-bars fa-xl"></i>
                         </button>
                     {% endif %}
                     <div class="dropdown-menu">

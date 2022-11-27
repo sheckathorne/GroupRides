@@ -1,7 +1,7 @@
 from django.urls import path
-from django.contrib.auth import views as auth_views
-from users import views as user_views
 from . import views
+from .views import EventComments
+from .decorators import user_is_ride_member
 
 urlpatterns = [
     path("", views.homepage, name="homepage"),
@@ -17,9 +17,12 @@ urlpatterns = [
         '<int:event_occurence_id>/ride_registration/delete/',
         views.delete_ride_reigstration,
         name="delete_registration"),
-    path('<int:event_occurence_id>/ride_registration/create/', views.create_ride_registration, name="create_registration"),
+    path(
+        '<int:event_occurence_id>/ride_registration/create/',
+        views.create_ride_registration,
+        name="create_registration"),
     path('<int:event_occurence_member_id>/ride/attendees', views.ride_attendees, name="ride_attendees"),
-    path('<int:event_occurence_id>/ride/comments', views.event_occurence_comments, name="ride_comments"),
+    path('<int:event_occurence_id>/ride/comments', user_is_ride_member(EventComments.as_view()), name="ride_comments"),
     path(
         '<int:event_occurence_id>/ride/comments/click',
         views.event_occurence_comments_click,
