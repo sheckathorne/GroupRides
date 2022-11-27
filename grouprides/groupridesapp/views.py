@@ -10,7 +10,7 @@ from .utils import days_from_today, club_ride_count, gather_available_rides
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from .decorators import user_is_ride_member
+from django.core.paginator import Paginator
 from django.utils import timezone
 
 
@@ -189,21 +189,25 @@ def event_occurence_comments_click(request, event_occurence_id):
         return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
 
 
+def get_event_comments(occurence_id, order_by):
+    return EventOccurenceMessage.objects.filter(event_occurence__id=occurence_id).order_by(order_by)
+
+
 class EventComments(TemplateView):
     def get(self, request, **kwargs):
         event_occurence_id = kwargs["event_occurence_id"]
         form = CreateEventOccurenceMessageForm()
-        event = EventOccurence.objects.get(pk=event_occurence_id)
+        event = get_object_or_404(EventOccurence, id=event_occurence_id)
+        event_comments = get_event_comments(occurence_id=event_occurence_id, order_by='create_date')
 
-        event_comments = (EventOccurenceMessage.objects
-                          .filter(
-                              event_occurence__id=event_occurence_id)
-                          .order_by('create_date'))
+        paginator = Paginator(event_comments, 5)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
         return render(request=request,
                       template_name="groupridesapp/rides/ride_comments.html",
                       context={
-                          "event_comments": event_comments,
+                          "event_comments": page_obj,
                           "event": event,
                           "form": form})
 

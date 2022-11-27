@@ -31,6 +31,23 @@
                 No comments for this ride
             {% endfor %}
             </ul>
+            <div class="pagination">
+                <span class="step-links">
+                    {% if event_comments.has_previous %}
+                        <a href="?page=1">&laquo; first</a>
+                        <a href="?page={{ event_comments.previous_page_number }}">previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Page {{ event_comments.number }} of {{ event_comments.paginator.num_pages }}.
+                    </span>
+
+                    {% if event_comments.has_next %}
+                        <a href="?page={{ event_comments.next_page_number }}">next</a>
+                        <a href="?page={{ event_comments.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
         </div>
         <hr/>
         <h5>Add your comment below:</h5>
