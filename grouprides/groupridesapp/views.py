@@ -5,13 +5,14 @@ from django.shortcuts import render, get_object_or_404
 from .models import Club, EventOccurence, EventOccurenceMember, EventOccurenceMessage, EventOccurenceMessageVisit
 from django.db.models import Q, Count
 from django.urls import reverse
-from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm
+from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, CreateClubForm
 from .utils import days_from_today, club_ride_count, gather_available_rides, generate_pagination_items
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.utils.text import slugify
 
 
 @login_required(login_url='/login')
@@ -224,7 +225,6 @@ class EventComments(TemplateView):
         if request.method == 'POST':
             form_data = CreateEventOccurenceMessageForm(request.POST)
             if form_data.is_valid():
-                print('message:', form_data['message'].value())
                 data = {
                     'message': form_data['message'].value(),
                     'user': request.user,
@@ -243,3 +243,43 @@ class EventComments(TemplateView):
                 messages.error(request, 'Comment cannot be blank.')
 
         return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
+
+
+class CreateClub(TemplateView):
+    def get(self, request, **kwargs):
+        form = CreateClubForm()
+        return render(
+            request=request,
+            template_name="groupridesapp/clubs/create_club.html",
+            context={"form": form}
+        )
+
+    def post(self, request, **kwargs):
+        if request.method == 'POST':
+            form = CreateClubForm(request.POST)
+            if form.is_valid():
+                user = request.user
+                slug = slugify(form['name'].value())
+                data = {
+                    "name": form['name'].value(),
+                    "web_url": form["web_url"].value(),
+                    "logo_url": form["logo_url"].value(),
+                    "zip_code": form["zip_code"].value(),
+                    "private": form["private"].value(),
+                    "created_by": user,
+                    "slug": slug,
+                }
+
+                Club.objects.create(**data)
+                return HttpResponseRedirect('/')
+            else:
+                for error in list(form.errors.values()):
+                    messages.error(request, error)
+
+        form = CreateClubForm()
+
+        return render(
+            request=request,
+            template_name="groupridesapp/clubs/create_club.html",
+            context={'form': form}
+        )

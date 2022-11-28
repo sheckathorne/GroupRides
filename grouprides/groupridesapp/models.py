@@ -53,7 +53,7 @@ def not_member_of_club(membership_exists):
 class Club(models.Model):
     name = models.CharField("Name", max_length=255)
     web_url = models.CharField("Website", max_length=255)
-    logo_url = models.CharField("Logo URL", max_length=255)
+    logo_url = models.CharField("Logo URL", max_length=500)
     zip_code = models.CharField("Zip Code", max_length=5, validators=[numeric_chars, length_of_five])
     private = models.BooleanField("Private")
     create_date = models.DateField("Date Created", auto_now_add=True)

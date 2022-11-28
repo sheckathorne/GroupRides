@@ -8,29 +8,31 @@
     </h5>
     <div class="card-body">
         <div class="row">
-            <ul class="list-group list-group-flush">
-            {% for comment in event_comments %}
-                {% if forloop.counter|divisibleby:2 %}
-                    <li class="list-group-item fw-bold">
-                        <span class="fw-bolder">
-                            {{ comment.user.first_name }}
-                            {{ comment.user.last_name }} -
-                            {{ comment.time_since_message }}</span>
-                         <p>{{ comment.message|safe }}</p>
-                    </li>
-                {% else %}
-                    <li class="list-group-item fw-bold" style="background-color: #cccccc;">
-                        <span class="fw-bolder">
-                            {{ comment.user.first_name }}
-                            {{ comment.user.last_name }} -
-                            {{ comment.time_since_message }}</span>
-                        <p>{{ comment.message|safe }}</p>
-                    </li>
-                {% endif %}
-            {% empty %}
-                No comments for this ride
-            {% endfor %}
-            </ul>
+            <div class="col">
+                <ul class="list-group">
+                {% for comment in event_comments %}
+                    {% if forloop.counter|divisibleby:2 %}
+                        <li class="list-group-item fw-bold">
+                            <span class="fw-bolder">
+                                {{ comment.user.first_name }}
+                                {{ comment.user.last_name }} -
+                                {{ comment.time_since_message }}</span>
+                             <p>{{ comment.message|safe }}</p>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item fw-bold" style="background-color: #cccccc;">
+                            <span class="fw-bolder">
+                                {{ comment.user.first_name }}
+                                {{ comment.user.last_name }} -
+                                {{ comment.time_since_message }}</span>
+                            <p>{{ comment.message|safe }}</p>
+                        </li>
+                    {% endif %}
+                {% empty %}
+                    No comments for this ride
+                {% endfor %}
+                </ul>
+            </div>
         </div>
         {% if event_comments.paginator.num_pages > 1 %}
             {% include 'groupridesapp/rides/ride_card/pagination.html' %}
