@@ -78,6 +78,7 @@ def available_rides_clubs(request):
                 club_name)
 
         clubs.append(new_club)
+        print(clubs)
 
     return render(request=request,
                   template_name="groupridesapp/rides/available_rides_clubs.html",
@@ -224,6 +225,7 @@ class EventComments(TemplateView):
         event = EventOccurence.objects.get(pk=event_occurence_id)
         if request.method == 'POST':
             form_data = CreateEventOccurenceMessageForm(request.POST)
+            print(form_data)
             if form_data.is_valid():
                 data = {
                     'message': form_data['message'].value(),

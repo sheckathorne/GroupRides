@@ -23,8 +23,8 @@
             <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='B' slug=club.slug %}">{{club.B}}</a></td>
             <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='C' slug=club.slug %}">{{club.C}}</a></td>
             <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='D' slug=club.slug %}">{{club.D}}</a></td>
-            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='N' slug=club.slug %}">{{club.N}}</a></td>
-            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='NA' slug=club.slug %}">{{club.NA}}</a></td>
+            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='N' slug=club.slug %}">{{club.Novice}}</a></td>
+            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='NA' slug=club.slug %}">{{club.None}}</a></td>
         </tr>
 {% empty %}
       No rides available for you to join
