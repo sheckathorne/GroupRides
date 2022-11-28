@@ -45,10 +45,6 @@ def generate_pagination_items(page_count=1, active_page=1, delta=2):
     left_ellipses = not bool(extra_items_to_right) and not bool(extra_items_to_left)
     right_ellipses = not bool(extra_items_to_right) and not bool(extra_items_to_left)
 
-    print('left', left_ellipses)
-    print('middle', middle_ellipses)
-    print('right', right_ellipses)
-
     prev_page = 1 if active_page == 1 else active_page - 1
     prev_disabled = " disabled" if active_page == 1 else ""
     next_page = page_count if active_page == page_count else active_page + 1

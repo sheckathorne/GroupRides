@@ -63,7 +63,11 @@ class CreateEventForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(CreateEventForm, self).__init__(*args, **kwargs)
         self.fields['route'].queryset = Route.objects.filter(created_by=self.user)
-        self.fields['club'].queryset = (Club.objects.filter(pk__in=ClubMembership.objects.filter(user=self.user, membership_type__lte=2).values('club')))
+        self.fields['club'].queryset = (
+            Club.objects.filter(
+                pk__in=ClubMembership.objects.filter(
+                    user=self.user, membership_type__lte=ClubMembership.MemberType.RideLeader.value)
+                .values('club')))
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Fieldset('Ride Info',

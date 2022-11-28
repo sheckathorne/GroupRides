@@ -237,7 +237,10 @@ class EventComments(TemplateView):
                 }
 
                 EventOccurenceMessage.objects.create(**data)
-                EventOccurenceMessageVisit.objects.update_or_create(**click_data, defaults={'last_visit': timezone.now()})
+                EventOccurenceMessageVisit.objects.update_or_create(
+                    **click_data,
+                    defaults={'last_visit': timezone.now()})
+
                 return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
             else:
                 messages.error(request, 'Comment cannot be blank.')

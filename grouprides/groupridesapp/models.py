@@ -80,8 +80,9 @@ class ClubMembership(models.Model):
     class MemberType(models.IntegerChoices):
         Creator = (1, "Creator")
         Admin = (2, "Admin")
-        Member = (3, "Member")
-        NonMember = (4, "Non-Member")
+        RideLeader = (3, "Ride Leader")
+        Member = (4, "Member")
+        NonMember = (5, "Non-Member")
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
@@ -147,12 +148,13 @@ class Event(models.Model):
     class MemberType(models.IntegerChoices):
         Creator = (1, "Creator")
         Admin = (2, "Admin")
-        Member = (3, "Member")
-        NonMember = (4, "Non-Member")
+        RideLeader = (3, "Ride Leader")
+        Member = (4, "Member")
+        NonMember = (5, "Non-Member")
 
     class EventMemberType(models.IntegerChoices):
-        Members = (3, "Current Members")
-        Open = (4, "Open")
+        Members = (4, "Current Members")
+        Open = (5, "Open")
 
     name = models.CharField("Event Name", max_length=100)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -216,8 +218,8 @@ class EventOccurence(models.Model):
         zip(pytz.all_timezones, pytz.all_timezones)
 
     class EventMemberType(models.IntegerChoices):
-        Members = (3, "Current Members")
-        Open = (4, "Open")
+        Members = (4, "Current Members")
+        Open = (5, "Open")
 
     event = models.ForeignKey(Event, null=True, blank=True, on_delete=models.CASCADE)
     occurence_name = models.CharField("Event Name", max_length=100)
