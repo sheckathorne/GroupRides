@@ -76,6 +76,35 @@ class Club(models.Model):
         return self.name
 
 
+class ClubMembership(models.Model):
+    class MemberType(models.IntegerChoices):
+        Creator = (1, "Creator")
+        Admin = (2, "Admin")
+        Member = (3, "Member")
+        NonMember = (4, "Non-Member")
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    club = models.ForeignKey(Club, on_delete=models.CASCADE)
+    create_date = models.DateField("Date Joined", auto_now_add=True)
+    membership_expires = models.DateField("Membership Expires")
+    active = models.BooleanField("Active", default=True)
+    membership_type = models.IntegerField("Membership Type", choices=MemberType.choices)
+
+    def is_expired(self):
+        now = timezone.now()
+        return self.membership_expires < now
+
+    def is_inactive(self):
+        return not self.active
+
+    def __str__(self):
+        return (
+                self.club.name + " - " +
+                self.user.last_name + ", " +
+                self.user.first_name + " - " + ClubMembership.MemberType(self.membership_type).label
+        )
+
+
 class Route(models.Model):
     name = models.CharField("Route Name", max_length=240)
     start_location_name = models.CharField("Start Location", max_length=240)
@@ -455,32 +484,3 @@ class UserRoute(models.Model):
 
     def __str__(self):
         return f"{self.route.name} for profile {self.user} by {self.route.created_by}"
-
-
-class ClubMembership(models.Model):
-    class MemberType(models.IntegerChoices):
-        Creator = (1, "Creator")
-        Admin = (2, "Admin")
-        Member = (3, "Member")
-        NonMember = (4, "Non-Member")
-
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    club = models.ForeignKey(Club, on_delete=models.CASCADE)
-    create_date = models.DateField("Date Joined", auto_now_add=True)
-    membership_expires = models.DateField("Membership Expires")
-    active = models.BooleanField("Active", default=True)
-    membership_type = models.IntegerField("Membership Type", choices=MemberType.choices)
-
-    def is_expired(self):
-        now = timezone.now()
-        return self.membership_expires < now
-
-    def is_inactive(self):
-        return not self.active
-
-    def __str__(self):
-        return (
-                self.club.name + " - " +
-                self.user.last_name + ", " +
-                self.user.first_name + " - " + ClubMembership.MemberType(self.membership_type).label
-        )

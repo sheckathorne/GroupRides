@@ -1,5 +1,5 @@
 from django import forms
-from .models import EventOccurenceMember, EventOccurenceMessage, Club, Event, Route
+from .models import EventOccurenceMember, EventOccurenceMessage, Club, ClubMembership, Event, Route
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import (
     Layout,
@@ -63,6 +63,7 @@ class CreateEventForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(CreateEventForm, self).__init__(*args, **kwargs)
         self.fields['route'].queryset = Route.objects.filter(created_by=self.user)
+        self.fields['club'].queryset = (Club.objects.filter(pk__in=ClubMembership.objects.filter(user=self.user, membership_type__lte=2).values('club')))
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Fieldset('Ride Info',
@@ -79,7 +80,7 @@ class CreateEventForm(forms.ModelForm):
                          css_class='row',
                      ),
                      Div(
-                         Div(Field('club', css_class="w-100", style="height: 38px;"), css_class='col-md-4', ),
+                         Div(Field('club', css_class="w-100", style="height: 38px;", type="date"), css_class='col-md-4', ),
                          css_class='row',
                      )),
             Fieldset('Pace',
