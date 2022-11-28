@@ -6,7 +6,7 @@ from .models import Club, EventOccurence, EventOccurenceMember, EventOccurenceMe
 from django.db.models import Q, Count
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm
-from .utils import days_from_today, club_ride_count, gather_available_rides
+from .utils import days_from_today, club_ride_count, gather_available_rides, generate_pagination_items
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -201,13 +201,20 @@ class EventComments(TemplateView):
         event_comments = get_event_comments(occurence_id=event_occurence_id, order_by='create_date')
 
         paginator = Paginator(event_comments, 5)
-        page_number = request.GET.get('page')
+        page_number = request.GET.get('page') or 1
         page_obj = paginator.get_page(page_number)
+
+        pagination_items = generate_pagination_items(
+            page_count=page_obj.paginator.num_pages,
+            active_page=page_number,
+            delta=2
+        )
 
         return render(request=request,
                       template_name="groupridesapp/rides/ride_comments.html",
                       context={
                           "event_comments": page_obj,
+                          "pagination_items": pagination_items,
                           "event": event,
                           "form": form})
 
