@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404
 from .models import Club, EventOccurence, EventOccurenceMember, EventOccurenceMessage, EventOccurenceMessageVisit
 from django.db.models import Q, Count
 from django.urls import reverse
-from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, CreateClubForm
+from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, CreateClubForm, CreateEventForm
 from .utils import days_from_today, club_ride_count, gather_available_rides, generate_pagination_items
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -282,4 +282,14 @@ class CreateClub(TemplateView):
             request=request,
             template_name="groupridesapp/clubs/create_club.html",
             context={'form': form}
+        )
+
+
+class CreateEvent(TemplateView):
+    def get(self, request, **kwargs):
+        form = CreateEventForm(user=request.user)
+        return render(
+            request=request,
+            template_name="groupridesapp/events/create_event.html",
+            context={"form": form}
         )

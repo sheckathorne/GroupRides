@@ -1,10 +1,11 @@
 from django import forms
-from .models import EventOccurenceMember, EventOccurenceMessage, Club
+from .models import EventOccurenceMember, EventOccurenceMessage, Club, Event, Route
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import (
     Layout,
     Field,
-    Submit
+    Fieldset,
+    Div
 )
 
 from crispy_forms.bootstrap import StrictButton
@@ -51,3 +52,42 @@ class CreateClubForm(forms.ModelForm):
 
         self.fields['name'].label = 'Club Name'
         self.fields['private'].label = 'Private (membership managed by Admin)'
+
+
+class CreateEventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(CreateEventForm, self).__init__(*args, **kwargs)
+        self.fields['route'].queryset = Route.objects.filter(created_by=self.user)
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Fieldset('Ride Info',
+                     Div(
+                         Div(Field('name'), css_class='col-md-4', ),
+                         css_class='row',
+                     ),
+                     Div(
+                         Div(Field('route', css_class="w-100", style="height: 38px;"), css_class='col-md-4', ),
+                         css_class='row',
+                     ),
+                     Div(
+                         Div(Field('privacy', css_class="w-100", style="height: 38px;"), css_class='col-md-4', ),
+                         css_class='row',
+                     ),
+                     Div(
+                         Div(Field('club', css_class="w-100", style="height: 38px;"), css_class='col-md-4', ),
+                         css_class='row',
+                     )),
+            Fieldset('Pace',
+                     Div(
+                         Div(
+                             Field('group_classification', css_class="w-100", style="height: 38px;"), css_class='col-md-4', ),
+                         Div('lower_pace_range', css_class='col-md-4', ),
+                         Div('upper_pace_range', css_class='col-md-4', ),
+                         css_class='row',
+                     ),
+                     ))

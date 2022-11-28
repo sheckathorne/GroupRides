@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import EventComments, CreateClub
+from .views import EventComments, CreateClub, CreateEvent
 from .decorators import user_is_ride_member
 
 urlpatterns = [
@@ -27,5 +27,6 @@ urlpatterns = [
         '<int:event_occurence_id>/ride/comments/click/',
         views.event_occurence_comments_click,
         name="ride_comments_click"),
-    path('create_club/', CreateClub.as_view(), name="create_club")
+    path('create_club/', CreateClub.as_view(), name="create_club"),
+    path('create_event/', CreateEvent.as_view(), name="create_event")
 ]
