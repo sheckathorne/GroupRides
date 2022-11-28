@@ -7,6 +7,8 @@ from crispy_forms.layout import (
     Submit
 )
 
+from crispy_forms.bootstrap import StrictButton
+
 
 class DeleteRideRegistrationForm(forms.ModelForm):
     class Meta:
@@ -44,7 +46,7 @@ class CreateClubForm(forms.ModelForm):
             Field('logo_url', wrapper_class='mb-3'),
             Field('zip_code', wrapper_class='mb-3'),
             Field('private', wrapper_class='mb-3'),
-            Submit('Create Club', value='Create Club')
+            StrictButton('Create Club', value='Create Club', type='submit', css_class='btn-outline-primary')
         )
 
         self.fields['name'].label = 'Club Name'
