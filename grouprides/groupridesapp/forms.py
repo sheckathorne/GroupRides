@@ -8,6 +8,8 @@ from crispy_forms.layout import (
     Div
 )
 
+from django.forms.widgets import SelectDateWidget
+
 from crispy_forms.bootstrap import StrictButton
 
 
@@ -58,6 +60,18 @@ class CreateEventForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = "__all__"
+        widgets = {
+            'start_date': forms.DateInput(
+                format='%m/%d/%Y',
+                attrs={'class': 'form-control', 'placeholder': 'Select a date', 'type': 'date'}),
+            'end_date': forms.DateInput(
+                format='%m/%d/%Y',
+                attrs={'class': 'form-control', 'placeholder': 'Select a date', 'type': 'date'}),
+            'ride_time': forms.TimeInput(
+                format='%-I:%M %p',
+                attrs={'class': 'form-control', 'placeholder': 'Select a time', 'type': 'time'}
+            )
+        }
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -68,6 +82,7 @@ class CreateEventForm(forms.ModelForm):
                 pk__in=ClubMembership.objects.filter(
                     user=self.user, membership_type__lte=ClubMembership.MemberType.RideLeader.value)
                 .values('club')))
+
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Fieldset('Ride Info',
@@ -86,13 +101,31 @@ class CreateEventForm(forms.ModelForm):
                      Div(
                          Div(Field('club', css_class="w-100", style="height: 38px;", type="date"), css_class='col-md-4', ),
                          css_class='row',
-                     )),
+                     ), css_class='mt-4'),
             Fieldset('Pace',
                      Div(
                          Div(
-                             Field('group_classification', css_class="w-100", style="height: 38px;"), css_class='col-md-4', ),
+                             Field('group_classification', css_class="w-100", style="height: 38px;")
+                             , css_class='col-md-4'
+                         ),
                          Div('lower_pace_range', css_class='col-md-4', ),
                          Div('upper_pace_range', css_class='col-md-4', ),
                          css_class='row',
+                     ), css_class='mt-4'),
+            Fieldset('Date / Time / Recurring',
+                     Div(
+                         Div('start_date', css_class='col-md-4', ),
+                         Div('end_date', css_class='col-md-4', ),
+                         css_class='row',
                      ),
-                     ))
+                     Div(
+                         Div('ride_time', css_class='col-md-4', ),
+                         Div(
+                             Field('time_zone', css_class="w-100", style="height: 38px;")
+                             , css_class='col-md-4'
+                         ),
+                         css_class='row',
+                     ),css_class='mt-4')
+            ,)
+
+        start_date = forms.DateField(widget=SelectDateWidget(empty_label="Nothing"))

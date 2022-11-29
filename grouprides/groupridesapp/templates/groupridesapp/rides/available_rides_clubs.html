@@ -4,27 +4,27 @@
 <table class="table">
     <thead>
         <tr>
-            <th scope="col">Club Name</th>
-            <th scope="col">Total</th>
-            <th scope="col">A</th>
-            <th scope="col">B</th>
-            <th scope="col">C</th>
-            <th scope="col">D</th>
-            <th scope="col">Novice</th>
-            <th scope="col">No Class</th>
+            <th scope="col" style="width: 30%">Club Name</th>
+            <th class="text-center" scope="col" style="width: 7%">Total</th>
+            <th class="text-center" scope="col" style="width: 7%">A</th>
+            <th class="text-center" scope="col" style="width: 7%">B</th>
+            <th class="text-center" scope="col" style="width: 7%">C</th>
+            <th class="text-center" scope="col" style="width: 7%">D</th>
+            <th class="text-center" scope="col" style="width: 7%">Novice</th>
+            <th class="text-center" scope="col" style="width: 7%">N/A</th>
         </tr>
     </thead>
     <tbody>
 {% for club in available_rides_clubs %}
         <tr>
             <td><a href="{% url 'available_rides' club_id=club.id slug=club.slug %}">{{club.name}}</a></td>
-            <td><a href="{% url 'available_rides' club_id=club.id slug=club.slug %}">{{club.total}}</a></td>
-            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='A' slug=club.slug %}">{{club.A}}</a></td>
-            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='B' slug=club.slug %}">{{club.B}}</a></td>
-            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='C' slug=club.slug %}">{{club.C}}</a></td>
-            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='D' slug=club.slug %}">{{club.D}}</a></td>
-            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='N' slug=club.slug %}">{{club.Novice}}</a></td>
-            <td><a href="{% url 'available_rides_group' club_id=club.id group_classification='NA' slug=club.slug %}">{{club.None}}</a></td>
+            <td class="text-center"><a href="{% url 'available_rides' club_id=club.id slug=club.slug %}">{{club.total}}</a></td>
+            <td class="text-center"><a href="{% url 'available_rides_group' club_id=club.id group_classification='A' slug=club.slug %}">{{club.A}}</a></td>
+            <td class="text-center"><a href="{% url 'available_rides_group' club_id=club.id group_classification='B' slug=club.slug %}">{{club.B}}</a></td>
+            <td class="text-center"><a href="{% url 'available_rides_group' club_id=club.id group_classification='C' slug=club.slug %}">{{club.C}}</a></td>
+            <td class="text-center"><a href="{% url 'available_rides_group' club_id=club.id group_classification='D' slug=club.slug %}">{{club.D}}</a></td>
+            <td class="text-center"><a href="{% url 'available_rides_group' club_id=club.id group_classification='N' slug=club.slug %}">{{club.Novice}}</a></td>
+            <td class="text-center"><a href="{% url 'available_rides_group' club_id=club.id group_classification='NA' slug=club.slug %}">{{club.None}}</a></td>
         </tr>
 {% empty %}
       No rides available for you to join

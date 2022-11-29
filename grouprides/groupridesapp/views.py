@@ -78,7 +78,6 @@ def available_rides_clubs(request):
                 club_name)
 
         clubs.append(new_club)
-        print(clubs)
 
     return render(request=request,
                   template_name="groupridesapp/rides/available_rides_clubs.html",
