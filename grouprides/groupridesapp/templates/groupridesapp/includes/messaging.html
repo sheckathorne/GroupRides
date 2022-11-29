@@ -1,3 +1,4 @@
+{% load static %}
 {% if messages %}
     {% for message in messages %}
         {% if message.tags == 'success' %}
@@ -23,3 +24,4 @@
         {% endif %}
     {% endfor %}
 {% endif %}
+<script src="{% static 'groupridesapp/js/messaging.js' %}"></script>

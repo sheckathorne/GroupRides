@@ -159,7 +159,8 @@ class Event(models.Model):
     name = models.CharField("Event Name", max_length=100)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     privacy = models.IntegerField("Privacy", choices=EventMemberType.choices)
-    club = models.ForeignKey(Club, on_delete=models.CASCADE)
+    club = models.ForeignKey(Club, on_delete=models.CASCADE,
+                             blank=True, null=True, help_text="Only required if ride is private")
     start_date = models.DateField("Start Date")
     end_date = models.DateField("End Date")
     ride_time = models.TimeField("Ride Time")
@@ -184,14 +185,14 @@ class Event(models.Model):
         self.full_clean()
         super(Event, self).save(*args, **kwargs)
         if created:
-            for i in range(0, (self.end_date - self.start_date).days + 1, self.frequency):
+            if self.frequency == 0:
                 EventOccurence.objects.create(
                     event=self,
                     occurence_name=self.name,
                     created_by=self.created_by,
                     privacy=self.privacy,
                     club=self.club,
-                    ride_date=self.start_date + datetime.timedelta(days=i),
+                    ride_date=self.start_date + datetime.timedelta(days=0),
                     ride_time=self.ride_time,
                     time_zone=self.time_zone,
                     max_riders=self.max_riders,
@@ -201,6 +202,24 @@ class Event(models.Model):
                     lower_pace_range=self.lower_pace_range,
                     upper_pace_range=self.upper_pace_range
                 )
+            else:
+                for i in range(0, (self.end_date - self.start_date).days + 1, self.frequency):
+                    EventOccurence.objects.create(
+                        event=self,
+                        occurence_name=self.name,
+                        created_by=self.created_by,
+                        privacy=self.privacy,
+                        club=self.club,
+                        ride_date=self.start_date + datetime.timedelta(days=i),
+                        ride_time=self.ride_time,
+                        time_zone=self.time_zone,
+                        max_riders=self.max_riders,
+                        is_canceled=self.is_canceled,
+                        route=self.route,
+                        group_classification=self.group_classification,
+                        lower_pace_range=self.lower_pace_range,
+                        upper_pace_range=self.upper_pace_range
+                    )
 
 
 class EventOccurence(models.Model):
@@ -225,7 +244,8 @@ class EventOccurence(models.Model):
     occurence_name = models.CharField("Event Name", max_length=100)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     privacy = models.IntegerField("Privacy", choices=EventMemberType.choices)
-    club = models.ForeignKey(Club, null=True, blank=True, on_delete=models.CASCADE)
+    club = models.ForeignKey(Club, null=True, blank=True,
+                             help_text="Only rquired if private is selected", on_delete=models.CASCADE)
     ride_date = models.DateField("Ride Date")
     ride_time = models.TimeField("Ride Time")
     time_zone = models.CharField("Time Zone", default="America/Chicago", choices=TIMEZONE_CHOICES, max_length=100)

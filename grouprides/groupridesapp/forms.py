@@ -57,11 +57,17 @@ class CreateClubForm(forms.ModelForm):
 
 
 def text_input(field_name, width=4):
-    return Div(Field(field_name), css_class=f"col-md-{width}", )
+    return Div(Field(field_name, id=f"event_create_{field_name}"), css_class=f"col-md-{width}", )
 
 
 def dropdown(field_name, height=38, width=4):
-    return Div(Field(field_name, css_class="w-100", style=f"height: {height}px;"), css_class=f"col-md-{width}", )
+    return Div(Field(
+        field_name,
+        id=f"event_create_{field_name}",
+        css_class="w-100",
+        style=f"height: {height}px;"),
+        css_class=f"col-md-{width}"
+    )
 
 
 def form_row(*args, margin=3):
@@ -69,22 +75,18 @@ def form_row(*args, margin=3):
 
 
 class CreateEventForm(forms.ModelForm):
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, user, user_clubs, user_routes, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(CreateEventForm, self).__init__(*args, **kwargs)
         self.fields['frequency'].label = 'Recurrence'
-        self.fields['route'].queryset = Route.objects.filter(created_by=user)
-        self.fields['club'].queryset = (
-            Club.objects.filter(
-                pk__in=ClubMembership.objects.filter(
-                    user=user, membership_type__lte=ClubMembership.MemberType.RideLeader.value)
-                .values('club')))
+        self.fields['route'].queryset = user_routes
+        self.fields['club'].queryset = user_clubs
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Fieldset('Ride Info',
-                     form_row(text_input("name"), dropdown("club")),
-                     form_row(dropdown("route"), dropdown("privacy")),
+                     form_row(text_input("name"), dropdown("privacy")),
+                     form_row(dropdown("route"), dropdown("club")),
                      form_row(text_input("max_riders")),
                      css_class='mt-4'),
             Fieldset('Pace',
@@ -105,6 +107,20 @@ class CreateEventForm(forms.ModelForm):
                 type='submit',
                 css_class='btn-outline-primary mb-4 col-md-4 w-100')
         )
+
+    def fields_required(self, fields):
+        for field in fields:
+            if not self.cleaned_data.get(field, ''):
+                msg = forms.ValidationError("This field is required.")
+                self.add_error(field, msg)
+
+    def clean(self):
+        private = self.cleaned_data.get('privacy')
+
+        if private == Event.EventMemberType.Members:
+            self.fields_required(['club'])
+
+        return self.cleaned_data
 
     class Meta:
         model = Event

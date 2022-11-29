@@ -2,7 +2,8 @@ import datetime
 
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
-from .models import Club, EventOccurence, EventOccurenceMember, EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route
+from .models import Club, EventOccurence, EventOccurenceMember, \
+    EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
 from django.db.models import Q, Count
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, CreateClubForm, CreateEventForm
@@ -289,27 +290,46 @@ class CreateClub(TemplateView):
         )
 
 
+def get_user_routes(user):
+    return Route.objects.filter(created_by=user)
+
+
+def get_user_clubs(user):
+    return (Club.objects.filter(
+        pk__in=ClubMembership.objects.filter(
+            user=user, membership_type__lte=ClubMembership.MemberType.RideLeader.value)
+        .values('club')))
+
+
 class CreateEvent(TemplateView):
     def get(self, request, **kwargs):
-        # if the user has no routes, and no ride leader or better access to a club, redirect to club creation
-        # and/or route creation with a message "must create route, must have ride leader access to club"...
+        user_routes = get_user_routes(request.user)
+        user_clubs = get_user_clubs(request.user)
+        if not user_routes.exists():
+            messages.warning(request, "Cannot create ride without any routes added. Please create a route first.")
+            return HttpResponseRedirect('/')
+        else:
+            form = CreateEventForm(request.user, user_clubs, user_routes)
+            return render(
+                request=request,
+                template_name="groupridesapp/events/create_event.html",
+                context={"form": form}
+            )
 
-        form = CreateEventForm(user=request.user)
-        return render(
-            request=request,
-            template_name="groupridesapp/events/create_event.html",
-            context={"form": form}
-        )
-
-    def post(self, request, **kwargs):
+    @staticmethod
+    def post(request, **kwargs):
+        user_routes = get_user_routes(request.user)
+        user_clubs = get_user_clubs(request.user)
         if request.method == 'POST':
-            form = CreateEventForm(request.user, request.POST)
+            form = CreateEventForm(request.user, user_clubs, user_routes, request.POST)
+            print('valid form', form.is_valid())
             if form.is_valid():
+                club = None if form['club'].value() == '' else Club.objects.get(pk=form['club'].value())
                 data = {
                     'name': form['name'].value(),
                     'created_by': request.user,
                     'privacy': form['privacy'].value(),
-                    'club': Club.objects.get(pk=form['club'].value()),
+                    'club': club,
                     'start_date': form['start_date'].value(),
                     'end_date': form['end_date'].value(),
                     'ride_time': form['ride_time'].value(),
@@ -323,13 +343,10 @@ class CreateEvent(TemplateView):
                 }
 
                 Event.objects.create(**data)
+                messages.success(request, 'Successfully created your ride!')
                 return HttpResponseRedirect(reverse('my_rides'))
-            else:
-                for field, error in form.errors.items():
-                    print('field:', field, 'error:', error)
-                    messages.error(request, error)
 
-        form = CreateEventForm(user=request.user)
+        form = CreateEventForm(request.user, request.POST)
         return render(
             request=request,
             template_name="groupridesapp/events/create_event.html",

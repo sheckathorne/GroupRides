@@ -1,7 +1,9 @@
 {% extends "groupridesapp/header.html" %}
+{% load static %}
 {% load crispy_forms_tags %}
 {% block content %}
     <form method="POST" action="{% url 'create_event' %}">
         {% crispy form %}
     </form>
+    <script src="{% static 'groupridesapp/js/create_event.js' %}"></script>
 {% endblock content %}
