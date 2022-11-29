@@ -75,8 +75,7 @@ def form_row(*args, margin=3):
 
 
 class CreateEventForm(forms.ModelForm):
-    def __init__(self, user, user_clubs, user_routes, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
+    def __init__(self, user_clubs, user_routes, *args, **kwargs):
         super(CreateEventForm, self).__init__(*args, **kwargs)
         self.fields['frequency'].label = 'Recurrence'
         self.fields['route'].queryset = user_routes
@@ -101,11 +100,9 @@ class CreateEventForm(forms.ModelForm):
                      form_row(text_input("end_date"), text_input("ride_time")),
                      form_row(dropdown("frequency")),
                      css_class='mt-4'),
-            StrictButton(
-                'Create Ride',
-                value='Create Ride',
-                type='submit',
-                css_class='btn-outline-primary mb-4 col-md-4 w-100')
+            form_row(
+                Div(StrictButton('Create Ride', value="Create Ride", type="submit", css_class="btn-primary w-100"),
+                    css_class="col-md-4",))
         )
 
     def fields_required(self, fields):
@@ -138,3 +135,29 @@ class CreateEventForm(forms.ModelForm):
                 attrs={'class': 'form-control', 'placeholder': 'Select a time', 'type': 'time'}
             )
         }
+
+
+class CreateRouteForm(forms.ModelForm):
+    def __init__(self, user, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(CreateRouteForm, self).__init__(*args, **kwargs)
+        self.fields['start_location_name'].label = 'Start Location Name'
+        self.fields['distance'].label = 'Distance (miles)'
+        self.fields['elevation'].label = 'Elevation (ft)'
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Fieldset('Route Info',
+                     form_row(text_input("name"), text_input("start_location_name")),
+                     form_row(text_input("route_url")),
+                     css_class='mt-4'),
+            Fieldset('Distance / Elevation',
+                     form_row(
+                         text_input("distance"),
+                         text_input("elevation")),
+                     css_class='mt-4'),
+            form_row(Div(StrictButton('Create Route', value="Create Route", type="submit", css_class="btn-primary w-100"), css_class="col-md-4",))
+        )
+
+    class Meta:
+        model = Route
+        exclude = ['created_by', 'date_created']

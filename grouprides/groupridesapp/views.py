@@ -1,12 +1,12 @@
 import datetime
-
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
 from django.db.models import Q, Count
 from django.urls import reverse
-from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, CreateClubForm, CreateEventForm
+from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
+    CreateClubForm, CreateEventForm, CreateRouteForm
 from .utils import days_from_today, club_ride_count, gather_available_rides, generate_pagination_items
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -309,7 +309,7 @@ class CreateEvent(TemplateView):
             messages.warning(request, "Cannot create ride without any routes added. Please create a route first.")
             return HttpResponseRedirect('/')
         else:
-            form = CreateEventForm(request.user, user_clubs, user_routes)
+            form = CreateEventForm(user_clubs, user_routes)
             return render(
                 request=request,
                 template_name="groupridesapp/events/create_event.html",
@@ -321,7 +321,7 @@ class CreateEvent(TemplateView):
         user_routes = get_user_routes(request.user)
         user_clubs = get_user_clubs(request.user)
         if request.method == 'POST':
-            form = CreateEventForm(request.user, user_clubs, user_routes, request.POST)
+            form = CreateEventForm(user_clubs, user_routes, request.POST)
             print('valid form', form.is_valid())
             if form.is_valid():
                 club = None if form['club'].value() == '' else Club.objects.get(pk=form['club'].value())
@@ -350,5 +350,15 @@ class CreateEvent(TemplateView):
         return render(
             request=request,
             template_name="groupridesapp/events/create_event.html",
+            context={"form": form}
+        )
+
+
+class CreateRoute(TemplateView):
+    def get(self, request, **kwargs):
+        form = CreateRouteForm(request.user)
+        return render(
+            request=request,
+            template_name="groupridesapp/routes/create_route.html",
             context={"form": form}
         )

@@ -125,7 +125,7 @@ class Route(models.Model):
             )
 
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.distance} miles"
 
 
 class Event(models.Model):
