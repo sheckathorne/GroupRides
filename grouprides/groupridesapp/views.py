@@ -2,7 +2,7 @@ import datetime
 
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
-from .models import Club, EventOccurence, EventOccurenceMember, EventOccurenceMessage, EventOccurenceMessageVisit
+from .models import Club, EventOccurence, EventOccurenceMember, EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route
 from django.db.models import Q, Count
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, CreateClubForm, CreateEventForm
@@ -265,11 +265,11 @@ class CreateClub(TemplateView):
                 user = request.user
                 slug = slugify(form['name'].value())
                 data = {
-                    "name": form['name'].value(),
-                    "web_url": form["web_url"].value(),
-                    "logo_url": form["logo_url"].value(),
-                    "zip_code": form["zip_code"].value(),
-                    "private": form["private"].value(),
+                    'name': form['name'].value(),
+                    'web_url': form['web_url'].value(),
+                    'logo_url': form['logo_url'].value(),
+                    'zip_code': form['zip_code'].value(),
+                    'private': form['private'].value(),
                     "created_by": user,
                     "slug": slug,
                 }
@@ -291,6 +291,44 @@ class CreateClub(TemplateView):
 
 class CreateEvent(TemplateView):
     def get(self, request, **kwargs):
+        # if the user has no routes, and no ride leader or better access to a club, redirect to club creation
+        # and/or route creation with a message "must create route, must have ride leader access to club"...
+
+        form = CreateEventForm(user=request.user)
+        return render(
+            request=request,
+            template_name="groupridesapp/events/create_event.html",
+            context={"form": form}
+        )
+
+    def post(self, request, **kwargs):
+        if request.method == 'POST':
+            form = CreateEventForm(request.user, request.POST)
+            if form.is_valid():
+                data = {
+                    'name': form['name'].value(),
+                    'created_by': request.user,
+                    'privacy': form['privacy'].value(),
+                    'club': Club.objects.get(pk=form['club'].value()),
+                    'start_date': form['start_date'].value(),
+                    'end_date': form['end_date'].value(),
+                    'ride_time': form['ride_time'].value(),
+                    'time_zone': form['time_zone'].value(),
+                    'frequency': form['frequency'].value(),
+                    'max_riders': form['max_riders'].value(),
+                    'group_classification': form['group_classification'].value(),
+                    'lower_pace_range': form['lower_pace_range'].value(),
+                    'upper_pace_range': form['upper_pace_range'].value(),
+                    'route': Route.objects.get(pk=form['route'].value()),
+                }
+
+                Event.objects.create(**data)
+                return HttpResponseRedirect(reverse('my_rides'))
+            else:
+                for field, error in form.errors.items():
+                    print('field:', field, 'error:', error)
+                    messages.error(request, error)
+
         form = CreateEventForm(user=request.user)
         return render(
             request=request,
