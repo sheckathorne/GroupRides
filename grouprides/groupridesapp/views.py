@@ -294,17 +294,32 @@ def get_user_routes(user):
     return Route.objects.filter(created_by=user)
 
 
-def get_user_clubs(user):
+def get_user_and_club_routes(user):
+    return Route.objects.filter(
+        Q(created_by=user) | Q(
+            club__in=(
+                Club.objects.filter(
+                    pk__in=ClubMembership.objects.filter(
+                        user=user,
+                        membership_type__lte=ClubMembership.MemberType.RideLeader.value)
+                    .values('club')
+                )
+            )
+        )
+    )
+
+
+def get_user_clubs(user, member_type):
     return (Club.objects.filter(
         pk__in=ClubMembership.objects.filter(
-            user=user, membership_type__lte=ClubMembership.MemberType.RideLeader.value)
+            user=user, membership_type__lte=member_type.value)
         .values('club')))
 
 
 class CreateEvent(TemplateView):
     def get(self, request, **kwargs):
         user_routes = get_user_routes(request.user)
-        user_clubs = get_user_clubs(request.user)
+        user_clubs = get_user_clubs(request.user, ClubMembership.MemberType.RideLeader)
         if not user_routes.exists():
             messages.warning(request, "Cannot create ride without any routes added. Please create a route first.")
             return HttpResponseRedirect('/')
@@ -319,10 +334,9 @@ class CreateEvent(TemplateView):
     @staticmethod
     def post(request, **kwargs):
         user_routes = get_user_routes(request.user)
-        user_clubs = get_user_clubs(request.user)
+        user_clubs = get_user_clubs(request.user, ClubMembership.MemberType.RideLeader)
         if request.method == 'POST':
             form = CreateEventForm(user_clubs, user_routes, request.POST)
-            print('valid form', form.is_valid())
             if form.is_valid():
                 club = None if form['club'].value() == '' else Club.objects.get(pk=form['club'].value())
                 data = {
@@ -356,9 +370,33 @@ class CreateEvent(TemplateView):
 
 class CreateRoute(TemplateView):
     def get(self, request, **kwargs):
-        form = CreateRouteForm(request.user)
+        user_clubs = get_user_clubs(request.user, ClubMembership.MemberType.RouteContributor)
+        form = CreateRouteForm(user_clubs)
         return render(
             request=request,
             template_name="groupridesapp/routes/create_route.html",
             context={"form": form}
         )
+
+    def post(self, request, **kwargs):
+        user_clubs = get_user_clubs(request.user, ClubMembership.MemberType.RouteContributor)
+        if request.method == "POST":
+            form = CreateRouteForm(user_clubs, request.POST)
+            if form.is_valid():
+                data = {
+                    "name": form["name"].value(),
+                    "start_location_name": form["start_location_name"].value(),
+                    "distance": form["distance"].value(),
+                    "elevation": form["elevation"].value()
+                }
+
+                Route.objects.create(**data, created_by=request.user)
+                messages.success(request, "Successfully created new route.")
+                return HttpResponseRedirect("/")
+
+            form = CreateRouteForm(user_clubs, request.POST)
+            return render(
+                request=request,
+                template_name="groupridesapp/routes/create_route.html",
+                context={"form": form}
+            )

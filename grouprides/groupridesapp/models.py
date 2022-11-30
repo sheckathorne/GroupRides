@@ -81,8 +81,9 @@ class ClubMembership(models.Model):
         Creator = (1, "Creator")
         Admin = (2, "Admin")
         RideLeader = (3, "Ride Leader")
-        Member = (4, "Member")
-        NonMember = (5, "Non-Member")
+        RouteContributor = (4, "Route Contributor")
+        Member = (5, "Member")
+        NonMember = (6, "Non-Member")
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
@@ -113,6 +114,8 @@ class Route(models.Model):
     distance = models.DecimalField("Distance", max_digits=7, decimal_places=2)
     elevation = models.IntegerField("Elevation")
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    shared = models.BooleanField("Share With Club", default=False)
+    club = models.ForeignKey(Club, blank=True, null=True, on_delete=models.CASCADE)
     date_created = models.DateField("Date Created", auto_now_add=True)
 
     def save(self, *args, **kwargs):
@@ -149,8 +152,9 @@ class Event(models.Model):
         Creator = (1, "Creator")
         Admin = (2, "Admin")
         RideLeader = (3, "Ride Leader")
-        Member = (4, "Member")
-        NonMember = (5, "Non-Member")
+        RouteContributor = (4, "Route Contributor")
+        Member = (5, "Member")
+        NonMember = (6, "Non-Member")
 
     class EventMemberType(models.IntegerChoices):
         Members = (4, "Current Members")
@@ -237,8 +241,8 @@ class EventOccurence(models.Model):
         zip(pytz.all_timezones, pytz.all_timezones)
 
     class EventMemberType(models.IntegerChoices):
-        Members = (4, "Current Members")
-        Open = (5, "Open")
+        Members = (Event.MemberType.Member.value, "Current Members")
+        Open = (Event.MemberType.NonMember.value, "Open")
 
     event = models.ForeignKey(Event, null=True, blank=True, on_delete=models.CASCADE)
     occurence_name = models.CharField("Event Name", max_length=100)

@@ -7,9 +7,6 @@ from crispy_forms.layout import (
     Fieldset,
     Div
 )
-
-from django.forms.widgets import SelectDateWidget
-
 from crispy_forms.bootstrap import StrictButton
 
 
@@ -56,14 +53,14 @@ class CreateClubForm(forms.ModelForm):
         self.fields['private'].label = 'Private (membership managed by Admin)'
 
 
-def text_input(field_name, width=4):
-    return Div(Field(field_name, id=f"event_create_{field_name}"), css_class=f"col-md-{width}", )
+def text_input(field_name, id_name, width=4):
+    return Div(Field(field_name, id=f"{id_name}_create_{field_name}"), css_class=f"col-md-{width}",)
 
 
-def dropdown(field_name, height=38, width=4):
+def dropdown(field_name, id_name, height=38, width=4):
     return Div(Field(
         field_name,
-        id=f"event_create_{field_name}",
+        id=f"{id_name}_create_{field_name}",
         css_class="w-100",
         style=f"height: {height}px;"),
         css_class=f"col-md-{width}"
@@ -84,21 +81,21 @@ class CreateEventForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Fieldset('Ride Info',
-                     form_row(text_input("name"), dropdown("privacy")),
-                     form_row(dropdown("route"), dropdown("club")),
-                     form_row(text_input("max_riders")),
+                     form_row(text_input("name","event"), dropdown("privacy","event")),
+                     form_row(dropdown("route","event"), dropdown("club","event")),
+                     form_row(text_input("max_riders","event")),
                      css_class='mt-4'),
             Fieldset('Pace',
                      form_row(
-                         dropdown("group_classification")),
+                         dropdown("group_classification","event")),
                      form_row(
-                         text_input("lower_pace_range"),
-                         text_input("upper_pace_range")),
+                         text_input("lower_pace_range","event"),
+                         text_input("upper_pace_range","event")),
                      css_class='mt-4'),
             Fieldset('Date / Time / Recurring',
-                     form_row(text_input("start_date"), dropdown("time_zone")),
-                     form_row(text_input("end_date"), text_input("ride_time")),
-                     form_row(dropdown("frequency")),
+                     form_row(text_input("start_date","event"), dropdown("time_zone","event")),
+                     form_row(text_input("end_date","event"), text_input("ride_time","event")),
+                     form_row(dropdown("frequency","event")),
                      css_class='mt-4'),
             form_row(
                 Div(StrictButton('Create Ride', value="Create Ride", type="submit", css_class="btn-primary w-100"),
@@ -138,25 +135,42 @@ class CreateEventForm(forms.ModelForm):
 
 
 class CreateRouteForm(forms.ModelForm):
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, user_clubs, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(CreateRouteForm, self).__init__(*args, **kwargs)
         self.fields['start_location_name'].label = 'Start Location Name'
         self.fields['distance'].label = 'Distance (miles)'
         self.fields['elevation'].label = 'Elevation (ft)'
+        self.fields['club'].queryset = user_clubs
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Fieldset('Route Info',
-                     form_row(text_input("name"), text_input("start_location_name")),
-                     form_row(text_input("route_url")),
+                     form_row(text_input("name","route"), text_input("start_location_name","route")),
+                     form_row(text_input("url","route")),
                      css_class='mt-4'),
             Fieldset('Distance / Elevation',
                      form_row(
-                         text_input("distance"),
-                         text_input("elevation")),
+                         text_input("distance","route"),
+                         text_input("elevation","route")),
                      css_class='mt-4'),
+            Fieldset('Sharing',
+                     form_row(text_input("shared", "route")),
+                     form_row(dropdown("club", "route"))),
             form_row(Div(StrictButton('Create Route', value="Create Route", type="submit", css_class="btn-primary w-100"), css_class="col-md-4",))
         )
+
+    def fields_required(self, fields):
+        for field in fields:
+            if not self.cleaned_data.get(field, ''):
+                msg = forms.ValidationError("This field is required.")
+                self.add_error(field, msg)
+
+    def clean(self):
+        private = self.cleaned_data.get('shared')
+        if private:
+            self.fields_required(['club'])
+
+        return self.cleaned_data
 
     class Meta:
         model = Route

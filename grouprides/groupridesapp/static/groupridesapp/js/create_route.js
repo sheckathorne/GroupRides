@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    if ($("#event_create_privacy").val() === "5") {
+    if ($("#route_create_shared").val() === "checked") {
         conditional_fields.show();
     } else {
         conditional_fields.hide();
@@ -9,8 +9,8 @@ $(document).ready(function(){
 var conditional_fields = $("#div_id_club");
 conditional_fields.hide();
 
-$("#event_create_privacy").change(function() {
-    if ($(this).val() === "5") {
+$("#route_create_shared").change(function() {
+    if (this.checked) {
         conditional_fields.show();
     } else {
         conditional_fields.hide();
