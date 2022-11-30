@@ -128,7 +128,7 @@ class Route(models.Model):
             )
 
     def __str__(self):
-        return f"{self.name} - {self.distance} miles"
+        return f"{self.name}, by {self.created_by.first_name} {self.created_by.last_name} - {self.distance} miles"
 
 
 class Event(models.Model):
@@ -157,8 +157,8 @@ class Event(models.Model):
         NonMember = (6, "Non-Member")
 
     class EventMemberType(models.IntegerChoices):
-        Members = (4, "Current Members")
-        Open = (5, "Open")
+        Members = (ClubMembership.MemberType.Member.value, "Current Members")
+        Open = (ClubMembership.MemberType.NonMember.value, "Open")
 
     name = models.CharField("Event Name", max_length=100)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

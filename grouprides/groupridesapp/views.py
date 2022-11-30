@@ -296,16 +296,11 @@ def get_user_routes(user):
 
 def get_user_and_club_routes(user):
     return Route.objects.filter(
-        Q(created_by=user) | Q(
-            club__in=(
-                Club.objects.filter(
-                    pk__in=ClubMembership.objects.filter(
-                        user=user,
-                        membership_type__lte=ClubMembership.MemberType.RideLeader.value)
-                    .values('club')
-                )
-            )
-        )
+        Q(created_by=user) |
+        Q(club__in=ClubMembership.objects.filter(
+            user=user,
+            membership_type__lte=ClubMembership.MemberType.RideLeader.value).values('club')
+          )
     )
 
 
@@ -318,7 +313,7 @@ def get_user_clubs(user, member_type):
 
 class CreateEvent(TemplateView):
     def get(self, request, **kwargs):
-        user_routes = get_user_routes(request.user)
+        user_routes = get_user_and_club_routes(request.user)
         user_clubs = get_user_clubs(request.user, ClubMembership.MemberType.RideLeader)
         if not user_routes.exists():
             messages.warning(request, "Cannot create ride without any routes added. Please create a route first.")
@@ -333,7 +328,7 @@ class CreateEvent(TemplateView):
 
     @staticmethod
     def post(request, **kwargs):
-        user_routes = get_user_routes(request.user)
+        user_routes = get_user_and_club_routes(request.user)
         user_clubs = get_user_clubs(request.user, ClubMembership.MemberType.RideLeader)
         if request.method == 'POST':
             form = CreateEventForm(user_clubs, user_routes, request.POST)
@@ -383,11 +378,14 @@ class CreateRoute(TemplateView):
         if request.method == "POST":
             form = CreateRouteForm(user_clubs, request.POST)
             if form.is_valid():
+                club = None if form['club'].value() == '' else Club.objects.get(pk=form['club'].value())
                 data = {
                     "name": form["name"].value(),
                     "start_location_name": form["start_location_name"].value(),
                     "distance": form["distance"].value(),
-                    "elevation": form["elevation"].value()
+                    "elevation": form["elevation"].value(),
+                    "shared": form["shared"].value(),
+                    "club": club
                 }
 
                 Route.objects.create(**data, created_by=request.user)
