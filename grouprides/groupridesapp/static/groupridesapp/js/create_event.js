@@ -1,4 +1,5 @@
-$(document).ready(function(){
+$(document).ready(function() {
+    console.log('hello')
     if ($("#event_create_privacy").val() === "5") {
         conditional_fields.show();
     } else {
