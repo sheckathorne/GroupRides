@@ -198,3 +198,15 @@ a.article-title:hover {
     color: black;
     border: none;
 }
+
+.dropdown-menu.show > li > a {
+    color: #ffffff;
+}
+
+.dropdown-menu.show > li > a:hover {
+    color: black;
+}
+
+.dropdown-menu.show {
+    background-color: #003F72;
+}

@@ -198,3 +198,8 @@ a.article-title:hover {
     color: black;
     border: none;
 }
+
+.dropdown-menu .show>li {
+background-color: red;
+color:#ffffff;
+}
