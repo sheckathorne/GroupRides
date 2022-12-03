@@ -1,5 +1,4 @@
 $(document).ready(function() {
-    console.log('hello')
     if ($("#event_create_privacy").val() === "5") {
         conditional_fields.show();
     } else {
@@ -17,3 +16,8 @@ $("#event_create_privacy").change(function() {
         conditional_fields.hide();
     }
 });
+
+$("#event_create_route").change(function() {
+    var url = `$(this).prop("data-url")
+    console.log(url)
+})

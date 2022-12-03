@@ -1,4 +1,6 @@
 from django import forms
+from django.forms import Select, ModelChoiceField
+
 from .models import EventOccurenceMember, EventOccurenceMessage, Club, ClubMembership, Event, Route
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import (
@@ -8,6 +10,7 @@ from crispy_forms.layout import (
     Div
 )
 from crispy_forms.bootstrap import StrictButton
+from django.utils.html import mark_safe
 
 
 class DeleteRideRegistrationForm(forms.ModelForm):
@@ -71,6 +74,33 @@ def form_row(*args, margin=3):
     return Div(*args, css_class=f"row mb-{margin}")
 
 
+class SelectWithOptionAttribute(Select):
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        if isinstance(label, dict):
+            opt_attrs = label.copy()
+            label = opt_attrs.pop('label')
+        else:
+            opt_attrs = {}
+
+        option_dict = super().create_option(
+            name, value, label, selected, index, subindex=subindex, attrs=attrs)
+
+        for key, val in opt_attrs.items():
+            option_dict['attrs'][key] = val
+
+        return option_dict
+
+
+class RouteChoiceField(ModelChoiceField):
+    widget = SelectWithOptionAttribute
+
+    def label_from_instance(self, obj):
+        return {
+            'label': super().label_from_instance(obj),
+            'data-url': obj.url
+        }
+
+
 class CreateEventForm(forms.ModelForm):
     def __init__(self, user_clubs, user_routes, *args, **kwargs):
         super(CreateEventForm, self).__init__(*args, **kwargs)
@@ -81,21 +111,21 @@ class CreateEventForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Fieldset('Ride Info',
-                     form_row(text_input("name","event"), dropdown("privacy","event")),
-                     form_row(dropdown("route","event"), dropdown("club","event")),
-                     form_row(text_input("max_riders","event")),
+                     form_row(text_input("name", "event"), dropdown("privacy", "event")),
+                     form_row(dropdown("route", "event"), dropdown("club", "event")),
+                     form_row(text_input("max_riders", "event")),
                      css_class='mt-4'),
             Fieldset('Pace',
                      form_row(
-                         dropdown("group_classification","event")),
+                         dropdown("group_classification", "event")),
                      form_row(
-                         text_input("lower_pace_range","event"),
-                         text_input("upper_pace_range","event")),
+                         text_input("lower_pace_range", "event"),
+                         text_input("upper_pace_range", "event")),
                      css_class='mt-4'),
             Fieldset('Date / Time / Recurring',
-                     form_row(text_input("start_date","event"), dropdown("time_zone","event")),
-                     form_row(text_input("end_date","event"), text_input("ride_time","event")),
-                     form_row(dropdown("frequency","event")),
+                     form_row(text_input("start_date", "event"), dropdown("time_zone", "event")),
+                     form_row(text_input("end_date", "event"), text_input("ride_time", "event")),
+                     form_row(dropdown("frequency", "event")),
                      css_class='mt-4'),
             form_row(
                 Div(StrictButton('Create Ride', value="Create Ride", type="submit", css_class="btn-primary w-100"),
@@ -131,6 +161,14 @@ class CreateEventForm(forms.ModelForm):
                 format='%-I:%M %p',
                 attrs={'class': 'form-control', 'placeholder': 'Select a time', 'type': 'time'}
             )
+        }
+
+        field_classes = {
+            'route': RouteChoiceField
+        }
+
+        help_texts = {
+            'route': mark_safe("<a id='route_url_id' href='' target='_blank'>Add</a>")
         }
 
 
