@@ -1,6 +1,5 @@
 {% extends "groupridesapp/header.html" %}
 {% block content %}
-    <h5  class="card-header navbar-color text-light mt-2 mb-2">My Upcoming Rides</h5>
     {% for ride in my_upcoming_rides %}
         {% with event_occurence=ride.event_occurence %}
             {% include 'groupridesapp/rides/ride_card/delete_confirm_modal.html' %}

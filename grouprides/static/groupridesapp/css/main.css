@@ -199,11 +199,11 @@ a.article-title:hover {
     border: none;
 }
 
-.dropdown-menu.show > li > a {
+.dropdown-menu.show > li > a, .dropdown-menu.show > li > button {
     color: #ffffff;
 }
 
-.dropdown-menu.show > li > a:hover {
+.dropdown-menu.show > li > a:hover, .dropdown-menu.show > li > button:hover {
     color: black;
 }
 
