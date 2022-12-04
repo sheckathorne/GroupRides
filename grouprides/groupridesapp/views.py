@@ -1,9 +1,11 @@
 import datetime
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
+
+from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
-from django.db.models import Q, Count
+from django.db.models import Q, Count, When
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
     CreateClubForm, CreateEventForm, CreateRouteForm
@@ -105,6 +107,18 @@ def available_rides(request, club_id, group_classification="", **kwargs):
                       "available_rides": available_rides_queryset,
                       "user": request.user
                   })
+
+
+@login_required(login_url='/login')
+def all_available_rides(request):
+    arq = gather_available_rides(user=request.user)
+    f = RideFilter(request.GET, queryset=arq)
+    f.filters['club'].queryset = Club.objects.filter(pk__in=arq.values('club')).distinct()
+    f.filters['group_classification'].queryset = arq.values_list('group_classification', flat=True).distinct()
+
+    return render(request=request,
+                  template_name="groupridesapp/rides/all_available_rides.html",
+                  context={"filter": f})
 
 
 @login_required(login_url='/login')

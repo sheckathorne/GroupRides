@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'users',
     'fontawesomefree',
     'crispy_forms',
-    'tinymce'
+    'tinymce',
+    'django_filters'
 ]
 
 MIDDLEWARE = [

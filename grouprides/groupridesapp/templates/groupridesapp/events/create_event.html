@@ -3,6 +3,7 @@
 {% load crispy_forms_tags %}
 {% block content %}
     <form method="POST" action="{% url 'create_event' %}">
+        {% csrf_token %}
         {% crispy form %}
     </form>
     <script src="{% static 'groupridesapp/js/create_event.js' %}"></script>

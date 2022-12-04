@@ -36,7 +36,7 @@ def ride_is_full(max_riders, number_of_riders):
 
 
 def max_is_fewer_than_riders(max_riders, number_of_riders):
-    if max_riders < number_of_riders:
+    if max_riders and number_of_riders and max_riders < number_of_riders:
         raise ValidationError('Cannot set max riders fewer than number of signed up riders')
 
 
@@ -249,7 +249,7 @@ class EventOccurence(models.Model):
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     privacy = models.IntegerField("Privacy", choices=EventMemberType.choices)
     club = models.ForeignKey(Club, null=True, blank=True,
-                             help_text="Only rquired if private is selected", on_delete=models.CASCADE)
+                             help_text="Only required if private is selected", on_delete=models.CASCADE)
     ride_date = models.DateField("Ride Date")
     ride_time = models.TimeField("Ride Time")
     time_zone = models.CharField("Time Zone", default="America/Chicago", choices=TIMEZONE_CHOICES, max_length=100)

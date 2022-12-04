@@ -1,7 +1,8 @@
 from django import forms
 from django.forms import Select, ModelChoiceField
 
-from .models import EventOccurenceMember, EventOccurenceMessage, Club, ClubMembership, Event, Route
+from .models import EventOccurenceMember, EventOccurenceMessage, \
+    Club, Event, Route
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import (
     Layout,
@@ -57,7 +58,7 @@ class CreateClubForm(forms.ModelForm):
 
 
 def text_input(field_name, id_name, width=4):
-    return Div(Field(field_name, id=f"{id_name}_create_{field_name}"), css_class=f"col-md-{width}",)
+    return Div(Field(field_name, id=f"{id_name}_create_{field_name}"), css_class=f"col-md-{width}", )
 
 
 def dropdown(field_name, id_name, height=38, width=4):
@@ -129,7 +130,7 @@ class CreateEventForm(forms.ModelForm):
                      css_class='mt-4'),
             form_row(
                 Div(StrictButton('Create Ride', value="Create Ride", type="submit", css_class="btn-primary w-100"),
-                    css_class="col-md-4",))
+                    css_class="col-md-4", ))
         )
 
     def fields_required(self, fields):
@@ -183,18 +184,20 @@ class CreateRouteForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Fieldset('Route Info',
-                     form_row(text_input("name","route"), text_input("start_location_name","route")),
-                     form_row(text_input("url","route")),
+                     form_row(text_input("name", "route"), text_input("start_location_name", "route")),
+                     form_row(text_input("url", "route")),
                      css_class='mt-4'),
             Fieldset('Distance / Elevation',
                      form_row(
-                         text_input("distance","route"),
-                         text_input("elevation","route")),
+                         text_input("distance", "route"),
+                         text_input("elevation", "route")),
                      css_class='mt-4'),
             Fieldset('Sharing',
                      form_row(text_input("shared", "route")),
                      form_row(dropdown("club", "route"))),
-            form_row(Div(StrictButton('Create Route', value="Create Route", type="submit", css_class="btn-primary w-100"), css_class="col-md-4",))
+            form_row(
+                Div(StrictButton('Create Route', value="Create Route", type="submit", css_class="btn-primary w-100"),
+                    css_class="col-md-4", ))
         )
 
     def fields_required(self, fields):

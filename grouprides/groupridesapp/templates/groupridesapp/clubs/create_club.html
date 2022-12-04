@@ -2,6 +2,7 @@
 {% load crispy_forms_tags %}
 {% block content %}
     <form method="POST" action="{% url 'create_club' %}">
+        {% csrf_token %}
         {% crispy form %}
     </form>
 {% endblock content %}
