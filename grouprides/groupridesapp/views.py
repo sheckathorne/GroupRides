@@ -61,7 +61,7 @@ def available_rides(request):
     f.filters['club'].queryset = Club.objects.filter(pk__in=arq.values('club')).distinct()
     f.filters['group_classification'].queryset = arq.values_list('group_classification', flat=True).distinct()
 
-    paginator = Paginator(f.qs.order_by('ride_date', 'ride_time'), 2)
+    paginator = Paginator(f.qs.order_by('ride_date', 'ride_time'), 4)
     page_number = request.GET.get('page') or 1
     page_obj = paginator.get_page(page_number)
 
