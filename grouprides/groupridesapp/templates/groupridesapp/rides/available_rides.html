@@ -5,6 +5,9 @@
 <form method="get">
     {% crispy form %}
 </form>
+{% if event_occurences.paginator.num_pages > 1 %}
+    {% include 'groupridesapp/pagination.html' %}
+{% endif %}
 {% for event_occurence in event_occurences %}
     {% can_register_to_ride user=user event_occurence=event_occurence as user_can_register %}
         {% if user_can_register %}

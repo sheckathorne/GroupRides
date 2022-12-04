@@ -62,9 +62,9 @@
     {% include 'groupridesapp/rides/ride_card/ride_card_body.html' %}
     <div class="card-footer">
         {% if event_occurence.club is not None %}
-            <small>{{ event_occurence.club.name}}</small>
+            <small class="fw-bold">{{ event_occurence.club.name}}</small>
         {% else %}
-            <small>No club affiliation</small>
+            <small class="fw-bold">No club affiliation</small>
         {% endif %}
     </div>
 </div>

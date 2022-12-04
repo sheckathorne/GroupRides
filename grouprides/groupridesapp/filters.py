@@ -1,5 +1,5 @@
 import django_filters
-from .models import EventOccurence, Club
+from .models import EventOccurence, Club, ClubMembership
 from django import forms
 from django.forms import inlineformset_factory, TextInput
 from .forms import form_row, dropdown, text_input
@@ -13,13 +13,13 @@ from crispy_forms.layout import (
 from crispy_forms.bootstrap import StrictButton
 
 
-class RideForm(forms.ModelForm):
+class AvailableRideForm(forms.ModelForm):
     class Meta:
         model = EventOccurence
         fields = ['club', 'group_classification']
 
     def __init__(self, *args, **kwargs):
-        super(RideForm, self).__init__(*args, **kwargs)
+        super(AvailableRideForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.disable_csrf = True
         self.helper.layout = Layout(
@@ -30,18 +30,26 @@ class RideForm(forms.ModelForm):
                                  dropdown("club", "rides", width=3, margin_bottom=2),
                                  dropdown("group_classification", "rides", width=3, margin_bottom=2),
                                  text_input("distance__lt", "rides", width=3, margin_bottom=2),
-                                 text_input("distance__gt", "rides", width=3, margin_bottom=2)
+                                 text_input("distance__gt", "rides", width=3, margin_bottom=2),
+                                 bottom_margin=1
                              ),
                              css_class="col-md-11"
                          ),
                          Div(StrictButton('Filter', value="Filter", type="submit", css_class="btn-primary w-100"),
                              css_class="col-md-1"),
+                         bottom_margin=2
                      ),
                      css_class='mt-4'),
         )
 
 
-class RideFilter(django_filters.FilterSet):
+def user_clubs(request):
+    return Club.objects.filter(
+        pk__in=ClubMembership.objects.filter(user=request.user).values('club')
+    )
+
+
+class AvailableRideFilter(django_filters.FilterSet):
     group_classification = django_filters.ChoiceFilter(
         label='',
         lookup_expr='exact',
@@ -54,7 +62,7 @@ class RideFilter(django_filters.FilterSet):
         label='',
         lookup_expr='exact',
         field_name='club',
-        queryset=None,
+        queryset=user_clubs,
         empty_label='Select Club'
     )
 
@@ -77,6 +85,6 @@ class RideFilter(django_filters.FilterSet):
     )
 
     class Meta:
-        form = RideForm
+        form = AvailableRideForm
         model = EventOccurence
         fields = ['club', 'group_classification', 'route__distance']

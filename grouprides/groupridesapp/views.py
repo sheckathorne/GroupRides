@@ -2,7 +2,7 @@ import datetime
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
 
-from .filters import RideFilter
+from .filters import AvailableRideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
 from django.db.models import Q
@@ -54,18 +54,17 @@ def my_rides(request):
                   })
 
 
-def remove_page_from_url(full_path):
-    if 'page' not in full_path:
-        return full_path
-    else:
-        return full_path[:full_path.find('page')-1]
-
-
 @login_required(login_url='/login')
 def available_rides(request):
+    def remove_page_from_url(full_path):
+        if 'page' not in full_path:
+            return full_path
+        else:
+            return full_path[:full_path.find('page') - 1]
+
     arq = gather_available_rides(user=request.user)
-    f = RideFilter(request.GET, queryset=arq)
-    f.filters['club'].queryset = Club.objects.filter(pk__in=arq.values('club')).distinct()
+    f = AvailableRideFilter(request.GET, queryset=arq)
+    f.filters['club'].queryset = get_user_clubs(request.user, ClubMembership.MemberType.NonMember)
     f.filters['group_classification'].queryset = arq.values_list('group_classification', flat=True).distinct()
 
     paginator = Paginator(f.qs.order_by('ride_date', 'ride_time'), 4)
@@ -111,18 +110,12 @@ def delete_ride_reigstration(request, event_occurence_id):
         if form.is_valid():
             registration_to_delete.delete()
             messages.error(request, "Successfully unregistered from ride.")
-            return HttpResponseRedirect("/")
+            return HttpResponseRedirect(reverse('my_rides'))
         else:
             for error in list(form.errors.values()):
                 messages.error(request, error)
 
-            form = DeleteRideRegistrationForm(instance=registration_to_delete)
-
-        template_vars = {'form': form}
-
-        return render(
-            request=request,
-            context=template_vars)
+        return HttpResponseRedirect("/")
 
 
 @login_required(login_url='/login')
@@ -182,14 +175,19 @@ class EventComments(TemplateView):
         event_comments = get_event_comments(occurence_id=event_occurence_id, order_by='create_date')
 
         paginator = Paginator(event_comments, 5)
+        paginator = Paginator(event_comments, 5)
         page_number = request.GET.get('page') or 1
         page_obj = paginator.get_page(page_number)
 
-        pagination_items = generate_pagination_items(
-            page_count=page_obj.paginator.num_pages,
-            active_page=page_number,
-            delta=2
-        )
+        page_count = page_obj.paginator.num_pages
+        pagination_items = []
+
+        if page_count > 1:
+            pagination_items = generate_pagination_items(
+                page_count=page_obj.paginator.num_pages,
+                active_page=page_number,
+                delta=2
+            )
 
         return render(request=request,
                       template_name="groupridesapp/rides/ride_comments.html",
@@ -205,7 +203,6 @@ class EventComments(TemplateView):
         event = EventOccurence.objects.get(pk=event_occurence_id)
         if request.method == 'POST':
             form_data = CreateEventOccurenceMessageForm(request.POST)
-            print(form_data)
             if form_data.is_valid():
                 data = {
                     'message': form_data['message'].value(),

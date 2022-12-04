@@ -71,8 +71,8 @@ def dropdown(field_name, id_name, height=38, width=4, margin_bottom=0):
     )
 
 
-def form_row(*args, margin=3):
-    return Div(*args, css_class=f"row mb-{margin}")
+def form_row(*args, bottom_margin=3):
+    return Div(*args, css_class=f"row mb-{bottom_margin}")
 
 
 class SelectWithOptionAttribute(Select):
