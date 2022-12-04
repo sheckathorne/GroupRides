@@ -54,6 +54,13 @@ def my_rides(request):
                   })
 
 
+def remove_page_from_url(full_path):
+    if 'page' not in full_path:
+        return full_path
+    else:
+        return full_path[:full_path.find('page')-1]
+
+
 @login_required(login_url='/login')
 def available_rides(request):
     arq = gather_available_rides(user=request.user)
@@ -64,11 +71,7 @@ def available_rides(request):
     paginator = Paginator(f.qs.order_by('ride_date', 'ride_time'), 4)
     page_number = request.GET.get('page') or 1
     page_obj = paginator.get_page(page_number)
-
-    if 'page' not in request.get_full_path():
-        url = request.get_full_path()
-    else:
-        url = request.get_full_path()[: request.get_full_path().find('page')-1]
+    url = remove_page_from_url(request.get_full_path())
 
     pagination_items = generate_pagination_items(
         page_count=page_obj.paginator.num_pages,
