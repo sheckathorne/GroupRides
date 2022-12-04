@@ -2,11 +2,10 @@
 {% block content %}
 {% load groupridesapp_extras %}
 {% load crispy_forms_tags %}
-<h5 class="card-header navbar-color text-light mt-2 mb-2">Available Rides</h5>
 <form method="get">
-    {% crispy filter.form %}
+    {% crispy form %}
 </form>
-{% for event_occurence in filter.qs %}
+{% for event_occurence in event_occurences %}
     {% can_register_to_ride user=user event_occurence=event_occurence as user_can_register %}
         {% if user_can_register %}
             {% include 'groupridesapp/rides/ride_card/create_confirm_modal.html' %}
@@ -15,4 +14,7 @@
 {% empty %}
     No rides available for you to join
 {% endfor %}
+{% if event_occurences.paginator.num_pages > 1 %}
+    {% include 'groupridesapp/pagination.html' %}
+{% endif %}
 {% endblock content %}

@@ -5,11 +5,11 @@ from django.shortcuts import render, get_object_or_404
 from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
-from django.db.models import Q, Count, When
+from django.db.models import Q
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
     CreateClubForm, CreateEventForm, CreateRouteForm
-from .utils import days_from_today, club_ride_count, gather_available_rides, generate_pagination_items
+from .utils import days_from_today, gather_available_rides, generate_pagination_items
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -61,9 +61,27 @@ def available_rides(request):
     f.filters['club'].queryset = Club.objects.filter(pk__in=arq.values('club')).distinct()
     f.filters['group_classification'].queryset = arq.values_list('group_classification', flat=True).distinct()
 
+    paginator = Paginator(f.qs.order_by('ride_date', 'ride_time'), 2)
+    page_number = request.GET.get('page') or 1
+    page_obj = paginator.get_page(page_number)
+
+    if 'page' not in request.get_full_path():
+        url = request.get_full_path()
+    else:
+        url = request.get_full_path()[: request.get_full_path().find('page')-1]
+
+    pagination_items = generate_pagination_items(
+        page_count=page_obj.paginator.num_pages,
+        active_page=page_number,
+        delta=2,
+        current_url=url
+    )
+
     return render(request=request,
-                  template_name="groupridesapp/rides/all_available_rides.html",
-                  context={"filter": f})
+                  template_name="groupridesapp/rides/available_rides.html",
+                  context={"form": f.form,
+                           "pagination_items": pagination_items,
+                           "event_occurences": page_obj})
 
 
 @login_required(login_url='/login')
@@ -101,8 +119,7 @@ def delete_ride_reigstration(request, event_occurence_id):
 
         return render(
             request=request,
-            context=template_vars
-        )
+            context=template_vars)
 
 
 @login_required(login_url='/login')
@@ -179,7 +196,8 @@ class EventComments(TemplateView):
                           "event": event,
                           "form": form})
 
-    def post(self, request, **kwargs):
+    @staticmethod
+    def post(request, **kwargs):
         event_occurence_id = kwargs["event_occurence_id"]
         event = EventOccurence.objects.get(pk=event_occurence_id)
         if request.method == 'POST':
@@ -218,7 +236,8 @@ class CreateClub(TemplateView):
             context={"form": form}
         )
 
-    def post(self, request, **kwargs):
+    @staticmethod
+    def post(request):
         if request.method == 'POST':
             form = CreateClubForm(request.POST)
             if form.is_valid():
@@ -286,7 +305,7 @@ class CreateEvent(TemplateView):
             )
 
     @staticmethod
-    def post(request, **kwargs):
+    def post(request):
         user_routes = get_user_and_club_routes(request.user)
         user_clubs = get_user_clubs(request.user, ClubMembership.MemberType.RideLeader)
         if request.method == 'POST':
@@ -332,7 +351,8 @@ class CreateRoute(TemplateView):
             context={"form": form}
         )
 
-    def post(self, request, **kwargs):
+    @staticmethod
+    def post(request):
         user_clubs = get_user_clubs(request.user, ClubMembership.MemberType.RouteContributor)
         if request.method == "POST":
             form = CreateRouteForm(user_clubs, request.POST)

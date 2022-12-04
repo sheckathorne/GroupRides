@@ -31,7 +31,7 @@ def gather_available_rides(user):
     )
 
 
-def generate_pagination_items(page_count=1, active_page=1, delta=2):
+def generate_pagination_items(page_count=1, active_page=1, delta=2, current_url=""):
     pagination_items = list()
     active_page = int(active_page)
 
@@ -50,18 +50,24 @@ def generate_pagination_items(page_count=1, active_page=1, delta=2):
     next_page = page_count if active_page == page_count else active_page + 1
     next_disabled = " disabled" if active_page == page_count else ""
 
+    qm_index = current_url.find("?")
+    query = "?"
+
+    if qm_index > 0:
+        query = query + current_url[qm_index + 1:] + "&"
+
     for i in range(0, page_count + 2):
         active = " active" if i == active_page else ""
 
         prev_button = f"<li class=\"page-item{ prev_disabled }\">" \
-                      f"<a class=\"page-link\" href=\"?page={prev_page}\">&laquo;</a></li>"
+                      f"<a class=\"page-link\" href=\"{query}page={prev_page}\">&laquo;</a></li>"
 
         next_button = f"<li class=\"page-item{ next_disabled }\">" \
-                      f"<a class=\"page-link\" href=\"?page={next_page}\">&raquo;</a></li>"
+                      f"<a class=\"page-link\" href=\"{query}page={next_page}\">&raquo;</a></li>"
 
         ellipses = f"<li class=\"page-item\"><a class=\"page-link\" href=\"#\">...</a></li>"
 
-        num_button = f"<li class=\"page-item{ active }\"><a class=\"page-link\" href=\"?page={i}\">{i}</a></li>"
+        num_button = f"<li class=\"page-item{ active }\"><a class=\"page-link\" href=\"{query}page={i}\">{i}</a></li>"
 
         if i == 0:
             pagination_items.append(prev_button)
