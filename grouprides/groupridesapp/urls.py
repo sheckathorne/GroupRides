@@ -6,9 +6,7 @@ from .decorators import user_is_ride_member
 urlpatterns = [
     path("", views.homepage, name="homepage"),
     path("my_rides/", views.my_rides, name="my_rides"),
-    path("available_rides/", views.available_rides_clubs, name="available_rides_clubs"),
-    path("<int:club_id>/available_rides/club/<slug:slug>/", views.available_rides, name="available_rides"),
-    path("all_available_rides/", views.all_available_rides, name="all_available_rides"),
+    path("available_rides/", views.available_rides, name="available_rides"),
     path(
         "<int:club_id>/available_rides/club/<slug:slug>/<str:group_classification>/",
         views.available_rides,

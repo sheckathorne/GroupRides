@@ -55,62 +55,7 @@ def my_rides(request):
 
 
 @login_required(login_url='/login')
-def available_rides_clubs(request):
-    arq = gather_available_rides(user=request.user)
-
-    available_rides_club = arq.values('club__name', 'club__id', 'club__slug').annotate(total=Count('club__id'))
-    available_rides_club_groups = (arq
-                                   .values('club__name', 'club__id', 'club__slug', 'group_classification')
-                                   .annotate(total=Count('club__id')))
-
-    clubs = []
-    group_classification = EventOccurence.GroupClassification
-    for club in available_rides_club:
-        club_name = club['club__name']
-        new_club = {
-            'name': club_name,
-            'slug': club['club__slug'],
-            'id': club['club__id'],
-            'total': club['total']
-        }
-
-        for gc in group_classification:
-            new_club[gc.label] = club_ride_count(
-                available_rides_club_groups.filter(
-                    group_classification=gc.label),
-                club_name)
-
-        clubs.append(new_club)
-
-    return render(request=request,
-                  template_name="groupridesapp/rides/available_rides_clubs.html",
-                  context={
-                      "available_rides_clubs": clubs,
-                      "user": request.user
-                  })
-
-
-@login_required(login_url='/login')
-def available_rides(request, club_id, group_classification="", **kwargs):
-    if len(group_classification) > 0:
-        arq = (gather_available_rides(user=request.user)
-               .filter(club=club_id)
-               .filter(group_classification=group_classification))
-    else:
-        arq = gather_available_rides(user=request.user).filter(club=club_id)
-
-    available_rides_queryset = arq.order_by('ride_date')
-
-    return render(request=request,
-                  template_name="groupridesapp/rides/available_rides.html",
-                  context={
-                      "available_rides": available_rides_queryset,
-                      "user": request.user
-                  })
-
-
-@login_required(login_url='/login')
-def all_available_rides(request):
+def available_rides(request):
     arq = gather_available_rides(user=request.user)
     f = RideFilter(request.GET, queryset=arq)
     f.filters['club'].queryset = Club.objects.filter(pk__in=arq.values('club')).distinct()

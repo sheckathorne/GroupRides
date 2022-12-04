@@ -27,10 +27,10 @@ class RideForm(forms.ModelForm):
                      form_row(
                          Div(
                              form_row(
-                                 dropdown("club", "rides", width=3),
-                                 dropdown("group_classification", "rides", width=3),
-                                 text_input("distance__lt", "rides", width=3),
-                                 text_input("distance__gt", "rides", width=3)
+                                 dropdown("club", "rides", width=3, margin_bottom=2),
+                                 dropdown("group_classification", "rides", width=3, margin_bottom=2),
+                                 text_input("distance__lt", "rides", width=3, margin_bottom=2),
+                                 text_input("distance__gt", "rides", width=3, margin_bottom=2)
                              ),
                              css_class="col-md-11"
                          ),

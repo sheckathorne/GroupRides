@@ -57,17 +57,17 @@ class CreateClubForm(forms.ModelForm):
         self.fields['private'].label = 'Private (membership managed by Admin)'
 
 
-def text_input(field_name, id_name, width=4):
-    return Div(Field(field_name, id=f"{id_name}_create_{field_name}"), css_class=f"col-md-{width}", )
+def text_input(field_name, id_name, width=4, margin_bottom=0):
+    return Div(Field(field_name, id=f"{id_name}_create_{field_name}"), css_class=f"col-md-{width} mb-{margin_bottom}", )
 
 
-def dropdown(field_name, id_name, height=38, width=4):
+def dropdown(field_name, id_name, height=38, width=4, margin_bottom=0):
     return Div(Field(
         field_name,
         id=f"{id_name}_create_{field_name}",
         css_class="w-100",
         style=f"height: {height}px;"),
-        css_class=f"col-md-{width}"
+        css_class=f"col-md-{width} mb-{margin_bottom}"
     )
 
 
