@@ -214,3 +214,11 @@ a.article-title:hover {
 .dropdown-divider {
     color: #ffffff;
 }
+
+.buttonHolder > a {
+    text-decoration: none;
+}
+
+.buttonHolder:hover > a {
+    color: #ffffff;
+}

@@ -2,7 +2,7 @@ import datetime
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
 
-from .filters import AvailableRideFilter
+from .filters import AvailableRideFilter, MyRideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
 from django.db.models import Q
@@ -32,6 +32,13 @@ def homepage(request):
                   })
 
 
+def remove_page_from_url(full_path):
+    if 'page' not in full_path:
+        return full_path
+    else:
+        return full_path[:full_path.find('page') - 1]
+
+
 @login_required(login_url='/login')
 def my_rides(request):
     days_in_the_future = days_from_today(11)
@@ -42,26 +49,43 @@ def my_rides(request):
         event_occurence__ride_date__gte=datetime.date.today()
     ).order_by('event_occurence__ride_date')
 
+    f = MyRideFilter(request.GET, queryset=my_upcoming_rides)
+
+    f.filters['club'].queryset = get_user_clubs(request.user, ClubMembership.MemberType.NonMember)
+    f.filters['group_classification'].queryset = \
+        my_upcoming_rides.values_list('event_occurence__group_classification', flat=True).distinct()
     # add comment counts for each ride in new property called comments {"total": 0, "new": 0}
-    for ride in my_upcoming_rides:
+
+    paginator = Paginator(f.qs.order_by('event_occurence__ride_date', 'event_occurence__ride_time'), 4)
+    page_number = request.GET.get('page') or 1
+    page_obj = paginator.get_page(page_number)
+    url = remove_page_from_url(request.get_full_path())
+    page_count = page_obj.paginator.num_pages
+    pagination_items = []
+
+    if page_count > 1:
+        pagination_items = generate_pagination_items(
+            page_count=page_count,
+            active_page=page_number,
+            delta=2,
+            current_url=url
+        )
+
+    for ride in page_obj:
         ride.comments = ride.num_comments(user=request.user)
 
     return render(request=request,
                   template_name="groupridesapp/rides/my_rides.html",
                   context={
-                      "my_upcoming_rides": my_upcoming_rides,
+                      "form": f.form,
+                      "pagination_items": pagination_items,
+                      "my_upcoming_rides": page_obj,
                       "user": request.user
                   })
 
 
 @login_required(login_url='/login')
 def available_rides(request):
-    def remove_page_from_url(full_path):
-        if 'page' not in full_path:
-            return full_path
-        else:
-            return full_path[:full_path.find('page') - 1]
-
     arq = gather_available_rides(user=request.user)
     f = AvailableRideFilter(request.GET, queryset=arq)
     f.filters['club'].queryset = get_user_clubs(request.user, ClubMembership.MemberType.NonMember)
@@ -71,13 +95,16 @@ def available_rides(request):
     page_number = request.GET.get('page') or 1
     page_obj = paginator.get_page(page_number)
     url = remove_page_from_url(request.get_full_path())
+    page_count = page_obj.paginator.num_pages
+    pagination_items = []
 
-    pagination_items = generate_pagination_items(
-        page_count=page_obj.paginator.num_pages,
-        active_page=page_number,
-        delta=2,
-        current_url=url
-    )
+    if page_count > 1:
+        pagination_items = generate_pagination_items(
+            page_count=page_count,
+            active_page=page_number,
+            delta=2,
+            current_url=url
+        )
 
     return render(request=request,
                   template_name="groupridesapp/rides/available_rides.html",

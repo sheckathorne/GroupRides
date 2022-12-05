@@ -381,8 +381,8 @@ class EventOccurenceMember(models.Model):
         Leader = (1, "Ride Leader")
         Rider = (2, "Rider")
 
-    event_occurence = models.ForeignKey(EventOccurence, on_delete=models.CASCADE)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    event_occurence = models.ForeignKey(EventOccurence, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, null=True, on_delete=models.CASCADE)
     role = models.IntegerField("Role", choices=RoleType.choices, default=2)
 
     def num_comments(self, user):
@@ -440,17 +440,18 @@ class EventOccurenceMember(models.Model):
         return self.event_occurence.privacy == self.event_occurence.EventMemberType.Members
 
     def clean(self, *args, **kwargs):
-        ride_is_full(self.event_occurence.max_riders, self.event_occurence.number_of_riders)
+        if self.event_occurence is not None:
+            ride_is_full(self.event_occurence.max_riders, self.event_occurence.number_of_riders)
 
-        # prevent non-members from joining members-only ride
-        if EventOccurence.EventMemberType(self.event_occurence.privacy) is self.event_occurence.EventMemberType.Members:
-            occurence_club = self.event_occurence.club
-            club_membership_exists = ClubMembership.objects.filter(user=self.user, club=occurence_club).exists()
-            not_member_of_club(club_membership_exists)
+            # prevent non-members from joining members-only ride
+            if EventOccurence.EventMemberType(self.event_occurence.privacy) is self.event_occurence.EventMemberType.Members:
+                occurence_club = self.event_occurence.club
+                club_membership_exists = ClubMembership.objects.filter(user=self.user, club=occurence_club).exists()
+                not_member_of_club(club_membership_exists)
 
-            membership = ClubMembership.objects.get(user=self.user, club=occurence_club)
-            expiration_date = membership.membership_expires
-            membership_is_expired(expiration_date, self.event_occurence.ride_date)
+                membership = ClubMembership.objects.get(user=self.user, club=occurence_club)
+                expiration_date = membership.membership_expires
+                membership_is_expired(expiration_date, self.event_occurence.ride_date)
 
     def __str__(self):
         role = EventOccurenceMember.RoleType(self.role).label

@@ -1,11 +1,21 @@
 {% extends "groupridesapp/header.html" %}
 {% block content %}
-    {% for ride in my_upcoming_rides %}
-        {% with event_occurence=ride.event_occurence %}
-            {% include 'groupridesapp/rides/ride_card/delete_confirm_modal.html' %}
-            {% include 'groupridesapp/rides/ride_card/ride_card.html' with is_registered=True user=user %}
-        {% endwith %}
-    {% empty %}
-        Not currently registered for any rides in the next week. (button to find/view rides)
-    {% endfor %}
+{% load crispy_forms_tags %}
+<form method="get">
+    {% crispy form %}
+</form>
+{% if my_upcoming_rides.paginator.num_pages > 1 %}
+    {% include 'groupridesapp/pagination.html' %}
+{% endif %}
+{% for ride in my_upcoming_rides %}
+    {% with event_occurence=ride.event_occurence %}
+        {% include 'groupridesapp/rides/ride_card/delete_confirm_modal.html' %}
+        {% include 'groupridesapp/rides/ride_card/ride_card.html' with is_registered=True user=user %}
+    {% endwith %}
+{% empty %}
+    Not currently registered for any rides in the next week. (button to find/view rides)
+{% endfor %}
+{% if my_upcoming_rides.paginator.num_pages > 1 %}
+    {% include 'groupridesapp/pagination.html' %}
+{% endif %}
 {% endblock content %}
