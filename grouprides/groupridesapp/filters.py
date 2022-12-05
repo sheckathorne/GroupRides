@@ -39,13 +39,13 @@ class AvailableRideForm(forms.ModelForm):
                                  text_input("distance__gt", "rides", width=3, margin_bottom=2),
                                  bottom_margin=1
                              ),
-                             css_class="col-md-10"
+                             css_class="col-lg-10"
                          ),
-                         Div(StrictButton('Filter', value="Filter", type="submit", css_class="btn-primary w-100"),
-                             css_class="col-md-1"),
+                         Div(StrictButton('Filter', value="Filter", type="submit", css_class="btn-primary w-100 mb-2"),
+                             css_class="col-lg-1 col-md-6"),
                          Div(ButtonHolder(HTML('<a href="/available_rides/">Clear</a>'),
-                                          css_class="btn btn-outline-primary w-100"),
-                             css_class="col-md-1"),
+                                          css_class="btn btn-outline-primary w-100 mb-2"),
+                             css_class="col-lg-1 col-md-6"),
                          bottom_margin=2
                      ),
                      css_class='mt-4'),
@@ -95,8 +95,8 @@ class AvailableRideFilter(django_filters.FilterSet):
 
 class MyRideForm(forms.ModelForm):
     class Meta:
-        model = EventOccurenceMember
-        fields = '__all__'
+        model = EventOccurence
+        fields = ['club', 'group_classification']
 
     def __init__(self, *args, **kwargs):
         super(MyRideForm, self).__init__(*args, **kwargs)
@@ -113,13 +113,13 @@ class MyRideForm(forms.ModelForm):
                                  text_input("distance__gt", "rides", width=3, margin_bottom=2),
                                  bottom_margin=1
                              ),
-                             css_class="col-md-10"
+                             css_class="col-lg-10"
                          ),
-                         Div(StrictButton('Filter', value="Filter", type="submit", css_class="btn-primary w-100"),
-                             css_class="col-md-1"),
+                         Div(StrictButton('Filter', value="Filter", type="submit", css_class="btn-primary w-100 mb-2"),
+                             css_class="col-lg-1 col-md-6"),
                          Div(ButtonHolder(HTML('<a href="/my_rides/">Clear</a>'),
-                                          css_class="btn btn-outline-primary w-100"),
-                             css_class="col-md-1"),
+                                          css_class="btn btn-outline-primary w-100 mb-2"),
+                             css_class="col-lg-1 col-md-6"),
                          bottom_margin=2
                      ),
                      css_class='mt-4'),
@@ -163,5 +163,5 @@ class MyRideFilter(django_filters.FilterSet):
 
     class Meta:
         form = MyRideForm
-        model = EventOccurenceMember
-        fields = ['event_occurence__club', 'event_occurence__group_classification', 'event_occurence__route__distance']
+        model = EventOccurence
+        fields = ['club', 'group_classification', 'route__distance']
