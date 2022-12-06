@@ -1,17 +1,15 @@
-<header class="site-header navbar navbar-expand-sm bd-navbar navbar-color">
+<header class="site-header navbar navbar-expand-sm bd-navbar navbar-color mb-2">
     <nav class="container-xxl bd-gutter flex-wrap flex-lg-nowrap navbar-color">
-        <div class="container">
-            <button aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation"
-                    class="navbar-toggler ml-auto float-right btncolor" data-bs-target="#navbarToggle" data-bs-toggle="collapse" type="button">
-                <i class="fas fa-bars fa-2x"></i>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarToggle">
-                {% if user.is_authenticated %}
-                    {% include 'groupridesapp/includes/navbar/logged_in.html' %}
-                {% else %}
-                    {% include 'groupridesapp/includes/navbar/logged_out.html' %}
-                {% endif %}
-            </div>
+        <button aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation"
+                class="navbar-toggler ml-auto float-right btncolor" data-bs-target="#navbarToggle" data-bs-toggle="collapse" type="button">
+            <i class="fas fa-bars fa-2x"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarToggle">
+            {% if user.is_authenticated %}
+                {% include 'groupridesapp/includes/navbar/logged_in.html' %}
+            {% else %}
+                {% include 'groupridesapp/includes/navbar/logged_out.html' %}
+            {% endif %}
         </div>
     </nav>
 </header>

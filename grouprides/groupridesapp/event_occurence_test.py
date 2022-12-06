@@ -1,3 +1,6 @@
+# in shell run:
+# exec(open('./groupridesapp/event_occurence_text.py).read())
+
 from users.models import CustomUser
 from groupridesapp.models import EventOccurence, EventOccurenceMember
 from groupridesapp.views import days_from_today

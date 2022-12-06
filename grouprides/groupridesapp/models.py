@@ -92,6 +92,11 @@ class ClubMembership(models.Model):
     active = models.BooleanField("Active", default=True)
     membership_type = models.IntegerField("Membership Type", choices=MemberType.choices)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'club'], name='One user membership per club')
+        ]
+
     def is_expired(self):
         now = timezone.now()
         return self.membership_expires < now

@@ -123,7 +123,7 @@ def club_home(request, club_id):
 
 
 @login_required(login_url='/login')
-def delete_ride_reigstration(request, event_occurence_id):
+def delete_ride_registration(request, event_occurence_id):
     event_occurences = EventOccurenceMember.objects.filter(
         Q(event_occurence__ride_date__gte=datetime.date.today()),
         Q(event_occurence__created_by=request.user) | Q(user=request.user)

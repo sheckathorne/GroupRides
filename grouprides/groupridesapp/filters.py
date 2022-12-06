@@ -43,12 +43,11 @@ class AvailableRideForm(forms.ModelForm):
                          ),
                          Div(StrictButton('Filter', value="Filter", type="submit", css_class="btn-primary w-100 mb-2"),
                              css_class="col-lg-1 col-md-6"),
-                         Div(ButtonHolder(HTML('<a href="/available_rides/">Clear</a>'),
-                                          css_class="btn btn-outline-primary w-100 mb-2"),
+                         Div(HTML('<a class="btn btn-outline-primary w-100 mb-2" href="/available_rides/">Clear</a>'),
                              css_class="col-lg-1 col-md-6"),
                          bottom_margin=2
                      ),
-                     css_class='mt-4'),
+                     css_class=''),
         )
 
 
@@ -117,12 +116,11 @@ class MyRideForm(forms.ModelForm):
                          ),
                          Div(StrictButton('Filter', value="Filter", type="submit", css_class="btn-primary w-100 mb-2"),
                              css_class="col-lg-1 col-md-6"),
-                         Div(ButtonHolder(HTML('<a href="/my_rides/">Clear</a>'),
-                                          css_class="btn btn-outline-primary w-100 mb-2"),
+                         Div(HTML('<a class="btn btn-outline-primary w-100 mb-2" href="/my_rides/">Clear</a>'),
                              css_class="col-lg-1 col-md-6"),
                          bottom_margin=2
                      ),
-                     css_class='mt-4'),
+                     css_class=''),
         )
 
 
