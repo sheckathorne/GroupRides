@@ -1,17 +1,13 @@
 from collections import OrderedDict
-
 import django_filters
-from django.urls import reverse
-
 from .models import EventOccurence
 from django import forms
 from .forms import form_row, dropdown, text_input
-
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import (
     Layout,
     Fieldset,
-    Div, HTML
+    Div
 )
 from crispy_forms.bootstrap import StrictButton
 

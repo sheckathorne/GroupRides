@@ -22,8 +22,6 @@ urlpatterns = [
 
     path('<int:event_occurence_member_id>/ride/attendees/', views.ride_attendees, name="ride_attendees"),
 
-
-
     path('create_club/', CreateClub.as_view(), name="create_club"),
     path('create_event/', CreateEvent.as_view(), name="create_event"),
     path('create_route/', CreateRoute.as_view(), name="create_route")
