@@ -1,10 +1,6 @@
 import datetime
-
-import django_filters
-from django.forms import TextInput
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
-
 from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
@@ -12,7 +8,8 @@ from django.db.models import Q
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
     CreateClubForm, CreateEventForm, CreateRouteForm
-from .utils import days_from_today, gather_available_rides, generate_pagination_items
+from .utils import days_from_today, gather_available_rides, generate_pagination_items, get_filter_fields, \
+    create_pagination, create_pagination_html, get_event_comments
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -35,80 +32,18 @@ def homepage(request):
                   })
 
 
-def remove_page_from_url(full_path):
-    if 'page' not in full_path:
-        return full_path
-    else:
-        return full_path[:full_path.find('page') - 1]
-
-
-def get_filter_fields(qs, table_prefix):
-    clubs_queryset = Club.objects.filter(pk__in=qs.values(f"{table_prefix}club")).distinct()
-    classification_choices = EventOccurence.GroupClassification.choices
-    available_choices = qs.values_list(f"{table_prefix}group_classification", flat=True)
-    group_classification_choices = [choice for choice in classification_choices if choice[0] in list(available_choices)]
-
-    club = django_filters.ModelChoiceFilter(
-        label='',
-        lookup_expr='exact',
-        field_name=f"{table_prefix}club",
-        queryset=clubs_queryset,
-        empty_label='Select Club'
+@login_required(login_url='/login')
+def my_clubs(request):
+    clubs = Club.objects.filter(
+        clubmembership__user=request.user
     )
 
-    group_classification = django_filters.ChoiceFilter(
-        label='',
-        lookup_expr='exact',
-        field_name=f"{table_prefix}group_classification",
-        choices=group_classification_choices,
-        empty_label='Select Classification'
-    )
-
-    distance__lt = django_filters.NumberFilter(
-        field_name=f"{table_prefix}route__distance",
-        lookup_expr='lt',
-        label='',
-        widget=TextInput(attrs={
-            'placeholder': 'Distance Less Than'
-        })
-    )
-
-    distance__gt = django_filters.NumberFilter(
-        field_name=f"{table_prefix}route__distance",
-        lookup_expr='gt',
-        label='',
-        widget=TextInput(attrs={
-            'placeholder': 'Distance Greater Than'
-        })
-    )
-
-    return [('club', club),
-            ('group_classification', group_classification),
-            ('distance__lt', distance__lt),
-            ('distance__gt', distance__gt)]
-
-
-def create_pagination(f, table_prefix, page_number):
-    paginator = Paginator(f.qs.order_by(f"{table_prefix}ride_date", f"{table_prefix}ride_time"), 4)
-    page_obj = paginator.get_page(page_number)
-
-    return page_obj
-
-
-def create_pagination_html(request, page_obj, page_number):
-    url = remove_page_from_url(request.get_full_path())
-    page_count = page_obj.paginator.num_pages
-    pagination_items = []
-
-    if page_count > 1:
-        pagination_items = generate_pagination_items(
-            page_count=page_count,
-            active_page=page_number,
-            delta=2,
-            current_url=url
-        )
-
-    return pagination_items
+    return render(request=request,
+                  template_name="groupridesapp/home.html",
+                  context={
+                      "my_clubs": my_clubs,
+                      "user": request.user
+                  })
 
 
 @login_required(login_url='/login')
@@ -235,10 +170,6 @@ def event_occurence_comments_click(request, event_occurence_id):
         return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
 
 
-def get_event_comments(occurence_id, order_by):
-    return EventOccurenceMessage.objects.filter(event_occurence__id=occurence_id).order_by(order_by)
-
-
 class EventComments(TemplateView):
     def get(self, request, **kwargs):
         event_occurence_id = kwargs["event_occurence_id"]
@@ -246,7 +177,6 @@ class EventComments(TemplateView):
         event = get_object_or_404(EventOccurence, id=event_occurence_id)
         event_comments = get_event_comments(occurence_id=event_occurence_id, order_by='create_date')
 
-        paginator = Paginator(event_comments, 5)
         paginator = Paginator(event_comments, 5)
         page_number = request.GET.get('page') or 1
         page_obj = paginator.get_page(page_number)

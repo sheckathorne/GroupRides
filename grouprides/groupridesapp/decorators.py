@@ -1,5 +1,7 @@
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.urls import reverse
+
 from .models import EventOccurenceMember
 
 
@@ -11,8 +13,10 @@ def user_is_ride_member(function=None, redirect_url='/'):
             member = EventOccurenceMember.objects.filter(user=request.user, event_occurence__id=event_occurence_id)
 
             if not member.exists():
-                messages.error(request, "You are cannot comment on rides to which you're not registered")
-                return redirect(redirect_url)
+                messages.error(
+                    request,
+                    "You cannot participate in this discussion until you're registered for the ride")
+                return redirect(reverse('my_rides'))
 
             return view_func(request, *args, **kwargs)
 

@@ -4,11 +4,7 @@ from .models import EventOccurence
 from django import forms
 from .forms import form_row, dropdown, text_input
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import (
-    Layout,
-    Fieldset,
-    Div
-)
+from crispy_forms.layout import Layout, Fieldset, Div
 from crispy_forms.bootstrap import StrictButton
 
 
@@ -23,24 +19,33 @@ class RideForm(forms.ModelForm):
         self.helper.disable_csrf = True
         self.helper.layout = Layout(
             Fieldset('Filter Rides',
-                     form_row(
-                         Div(
-                             form_row(
-                                 dropdown("club", "rides", width=3, margin_bottom=2),
-                                 dropdown("group_classification", "rides", width=3, margin_bottom=2),
-                                 text_input("distance__lt", "rides", width=3, margin_bottom=2),
-                                 text_input("distance__gt", "rides", width=3, margin_bottom=2),
-                                 bottom_margin=1
-                             ),
-                             css_class="col-lg-10"
-                         ),
-                         Div(StrictButton('Filter', value="Filter", type="submit", css_class="btn-primary w-100 mb-2"),
+                     form_row(Div(form_row(
+                         dropdown(
+                             "club",
+                             "rides",
+                             width=3,
+                             margin_bottom=2,
+                             onchange="form.submit()"),
+                         dropdown(
+                             "group_classification",
+                             "rides",
+                             width=3,
+                             margin_bottom=2,
+                             onchange="form.submit()"),
+                         text_input("distance__lt", "rides", width=3, margin_bottom=2),
+                         text_input("distance__gt", "rides", width=3, margin_bottom=2),
+                         bottom_margin=1),
+                         css_class="col-lg-10"),
+                         Div(StrictButton(
+                             'Filter',
+                             value="Filter",
+                             type="submit",
+                             css_class="btn-primary w-100 mb-2"),
                              css_class="col-lg-1 col-md-6"),
                          bottom_margin=2,
                          row_id="ride-filter-parent"
                      ),
-                     css_class=''),
-        )
+                     css_class=''),)
 
 
 class RideFilter(django_filters.FilterSet):
@@ -53,7 +58,6 @@ class RideFilter(django_filters.FilterSet):
         self.url = url
 
     class Meta:
-        url = 'my_available_rides'
         form = RideForm
         model = EventOccurence
         fields = ['club', 'group_classification', 'route__distance']

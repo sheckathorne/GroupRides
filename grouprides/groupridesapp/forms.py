@@ -61,12 +61,14 @@ def text_input(field_name, id_name, width=4, margin_bottom=0):
     return Div(Field(field_name, id=f"{id_name}_create_{field_name}"), css_class=f"col-md-{width} mb-{margin_bottom}", )
 
 
-def dropdown(field_name, id_name, height=38, width=4, margin_bottom=0):
-    return Div(Field(
-        field_name,
-        id=f"{id_name}_create_{field_name}",
-        css_class="w-100",
-        style=f"height: {height}px;"),
+def dropdown(field_name, id_name, height=38, width=4, margin_bottom=0, onchange=""):
+    return Div(
+        Field(
+            field_name,
+            id=f"{id_name}_create_{field_name}",
+            css_class="w-100",
+            style=f"height: {height}px;",
+            onchange=onchange),
         css_class=f"col-md-{width} mb-{margin_bottom}"
     )
 

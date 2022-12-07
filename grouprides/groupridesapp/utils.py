@@ -1,5 +1,10 @@
 import datetime
-from .models import EventOccurence, EventOccurenceMember, ClubMembership
+
+import django_filters
+from django.core.paginator import Paginator
+from django.forms import TextInput
+
+from .models import EventOccurence, EventOccurenceMember, ClubMembership, Club, EventOccurenceMessage
 
 
 def days_from_today(n):
@@ -96,3 +101,83 @@ def generate_pagination_items(page_count=1, active_page=1, delta=2, current_url=
                     pagination_items.append(ellipses)
 
     return pagination_items
+
+
+def remove_page_from_url(full_path):
+    if 'page' not in full_path:
+        return full_path
+    else:
+        return full_path[:full_path.find('page') - 1]
+
+
+def get_filter_fields(qs, table_prefix):
+    clubs_queryset = Club.objects.filter(pk__in=qs.values(f"{table_prefix}club")).distinct()
+    classification_choices = EventOccurence.GroupClassification.choices
+    available_choices = qs.values_list(f"{table_prefix}group_classification", flat=True)
+    group_classification_choices = [choice for choice in classification_choices if choice[0] in list(available_choices)]
+
+    club = django_filters.ModelChoiceFilter(
+        label='',
+        lookup_expr='exact',
+        field_name=f"{table_prefix}club",
+        queryset=clubs_queryset,
+        empty_label='Select Club'
+    )
+
+    group_classification = django_filters.ChoiceFilter(
+        label='',
+        lookup_expr='exact',
+        field_name=f"{table_prefix}group_classification",
+        choices=group_classification_choices,
+        empty_label='Select Classification'
+    )
+
+    distance__lt = django_filters.NumberFilter(
+        field_name=f"{table_prefix}route__distance",
+        lookup_expr='lt',
+        label='',
+        widget=TextInput(attrs={
+            'placeholder': 'Distance Less Than'
+        })
+    )
+
+    distance__gt = django_filters.NumberFilter(
+        field_name=f"{table_prefix}route__distance",
+        lookup_expr='gt',
+        label='',
+        widget=TextInput(attrs={
+            'placeholder': 'Distance Greater Than'
+        })
+    )
+
+    return [('club', club),
+            ('group_classification', group_classification),
+            ('distance__lt', distance__lt),
+            ('distance__gt', distance__gt)]
+
+
+def create_pagination(f, table_prefix, page_number):
+    paginator = Paginator(f.qs.order_by(f"{table_prefix}ride_date", f"{table_prefix}ride_time"), 4)
+    page_obj = paginator.get_page(page_number)
+
+    return page_obj
+
+
+def create_pagination_html(request, page_obj, page_number):
+    url = remove_page_from_url(request.get_full_path())
+    page_count = page_obj.paginator.num_pages
+    pagination_items = []
+
+    if page_count > 1:
+        pagination_items = generate_pagination_items(
+            page_count=page_count,
+            active_page=page_number,
+            delta=2,
+            current_url=url
+        )
+
+    return pagination_items
+
+
+def get_event_comments(occurence_id, order_by):
+    return EventOccurenceMessage.objects.filter(event_occurence__id=occurence_id).order_by(order_by)
