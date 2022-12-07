@@ -5,7 +5,6 @@
         {% for club in my_clubs %}
             <div class="card-body">
                 <h6 class="card-title">{{ club.name }}</h6>
-                <a href="{% url 'club_home' club.id %}" class="btn btn-primary">All club rides</a>
             </div>
         {% endfor %}
     </div>

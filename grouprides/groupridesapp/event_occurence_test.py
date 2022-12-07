@@ -1,8 +1,8 @@
 # in shell run:
-# exec(open('./groupridesapp/event_occurence_text.py).read())
+# exec(open('./groupridesapp/event_occurence_test.py').read())
 
 from users.models import CustomUser
-from groupridesapp.models import EventOccurence, EventOccurenceMember
+from groupridesapp.models import EventOccurence, EventOccurenceMember, Club
 from groupridesapp.views import days_from_today
 import datetime
 
@@ -15,4 +15,7 @@ my_upcoming_rides = EventOccurenceMember.objects.select_related('event_occurence
     event_occurence__ride_date__gte=datetime.date.today()
 ).order_by('event_occurence__ride_date')
 
-print(my_upcoming_rides)
+clubs = Club.objects.filter(pk__in=my_upcoming_rides.values('event_occurence__club')).distinct()
+classification_choices = EventOccurence.GroupClassification.choices
+availabile_choices = my_upcoming_rides.values_list('event_occurence__group_classification', flat=True)
+print([a for a in classification_choices if a[0] in list(availabile_choices)])

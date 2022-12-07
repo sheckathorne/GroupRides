@@ -1,8 +1,11 @@
 import datetime
+
+import django_filters
+from django.forms import TextInput
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
 
-from .filters import AvailableRideFilter, MyRideFilter
+from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
 from django.db.models import Q
@@ -39,26 +42,60 @@ def remove_page_from_url(full_path):
         return full_path[:full_path.find('page') - 1]
 
 
-@login_required(login_url='/login')
-def my_rides(request):
-    days_in_the_future = days_from_today(11)
+def get_filter_fields(qs, table_prefix):
+    clubs_queryset = Club.objects.filter(pk__in=qs.values(f"{table_prefix}club")).distinct()
+    classification_choices = EventOccurence.GroupClassification.choices
+    available_choices = qs.values_list(f"{table_prefix}group_classification", flat=True)
+    group_classification_choices = [choice for choice in classification_choices if choice[0] in list(available_choices)]
 
-    my_upcoming_rides = EventOccurenceMember.objects.filter(
-        user=request.user,
-        event_occurence__ride_date__lte=days_in_the_future,
-        event_occurence__ride_date__gte=datetime.date.today()
-    ).order_by('event_occurence__ride_date')
+    club = django_filters.ModelChoiceFilter(
+        label='',
+        lookup_expr='exact',
+        field_name=f"{table_prefix}club",
+        queryset=clubs_queryset,
+        empty_label='Select Club'
+    )
 
-    f = MyRideFilter(request.GET, queryset=my_upcoming_rides)
+    group_classification = django_filters.ChoiceFilter(
+        label='',
+        lookup_expr='exact',
+        field_name=f"{table_prefix}group_classification",
+        choices=group_classification_choices,
+        empty_label='Select Classification'
+    )
 
-    f.filters['club'].queryset = get_user_clubs(request.user, ClubMembership.MemberType.NonMember)
-    f.filters['group_classification'].queryset = \
-        my_upcoming_rides.values_list('event_occurence__group_classification', flat=True).distinct()
-    # add comment counts for each ride in new property called comments {"total": 0, "new": 0}
+    distance__lt = django_filters.NumberFilter(
+        field_name=f"{table_prefix}route__distance",
+        lookup_expr='lt',
+        label='',
+        widget=TextInput(attrs={
+            'placeholder': 'Distance Less Than'
+        })
+    )
 
-    paginator = Paginator(f.qs.order_by('event_occurence__ride_date', 'event_occurence__ride_time'), 4)
-    page_number = request.GET.get('page') or 1
+    distance__gt = django_filters.NumberFilter(
+        field_name=f"{table_prefix}route__distance",
+        lookup_expr='gt',
+        label='',
+        widget=TextInput(attrs={
+            'placeholder': 'Distance Greater Than'
+        })
+    )
+
+    return [('club', club),
+            ('group_classification', group_classification),
+            ('distance__lt', distance__lt),
+            ('distance__gt', distance__gt)]
+
+
+def create_pagination(f, table_prefix, page_number):
+    paginator = Paginator(f.qs.order_by(f"{table_prefix}ride_date", f"{table_prefix}ride_time"), 4)
     page_obj = paginator.get_page(page_number)
+
+    return page_obj
+
+
+def create_pagination_html(request, page_obj, page_number):
     url = remove_page_from_url(request.get_full_path())
     page_count = page_obj.paginator.num_pages
     pagination_items = []
@@ -70,6 +107,29 @@ def my_rides(request):
             delta=2,
             current_url=url
         )
+
+    return pagination_items
+
+
+@login_required(login_url='/login')
+def my_rides(request):
+    TABLE_PREFIX = "event_occurence__"
+
+    my_upcoming_rides = EventOccurenceMember.objects.filter(
+        user=request.user,
+        event_occurence__ride_date__lte=days_from_today(11),
+        event_occurence__ride_date__gte=datetime.date.today()
+    ).order_by('event_occurence__ride_date')
+
+    f = RideFilter(
+            request.GET,
+            queryset=my_upcoming_rides,
+            filter_fields=get_filter_fields(my_upcoming_rides, TABLE_PREFIX)
+        )
+
+    page_number = request.GET.get('page') or 1
+    page_obj = create_pagination(f, TABLE_PREFIX, page_number)
+    pagination_items = create_pagination_html(request, page_obj, page_number)
 
     for ride in page_obj:
         ride.comments = ride.num_comments(user=request.user)
@@ -86,40 +146,25 @@ def my_rides(request):
 
 @login_required(login_url='/login')
 def available_rides(request):
+    TABLE_PREFIX = ""
+
     arq = gather_available_rides(user=request.user)
-    f = AvailableRideFilter(request.GET, queryset=arq)
-    f.filters['club'].queryset = get_user_clubs(request.user, ClubMembership.MemberType.NonMember)
-    f.filters['group_classification'].queryset = arq.values_list('group_classification', flat=True).distinct()
 
-    paginator = Paginator(f.qs.order_by('ride_date', 'ride_time'), 4)
-    page_number = request.GET.get('page') or 1
-    page_obj = paginator.get_page(page_number)
-    url = remove_page_from_url(request.get_full_path())
-    page_count = page_obj.paginator.num_pages
-    pagination_items = []
-
-    if page_count > 1:
-        pagination_items = generate_pagination_items(
-            page_count=page_count,
-            active_page=page_number,
-            delta=2,
-            current_url=url
+    f = RideFilter(
+            request.GET,
+            queryset=arq,
+            filter_fields=get_filter_fields(arq, TABLE_PREFIX)
         )
+
+    page_number = request.GET.get('page') or 1
+    page_obj = create_pagination(f, TABLE_PREFIX, page_number)
+    pagination_items = create_pagination_html(request, page_obj, page_number)
 
     return render(request=request,
                   template_name="groupridesapp/rides/available_rides.html",
                   context={"form": f.form,
                            "pagination_items": pagination_items,
                            "event_occurences": page_obj})
-
-
-@login_required(login_url='/login')
-def club_home(request, club_id):
-    event_occurences = EventOccurence.objects.filter(event__club__pk=club_id)
-
-    return render(request=request,
-                  template_name="groupridesapp/club_home.html",
-                  context={"event_occurences": event_occurences})
 
 
 @login_required(login_url='/login')

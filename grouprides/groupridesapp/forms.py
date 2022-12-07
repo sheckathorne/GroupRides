@@ -71,8 +71,9 @@ def dropdown(field_name, id_name, height=38, width=4, margin_bottom=0):
     )
 
 
-def form_row(*args, bottom_margin=3):
-    return Div(*args, css_class=f"row mb-{bottom_margin}")
+def form_row(*args, bottom_margin=3, **kwargs):
+    row_id = 'generic-row' if 'row_id' not in kwargs else kwargs['row_id']
+    return Div(*args, css_class=f"row mb-{bottom_margin},", id=row_id)
 
 
 class SelectWithOptionAttribute(Select):
