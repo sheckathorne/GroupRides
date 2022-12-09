@@ -98,7 +98,7 @@ class ClubMembership(models.Model):
         ]
 
     def is_expired(self):
-        now = timezone.now()
+        now = timezone.now().date()
         return self.membership_expires < now
 
     def is_inactive(self):

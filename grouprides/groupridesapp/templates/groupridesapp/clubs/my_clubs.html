@@ -23,7 +23,7 @@
             {% if membership.user_can_manage_club %}
                 <div class="row mt-4">
                     <div class="col">
-                        Some button here that launches a view that shows all current members and requesting members
+                        <a class="btn btn-primary" href="{% url 'club_member_management' _slug=membership.club.slug club_id=membership.club.id  %}">Manage Club Members</a>
                     </div>
                 </div>
             {% endif %}

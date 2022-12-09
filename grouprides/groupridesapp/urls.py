@@ -26,13 +26,16 @@ urlpatterns = [
             path("click/", views.event_occurence_comments_click, name="ride_comments_click")
         ])),
 
-        path("<int:event_occurence_member_id>/attendees/",views.ride_attendees,name="ride_attendees"),
+        path("<int:event_occurence_member_id>/attendees/",views.ride_attendees, name="ride_attendees"),
     ])),
 
     # Clubs
     path("clubs/", include([
         path("joined/", views.my_clubs, name="my_clubs"),
-        path("create/", CreateClub.as_view(), name="create_club")
+        path("create/", CreateClub.as_view(), name="create_club"),
+        path("members/", include([
+            path("<str:_slug>-<int:club_id>/management/", views.club_member_management, name="club_member_management")
+        ]))
     ])),
 
     # Routes

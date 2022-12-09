@@ -1,0 +1,9 @@
+{% for member in active_members %}
+    <div class="row">
+        <div class="col">{{ member.user.last_name }}, {{ member.user.first_name }}</div>
+        <div class="col">{{ member.create_date|date:"M d, Y" }}</div>
+        <div class="col">{{ member.level }}</div>
+    </div>
+{% endfor %}
+
+

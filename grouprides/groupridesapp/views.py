@@ -1,6 +1,8 @@
 import datetime
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
+
+from .decorators import can_manage_club
 from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
@@ -379,3 +381,21 @@ class CreateRoute(TemplateView):
                 template_name="groupridesapp/routes/create_route.html",
                 context={"form": form}
             )
+
+
+@login_required(login_url='/login')
+@can_manage_club
+def club_member_management(request, _slug, club_id):
+    aqs = ClubMembership.objects.filter(
+        club=club_id
+    ).order_by('membership_type', 'user__last_name', 'user__first_name')
+
+    active_members = [mem for mem in aqs if not mem.is_expired() and not mem.is_inactive()]
+
+    return render(request=request,
+                  template_name="groupridesapp/clubs/members/members.html",
+                  context={
+                      "active_members": active_members,
+                      "user": request.user
+                  })
+
