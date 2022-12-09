@@ -20,28 +20,28 @@ from django.utils.text import slugify
 
 @login_required(login_url='/login')
 def homepage(request):
-    my_clubs = Club.objects.filter(
+    homepage_clubs = Club.objects.filter(
         clubmembership__user=request.user
     )
 
     return render(request=request,
                   template_name="groupridesapp/home.html",
                   context={
-                      "my_clubs": my_clubs,
+                      "my_clubs": homepage_clubs,
                       "user": request.user
                   })
 
 
 @login_required(login_url='/login')
 def my_clubs(request):
-    clubs = Club.objects.filter(
-        clubmembership__user=request.user
+    clubs = ClubMembership.objects.filter(
+        user=request.user
     )
 
     return render(request=request,
-                  template_name="groupridesapp/home.html",
+                  template_name="groupridesapp/clubs/my_clubs.html",
                   context={
-                      "my_clubs": my_clubs,
+                      "clubs": clubs,
                       "user": request.user
                   })
 

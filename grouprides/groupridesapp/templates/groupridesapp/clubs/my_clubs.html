@@ -1,4 +1,35 @@
 {% extends "groupridesapp/header.html" %}
 {% block content %}
-
+    {% for membership in clubs %}
+        <div class="card mb-3 border-dark">
+            <h6 class="card-header{{ canceled }}">
+                <div class="row d-flex align-items-center">
+                    <div class="col">
+                        <span>
+                            {{ membership.club.name }}
+                        </span>
+                    </div>
+                </div>
+            </h6>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-2">Membership Level:</div>
+                    <div class="col">{{ membership.level }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2">Membership Expires:</div>
+                    <div class="col">{{ membership.membership_expires}}</div>
+                </div>
+            {% if membership.user_can_manage_club %}
+                <div class="row mt-4">
+                    <div class="col">
+                        Some button here that launches a view that shows all current members and requesting members
+                    </div>
+                </div>
+            {% endif %}
+            </div>
+        </div>
+    {% empty %}
+        <p>no clubs to show</p>
+    {% endfor %}
 {% endblock content %}

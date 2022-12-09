@@ -104,12 +104,37 @@ class ClubMembership(models.Model):
     def is_inactive(self):
         return not self.active
 
+    @property
+    def user_can_manage_club(self):
+        return self.membership_type <= ClubMembership.MemberType.Admin.value
+
+    @property
+    def level(self):
+        return ClubMembership.MemberType(self.membership_type).label
+
     def __str__(self):
         return (
                 self.club.name + " - " +
                 self.user.last_name + ", " +
                 self.user.first_name + " - " + ClubMembership.MemberType(self.membership_type).label
         )
+
+
+class ClubMembershipRequest(models.Model):
+    class RequestStatus(models.IntegerChoices):
+        Pending = (1, 'Pending')
+        Approved = (2, 'Approved')
+        Denied = (3, 'Denied')
+
+    club = models.ForeignKey(Club, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, related_name="request_user", on_delete=models.CASCADE)
+    responder = models.ForeignKey(CustomUser, related_name="response_user", null=True, on_delete=models.CASCADE)
+    request_date = models.DateTimeField("Request Date", auto_now_add=True)
+    response_date = models.DateTimeField("Response Date", null=True)
+    status = models.IntegerField("Request Status", choices=RequestStatus.choices)
+
+    def __str__(self):
+        return f"{self.user.last_name}, {self.user.first_name} to join {self.club.name}"
 
 
 class Route(models.Model):

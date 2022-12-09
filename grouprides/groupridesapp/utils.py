@@ -110,6 +110,10 @@ def remove_page_from_url(full_path):
         return full_path[:full_path.find('page') - 1]
 
 
+def filter_club(queryset, _club, value):
+    return queryset.filter(club=value.id)
+
+
 def get_filter_fields(qs, table_prefix):
     clubs_queryset = Club.objects.filter(pk__in=qs.values(f"{table_prefix}club")).distinct()
     classification_choices = EventOccurence.GroupClassification.choices
@@ -120,8 +124,10 @@ def get_filter_fields(qs, table_prefix):
         label='',
         lookup_expr='exact',
         field_name=f"{table_prefix}club",
+        to_field_name='slug',
         queryset=clubs_queryset,
-        empty_label='Select Club'
+        empty_label='Select Club',
+        method=filter_club,
     )
 
     group_classification = django_filters.ChoiceFilter(

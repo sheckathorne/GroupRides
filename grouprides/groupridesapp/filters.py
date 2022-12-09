@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import django_filters
+
 from .models import EventOccurence
 from django import forms
 from .forms import form_row, dropdown, text_input
@@ -54,6 +55,7 @@ class RideFilter(django_filters.FilterSet):
         self.filters = OrderedDict()
         for field in filter_fields:
             self.filters[field[0]] = field[1]
+
         self.queryset = kwargs['queryset']
         self.url = url
 
