@@ -215,7 +215,7 @@ a.article-title:hover {
     color: #ffffff;
 }
 
-.buttonHolder > a {
+.buttonHolder > a, .nav-item > a {
     text-decoration: none;
 }
 
