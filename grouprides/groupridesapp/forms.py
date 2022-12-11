@@ -66,7 +66,7 @@ class EditClubMemberForm(forms.ModelForm):
 
         widgets = {
             'membership_expires': forms.DateInput(
-                format='%Y-%m-%d',
+                # format='%Y-%m-%d',
                 attrs={'class': 'form-control', 'type': 'date'})
         }
 
@@ -85,7 +85,7 @@ class EditClubMemberForm(forms.ModelForm):
         self.fields['membership_type'].disabled = member_dropdown_disabled
         self.fields['membership_expires'].disabled = member_dropdown_disabled
         self.fields["active"].disabled = member_dropdown_disabled
-        self.fields["membership_expires"].initial = member.membership_type
+
 
 class CreateClubForm(forms.ModelForm):
     class Meta:
