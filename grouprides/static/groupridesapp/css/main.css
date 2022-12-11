@@ -215,6 +215,10 @@ a.article-title:hover {
     color: #ffffff;
 }
 
-a > button {
+.buttonHolder > a {
     text-decoration: none;
+}
+
+.buttonHolder:hover > a {
+    color: #ffffff;
 }

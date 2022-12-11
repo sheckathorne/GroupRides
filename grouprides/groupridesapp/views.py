@@ -400,13 +400,18 @@ class ClubMemberManagement(TemplateView):
         club_membership = get_object_or_404(ClubMembership, pk=membership_id)
 
         if request.method == "POST":
-            form = EditClubMemberForm(request.POST, instance=club_membership)
+            form = EditClubMemberForm(request.POST, user=request.user, club_id=club_id, instance=club_membership)
             if form.is_valid():
                 form.save()
                 messages.success(request, "Successfully updated membership details")
                 return redirect(reverse("club_member_management", kwargs={'_slug': slug, 'club_id': club_id}))
+            else:
+                for errortype in form.errors.as_data()['__all__']:
+                    for error in errortype:
+                        messages.error(request, error)
+                return redirect(reverse("club_member_management", kwargs={'_slug': slug, 'club_id': club_id}))
         else:
-            form = EditClubMemberForm(instance=club_membership)
+            form = EditClubMemberForm(user=request.user, instance=club_membership)
 
         return render(
             request,

@@ -1,9 +1,4 @@
-{% comment %}
-        {% load crispy_forms_tags %}
-        <div id="club-member-row-{{member.member.id}}" class="row">
-
-        </div>
-{% endcomment %}
+{% load static %}
 {% if active_members.paginator.num_pages > 1 %}
     {% include 'groupridesapp/pagination.html' %}
 {% endif %}
@@ -41,6 +36,7 @@
     {% endfor %}
     </tbody>
 </table>
+<script src="{% static 'groupridesapp/js/club_member_management.js' %}"></script>
 {% if active_members.paginator.num_pages > 1 %}
     {% include 'groupridesapp/pagination.html' %}
 {% endif %}
