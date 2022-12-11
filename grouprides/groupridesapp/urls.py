@@ -34,8 +34,8 @@ urlpatterns = [
     path("clubs/", include([
         path("joined/", views.my_clubs, name="my_clubs"),
         path("create/", CreateClub.as_view(), name="create_club"),
-        path("members/", include([
-            path("<str:_slug>-<int:club_id>/management/", include([
+        path("<str:_slug>-<int:club_id>/", include([
+            path("members/management/", include([
                 path(
                     "<str:tab_type>/",
                     login_required(can_manage_club(ClubMemberManagement.as_view()),
