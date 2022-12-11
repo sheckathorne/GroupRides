@@ -1,0 +1,31 @@
+{% extends "groupridesapp/header.html" %}
+{% block content %}
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <a href="{% url 'club_member_management' _slug=slug club_id=club_id tab_type='active' %}">
+        <button class="nav-link{{ tab_classes.active }}" id="member-tab-active" data-bs-toggle="tab" data-bs-target="#member-tab-active-pane" type="button" role="tab" aria-controls="member-tab-active-pane" aria-selected="true">Active</button>
+      </a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a href="{% url 'club_member_management' _slug=slug club_id=club_id tab_type='inactive' %}">
+        <button class="nav-link{{ tab_classes.inactive }}" id="member-tab-expired-inactive" data-bs-toggle="tab" data-bs-target="#member-tab-expired-inactive-pane" type="button" role="tab" aria-controls="member-tab-expired-inactive-pane" aria-selected="false">Inactive/Expired</button>
+      </a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a href="{% url 'club_member_management' _slug=slug club_id=club_id tab_type='requests' %}">
+        <button class="nav-link{{ tab_classes.requests }}" id="member-tab-requests" data-bs-toggle="tab" data-bs-target="#member-tab-requests-pane" type="button" role="tab" aria-controls="member-tab-requests-pane" aria-selected="false">Join Requests</button>
+      </a>
+    </li>
+  </ul>
+  <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="member-tab-active-pane" role="tabpanel" aria-labelledby="member-tab-active" tabindex="0">
+      {% include 'groupridesapp/clubs/members/members_list.html' %}
+    </div>
+    <div class="tab-pane fade" id="member-tab-expired-inactive-pane" role="tabpanel" aria-labelledby="member-tab-expired-inactive" tabindex="0">
+        {% include 'groupridesapp/clubs/members/members_list.html' %}
+    </div>
+    <div class="tab-pane fade" id="member-tab-requests-pane" role="tabpanel" aria-labelledby="member-tab-requests" tabindex="0">
+      Requests Content
+    </div>
+  </div>
+{% endblock content %}

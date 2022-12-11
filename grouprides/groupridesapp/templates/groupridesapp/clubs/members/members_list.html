@@ -1,22 +1,28 @@
 {% load static %}
-{% if active_members.paginator.num_pages > 1 %}
+{% if members.paginator.num_pages > 1 %}
     {% include 'groupridesapp/pagination.html' %}
 {% endif %}
 <table class="table mt-4">
     <thead>
         <tr>
+            <th scope="col"></th>
             <th scope="col">Name</th>
             <th scope="col">Member Type</th>
             <th scope="col">Joined</th>
             <th scope="col">Exp. Date</th>
-            <th scope="col"></th>
         </tr>
     </thead>
     <tbody>
-    {% for member in active_members %}
+
+    {% for member in members %}
         {% with mem=member.member form=member.form %}
         {% include 'groupridesapp/clubs/members/edit_member_modal.html' %}
         <tr>
+            <td class="align-middle">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#editMemberModal-{{ mem.id }}">
+                    <i class="fas fa-edit"></i>
+                </a>
+            </td>
             <td class="align-middle">{{mem.user.last_name}}, {{mem.user.first_name}}</td>
             <td class="align-middle">{{mem.membership_type_label}}</td>
             <td class="align-middle">{{mem.create_date}}</td>
@@ -25,19 +31,12 @@
             {% else %}
                 <td class="align-middle">{{mem.membership_expires}}</td>
             {% endif %}
-            <td class="align-middle">
-                <a href="#" data-bs-toggle="modal" data-bs-target="#editMemberModal-{{ mem.id }}">
-                    <button class="btn btn-primary">Edit
-                    </button>
-                </a>
-            </td>
         </tr>
         {% endwith %}
     {% endfor %}
     </tbody>
 </table>
 <script src="{% static 'groupridesapp/js/club_member_management.js' %}"></script>
-{% if active_members.paginator.num_pages > 1 %}
+{% if members.paginator.num_pages > 1 %}
     {% include 'groupridesapp/pagination.html' %}
 {% endif %}
-

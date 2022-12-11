@@ -23,7 +23,7 @@
             {% if membership.user_can_manage_club %}
                 <div class="row mt-4">
                     <div class="col">
-                        <a class="btn btn-primary" href="{% url 'club_member_management' _slug=membership.club.slug club_id=membership.club.id  %}">Manage Club Members</a>
+                        <a class="btn btn-primary" href="{% url 'club_member_management' _slug=membership.club.slug club_id=membership.club.id tab_type='active'  %}">Manage Club Members</a>
                     </div>
                 </div>
             {% endif %}

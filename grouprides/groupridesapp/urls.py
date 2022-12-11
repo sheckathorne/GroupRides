@@ -37,8 +37,9 @@ urlpatterns = [
         path("members/", include([
             path("<str:_slug>-<int:club_id>/management/", include([
                 path(
-                    "",
-                    login_required(can_manage_club(ClubMemberManagement.as_view()), login_url='/login'),
+                    "<str:tab_type>/",
+                    login_required(can_manage_club(ClubMemberManagement.as_view()),
+                                   login_url='/login'),
                     name="club_member_management"),
                 path(
                     "<int:membership_id>/",

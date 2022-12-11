@@ -371,25 +371,36 @@ class ClubMemberManagement(TemplateView):
     def get(self, request, **kwargs):
         club_id = kwargs['club_id']
         slug = kwargs['_slug']
+        tab_type = kwargs.get('tab_type', None)
         aqs = ClubMembership.objects.filter(
             club=club_id
         ).order_by('membership_type', 'user__last_name', 'user__first_name')
 
-        active_members = [
-            {'member': mem, 'form': EditClubMemberForm(instance=mem)} for mem in aqs
-            if not mem.is_expired() and not mem.is_inactive()
-        ]
+        if tab_type == "inactive":
+            members = [
+                {'member': mem, 'form': EditClubMemberForm(instance=mem)}
+                for mem in aqs if
+                mem.is_expired() or mem.is_inactive()
+            ]
+        else:
+            members = [
+                {'member': mem, 'form': EditClubMemberForm(instance=mem)}
+                for mem in aqs if
+                not mem.is_expired() and not mem.is_inactive()
+            ]
 
-        pagination = generate_pagination(request, qs=active_members, items_per_page=10)
+        pagination = generate_pagination(request, qs=members, items_per_page=10)
+        tab_classes = {'active': '', 'inactive': '', 'requests': '', tab_type: ' active'}
 
         return render(request=request,
-                      template_name="groupridesapp/clubs/members/members.html",
+                      template_name="groupridesapp/clubs/members/members_tabs.html",
                       context={
-                          "active_members": pagination["page_obj"],
+                          "members": pagination["page_obj"],
                           "pagination_items": pagination["pagination_items"],
                           "user": request.user,
                           "slug": slug,
                           "club_id": club_id,
+                          "tab_classes": tab_classes,
                       })
 
     @staticmethod
