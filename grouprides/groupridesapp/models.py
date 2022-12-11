@@ -82,8 +82,9 @@ class ClubMembership(models.Model):
         Admin = (2, "Admin")
         RideLeader = (3, "Ride Leader")
         RouteContributor = (4, "Route Contributor")
-        Member = (5, "Member")
-        NonMember = (6, "Non-Member")
+        PaidMember = (5, "Paid Member")
+        UnpaidMember = (6, "Unpaid Member")
+        NonMember = (7, 'Non-Member')
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
@@ -101,6 +102,11 @@ class ClubMembership(models.Model):
         now = timezone.now().date()
         return self.membership_expires < now
 
+    @property
+    def expired(self):
+        now = timezone.now().date()
+        return self.membership_expires < now
+
     def is_inactive(self):
         return not self.active
 
@@ -109,7 +115,7 @@ class ClubMembership(models.Model):
         return self.membership_type <= ClubMembership.MemberType.Admin.value
 
     @property
-    def level(self):
+    def membership_type_label(self):
         return ClubMembership.MemberType(self.membership_type).label
 
     def __str__(self):
@@ -183,11 +189,12 @@ class Event(models.Model):
         Admin = (2, "Admin")
         RideLeader = (3, "Ride Leader")
         RouteContributor = (4, "Route Contributor")
-        Member = (5, "Member")
-        NonMember = (6, "Non-Member")
+        PaidMember = (5, "Paid Member")
+        UnpaidMember = (6, "Unpaid Member")
+        NonMember = (7, 'Non-Member')
 
     class EventMemberType(models.IntegerChoices):
-        Members = (ClubMembership.MemberType.Member.value, "Current Members")
+        Members = (ClubMembership.MemberType.PaidMember.value, "Current Members")
         Open = (ClubMembership.MemberType.NonMember.value, "Open")
 
     name = models.CharField("Event Name", max_length=100)
@@ -271,7 +278,7 @@ class EventOccurence(models.Model):
         zip(pytz.all_timezones, pytz.all_timezones)
 
     class EventMemberType(models.IntegerChoices):
-        Members = (Event.MemberType.Member.value, "Current Members")
+        Members = (Event.MemberType.PaidMember.value, "Current Members")
         Open = (Event.MemberType.NonMember.value, "Open")
 
     event = models.ForeignKey(Event, null=True, blank=True, on_delete=models.CASCADE)

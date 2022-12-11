@@ -42,8 +42,6 @@ def can_manage_club(function):
             membership_type__lte=ClubMembership.MemberType.Admin.value
         )
 
-        print('member:', member)
-
         if not member.exists():
             messages.error(
                 request,

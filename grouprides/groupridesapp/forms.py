@@ -1,8 +1,10 @@
+from datetime import datetime
+
 from django import forms
 from django.forms import Select, ModelChoiceField
 
 from .models import EventOccurenceMember, EventOccurenceMessage, \
-    Club, Event, Route
+    Club, Event, Route, ClubMembership
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import (
     Layout,
@@ -12,6 +14,27 @@ from crispy_forms.layout import (
 )
 from crispy_forms.bootstrap import StrictButton
 from django.utils.html import mark_safe
+
+
+def text_input(field_name, id_name, width=4, margin_bottom=0):
+    return Div(Field(field_name, id=f"{id_name}_create_{field_name}"), css_class=f"col-md-{width} mb-{margin_bottom}", )
+
+
+def dropdown(field_name, id_name, height=38, width=4, margin_bottom=0, onchange=""):
+    return Div(
+        Field(
+            field_name,
+            id=f"{id_name}_create_{field_name}",
+            css_class="w-100",
+            style=f"height: {height}px;",
+            onchange=onchange,),
+        css_class=f"col-md-{width} mb-{margin_bottom}"
+    )
+
+
+def form_row(*args, bottom_margin=3, **kwargs):
+    row_id = 'generic-row' if 'row_id' not in kwargs else kwargs['row_id']
+    return Div(*args, css_class=f"row mb-{bottom_margin},", id=row_id)
 
 
 class DeleteRideRegistrationForm(forms.ModelForm):
@@ -36,6 +59,34 @@ class CreateEventOccurenceMessageForm(forms.ModelForm):
         self.fields['message'].label = ''
 
 
+class EditClubMemberForm(forms.ModelForm):
+    class Meta:
+        model = ClubMembership
+        fields = ['membership_expires', 'active', 'membership_type']
+
+        widgets = {
+            'membership_expires': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={'class': 'form-control', 'type': 'date'})
+        }
+
+    def __init__(self, *args, **kwargs):
+        member = kwargs['instance']
+        member_dropdown_disabled = (member.membership_type == ClubMembership.MemberType.Creator.value)
+
+        super(EditClubMemberForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            form_row(dropdown("membership_type", "member", width=12, margin_bottom=2)),
+            form_row(Div(Field("membership_expires", id=f"member_create_membership_expires"), css_class=f"col-md-12 mb-2", )),
+            form_row(Div(Field("active"), css_class="mb-1"))
+        )
+
+        self.fields['membership_type'].disabled = member_dropdown_disabled
+        self.fields['membership_expires'].disabled = member_dropdown_disabled
+        self.fields["active"].disabled = member_dropdown_disabled
+        self.fields["membership_expires"].initial = member.membership_type
+
 class CreateClubForm(forms.ModelForm):
     class Meta:
         model = Club
@@ -55,27 +106,6 @@ class CreateClubForm(forms.ModelForm):
 
         self.fields['name'].label = 'Club Name'
         self.fields['private'].label = 'Private (membership managed by Admin)'
-
-
-def text_input(field_name, id_name, width=4, margin_bottom=0):
-    return Div(Field(field_name, id=f"{id_name}_create_{field_name}"), css_class=f"col-md-{width} mb-{margin_bottom}", )
-
-
-def dropdown(field_name, id_name, height=38, width=4, margin_bottom=0, onchange=""):
-    return Div(
-        Field(
-            field_name,
-            id=f"{id_name}_create_{field_name}",
-            css_class="w-100",
-            style=f"height: {height}px;",
-            onchange=onchange),
-        css_class=f"col-md-{width} mb-{margin_bottom}"
-    )
-
-
-def form_row(*args, bottom_margin=3, **kwargs):
-    row_id = 'generic-row' if 'row_id' not in kwargs else kwargs['row_id']
-    return Div(*args, css_class=f"row mb-{bottom_margin},", id=row_id)
 
 
 class SelectWithOptionAttribute(Select):

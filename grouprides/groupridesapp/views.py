@@ -1,21 +1,18 @@
 import datetime
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
-
-from .decorators import can_manage_club
 from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
 from django.db.models import Q
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
-    CreateClubForm, CreateEventForm, CreateRouteForm
-from .utils import days_from_today, gather_available_rides, generate_pagination_items, get_filter_fields, \
-    create_pagination, create_pagination_html, get_event_comments
+    CreateClubForm, CreateEventForm, CreateRouteForm, EditClubMemberForm
+from .utils import days_from_today, gather_available_rides, get_filter_fields, \
+    create_pagination, create_pagination_html, get_event_comments, generate_pagination
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.core.paginator import Paginator
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -178,26 +175,13 @@ class EventComments(TemplateView):
         form = CreateEventOccurenceMessageForm()
         event = get_object_or_404(EventOccurence, id=event_occurence_id)
         event_comments = get_event_comments(occurence_id=event_occurence_id, order_by='create_date')
-
-        paginator = Paginator(event_comments, 5)
-        page_number = request.GET.get('page') or 1
-        page_obj = paginator.get_page(page_number)
-
-        page_count = page_obj.paginator.num_pages
-        pagination_items = []
-
-        if page_count > 1:
-            pagination_items = generate_pagination_items(
-                page_count=page_obj.paginator.num_pages,
-                active_page=page_number,
-                delta=2
-            )
+        pagination = generate_pagination(request, qs=event_comments, items_per_page=5)
 
         return render(request=request,
                       template_name="groupridesapp/rides/ride_comments.html",
                       context={
-                          "event_comments": page_obj,
-                          "pagination_items": pagination_items,
+                          "event_comments": pagination["page_obj"],
+                          "pagination_items": pagination["pagination_items"],
                           "event": event,
                           "form": form})
 
@@ -383,19 +367,27 @@ class CreateRoute(TemplateView):
             )
 
 
-@login_required(login_url='/login')
-@can_manage_club
-def club_member_management(request, _slug, club_id):
-    aqs = ClubMembership.objects.filter(
-        club=club_id
-    ).order_by('membership_type', 'user__last_name', 'user__first_name')
+class ClubMemberManagement(TemplateView):
+    def get(self, request, **kwargs):
+        club_id = kwargs['club_id']
+        slug = kwargs['_slug']
+        aqs = ClubMembership.objects.filter(
+            club=club_id
+        ).order_by('membership_type', 'user__last_name', 'user__first_name')
 
-    active_members = [mem for mem in aqs if not mem.is_expired() and not mem.is_inactive()]
+        active_members = [
+            {'member': mem, 'form': EditClubMemberForm(instance=mem)} for mem in aqs
+            if not mem.is_expired() and not mem.is_inactive()
+        ]
 
-    return render(request=request,
-                  template_name="groupridesapp/clubs/members/members.html",
-                  context={
-                      "active_members": active_members,
-                      "user": request.user
-                  })
+        pagination = generate_pagination(request, qs=active_members, items_per_page=10)
 
+        return render(request=request,
+                      template_name="groupridesapp/clubs/members/members.html",
+                      context={
+                          "active_members": pagination["page_obj"],
+                          "pagination_items": pagination["pagination_items"],
+                          "user": request.user,
+                          "slug": slug,
+                          "club_id": club_id,
+                      })

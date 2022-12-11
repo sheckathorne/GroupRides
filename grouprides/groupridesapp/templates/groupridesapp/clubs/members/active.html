@@ -1,9 +1,47 @@
-{% for member in active_members %}
-    <div class="row">
-        <div class="col">{{ member.user.last_name }}, {{ member.user.first_name }}</div>
-        <div class="col">{{ member.create_date|date:"M d, Y" }}</div>
-        <div class="col">{{ member.level }}</div>
-    </div>
-{% endfor %}
+{% comment %}
+        {% load crispy_forms_tags %}
+        <div id="club-member-row-{{member.member.id}}" class="row">
 
+        </div>
+{% endcomment %}
+{% if active_members.paginator.num_pages > 1 %}
+    {% include 'groupridesapp/pagination.html' %}
+{% endif %}
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Member Type</th>
+            <th scope="col">Joined</th>
+            <th scope="col">Exp. Date</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for member in active_members %}
+        {% with mem=member.member form=member.form %}
+        {% include 'groupridesapp/clubs/members/edit_member_modal.html' %}
+        <tr>
+            <td class="align-middle">{{mem.user.last_name}}, {{mem.user.first_name}}</td>
+            <td class="align-middle">{{mem.membership_type_label}}</td>
+            <td class="align-middle">{{mem.create_date}}</td>
+            {% if mem.expired %}
+                <td class="align-middle" style="color: red;">{{mem.membership_expires}}</td>
+            {% else %}
+                <td class="align-middle">{{mem.membership_expires}}</td>
+            {% endif %}
+            <td class="align-middle">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#editMemberModal-{{ mem.id }}">
+                    <button class="btn btn-primary">Edit
+                    </button>
+                </a>
+            </td>
+        </tr>
+        {% endwith %}
+    {% endfor %}
+    </tbody>
+</table>
+{% if active_members.paginator.num_pages > 1 %}
+    {% include 'groupridesapp/pagination.html' %}
+{% endif %}
 

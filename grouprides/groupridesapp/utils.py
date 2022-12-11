@@ -36,6 +36,24 @@ def gather_available_rides(user):
     )
 
 
+def generate_pagination(request, qs=None, items_per_page=10):
+    paginator = Paginator(qs, items_per_page)
+    page_number = request.GET.get('page') or 1
+    page_obj = paginator.get_page(page_number)
+
+    page_count = page_obj.paginator.num_pages
+    pagination_items = []
+
+    if page_count > 1:
+        pagination_items = generate_pagination_items(
+            page_count=page_obj.paginator.num_pages,
+            active_page=page_number,
+            delta=2
+        )
+
+    return {"page_obj": page_obj, "pagination_items": pagination_items}
+
+
 def generate_pagination_items(page_count=1, active_page=1, delta=2, current_url=""):
     pagination_items = list()
     active_page = int(active_page)

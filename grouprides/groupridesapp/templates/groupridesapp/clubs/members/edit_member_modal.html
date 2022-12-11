@@ -1,0 +1,21 @@
+{% load crispy_forms_tags %}
+<div class="modal fade" id="editMemberModal-{{ mem.id }}" tabindex="-1" aria-labelledby="editMemberModal-{{ mem.id }}-label" aria-hidden="true">
+  <form method="post" action="{% url 'edit_club_member' _slug=slug club_id=club_id membership_id=mem.id %}">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">{{ mem.user.last_name }}, {{ mem.user.first_name }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {% csrf_token %}
+          {% crispy form %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
