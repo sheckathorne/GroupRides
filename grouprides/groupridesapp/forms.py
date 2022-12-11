@@ -79,7 +79,12 @@ class EditClubMemberForm(forms.ModelForm):
         self.helper.layout = Layout(
             form_row(dropdown("membership_type", "member", width=12, margin_bottom=2)),
             form_row(Div(Field("membership_expires", id=f"member_create_membership_expires"), css_class=f"col-md-12 mb-2", )),
-            form_row(Div(Field("active"), css_class="mb-1"))
+            form_row(Div(Field("active"), css_class="mb-1")),
+            Div(
+                StrictButton('Close', value="Close", type="button", css_class="btn-secondary", data_bs_dismiss="modal"),
+                StrictButton('Confirm', value="Confirm", type="submit", css_class="btn-primary"),
+                css_class="modal-footer"
+            ),
         )
 
         self.fields['membership_type'].disabled = member_dropdown_disabled

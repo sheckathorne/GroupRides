@@ -1,6 +1,6 @@
 import datetime
 from django.views.generic import TemplateView
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
@@ -391,3 +391,25 @@ class ClubMemberManagement(TemplateView):
                           "slug": slug,
                           "club_id": club_id,
                       })
+
+    @staticmethod
+    def post(request, **kwargs):
+        club_id = kwargs['club_id']
+        slug = kwargs['_slug']
+        membership_id = kwargs['membership_id']
+        club_membership = get_object_or_404(ClubMembership, pk=membership_id)
+
+        if request.method == "POST":
+            form = EditClubMemberForm(request.POST, instance=club_membership)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Successfully updated membership details")
+                return redirect(reverse("club_member_management", kwargs={'_slug': slug, 'club_id': club_id}))
+        else:
+            form = EditClubMemberForm(instance=club_membership)
+
+        return render(
+            request,
+            reverse("club_member_management", kwargs={'_slug': slug, 'club_id': club_id}),
+            {"form": form}
+        )
