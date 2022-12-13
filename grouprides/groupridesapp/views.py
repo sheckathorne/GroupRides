@@ -1,4 +1,6 @@
 import datetime
+
+from django.core.exceptions import ValidationError
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404, redirect
 from .filters import RideFilter
@@ -9,7 +11,7 @@ from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
     CreateClubForm, CreateEventForm, CreateRouteForm, EditClubMemberForm
 from .utils import days_from_today, gather_available_rides, get_filter_fields, \
-    create_pagination, create_pagination_html, get_event_comments, generate_pagination
+    create_pagination, create_pagination_html, get_event_comments, generate_pagination, get_members_by_type
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -372,22 +374,12 @@ class ClubMemberManagement(TemplateView):
         club_id = kwargs['club_id']
         slug = kwargs['_slug']
         tab_type = kwargs.get('tab_type', None)
+
         aqs = ClubMembership.objects.filter(
             club=club_id
         ).order_by('membership_type', 'user__last_name', 'user__first_name')
 
-        if tab_type == "inactive":
-            members = [
-                {'member': mem, 'form': EditClubMemberForm(instance=mem)}
-                for mem in aqs if
-                mem.is_expired() or mem.is_inactive()
-            ]
-        else:
-            members = [
-                {'member': mem, 'form': EditClubMemberForm(instance=mem)}
-                for mem in aqs if
-                not mem.is_expired() and not mem.is_inactive()
-            ]
+        members = get_members_by_type(tab_type, aqs)
 
         pagination = generate_pagination(request, qs=members, items_per_page=10)
         tab_classes = {'active': '', 'inactive': '', 'requests': '', tab_type: ' active'}
@@ -401,6 +393,7 @@ class ClubMemberManagement(TemplateView):
                           "slug": slug,
                           "club_id": club_id,
                           "tab_classes": tab_classes,
+                          "tab_type": tab_type,
                       })
 
     @staticmethod
@@ -415,17 +408,50 @@ class ClubMemberManagement(TemplateView):
             if form.is_valid():
                 form.save()
                 messages.success(request, "Successfully updated membership details")
-                return redirect(reverse("club_member_management", kwargs={'_slug': slug, 'club_id': club_id}))
+                return redirect(reverse("club_member_management", kwargs={
+                    '_slug': slug,
+                    'club_id': club_id,
+                    'tab_type': 'active'}))
             else:
                 for errortype in form.errors.as_data()['__all__']:
                     for error in errortype:
                         messages.error(request, error)
-                return redirect(reverse("club_member_management", kwargs={'_slug': slug, 'club_id': club_id}))
+                return redirect(reverse("club_member_management", kwargs={
+                    '_slug': slug,
+                    'club_id': club_id,
+                    'tab_type': 'active'}))
         else:
             form = EditClubMemberForm(user=request.user, instance=club_membership)
 
         return render(
             request,
-            reverse("club_member_management", kwargs={'_slug': slug, 'club_id': club_id}),
+            reverse("club_member_management", kwargs={
+                '_slug': slug,
+                'club_id': club_id,
+                'tab_type': 'active'}),
             {"form": form}
         )
+
+
+def deactivate_membership(request, _slug, club_id, membership_id, tab_type):
+    membership = get_object_or_404(ClubMembership, pk=membership_id)
+    requestor_membership = ClubMembership.objects.get(
+        club=club_id,
+        user=request.user
+    )
+
+    requestor_role = requestor_membership.membership_type
+    member_role = membership.membership_type
+    creator_role_type = ClubMembership.MemberType.Creator.value
+
+    if member_role == creator_role_type and requestor_role > creator_role_type:
+        raise ValidationError(
+            "Only creators can modify a creator."
+        )
+
+    else:
+        membership.active = not membership.active
+        membership.save()
+        messages.success(request, "Changed active status!")
+
+        return redirect(request.META['HTTP_REFERER'])

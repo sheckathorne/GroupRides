@@ -38,13 +38,16 @@ urlpatterns = [
             path("members/management/", include([
                 path(
                     "<str:tab_type>/",
-                    login_required(can_manage_club(ClubMemberManagement.as_view()),
-                                   login_url='/login'),
+                    login_required(can_manage_club(ClubMemberManagement.as_view()), login_url='/login'),
                     name="club_member_management"),
                 path(
-                    "<int:membership_id>/",
+                    "<int:membership_id>/edit/",
                     login_required(can_manage_club(ClubMemberManagement.as_view()), login_url='/login'),
-                    name="edit_club_member")
+                    name="edit_club_member"),
+                path(
+                    "<int:membership_id>/<str:tab_type>/activation/",
+                    login_required(can_manage_club(views.deactivate_membership), login_url='/login'),
+                    name="club_member_activation"),
             ]))
         ]))
     ])),

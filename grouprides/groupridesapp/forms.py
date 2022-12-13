@@ -67,14 +67,13 @@ class EditClubMemberForm(forms.ModelForm):
 
         widgets = {
             'membership_expires': forms.DateInput(
-                # format='%Y-%m-%d',
                 attrs={'class': 'form-control', 'type': 'date'})
         }
 
     def clean(self):
         data = super().clean()
-        requstor_membership = ClubMembership.objects.get(user=self.user, club=self.club_id)
-        requestor_role = requstor_membership.membership_type
+        requestor_membership = ClubMembership.objects.get(user=self.user, club=self.club_id)
+        requestor_role = requestor_membership.membership_type
         new_role_type = data['membership_type']
         creator_role_type = ClubMembership.MemberType.Creator.value
 

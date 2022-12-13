@@ -4,6 +4,7 @@ import django_filters
 from django.core.paginator import Paginator
 from django.forms import TextInput
 
+from .forms import EditClubMemberForm
 from .models import EventOccurence, EventOccurenceMember, ClubMembership, Club, EventOccurenceMessage
 
 
@@ -205,3 +206,26 @@ def create_pagination_html(request, page_obj, page_number):
 
 def get_event_comments(occurence_id, order_by):
     return EventOccurenceMessage.objects.filter(event_occurence__id=occurence_id).order_by(order_by)
+
+
+def get_members_by_type(tab_type, qs):
+    if tab_type == "inactive":
+        members = [
+            {'member': mem, 'form': EditClubMemberForm(instance=mem)}
+            for mem in qs if
+            mem.is_expired() or mem.is_inactive()
+        ]
+    elif tab_type == "active":
+        members = [
+            {'member': mem, 'form': EditClubMemberForm(instance=mem)}
+            for mem in qs if
+            not mem.is_expired() and not mem.is_inactive()
+        ]
+    else:
+        members = [
+            {'member': mem, 'form': EditClubMemberForm(instance=mem)}
+            for mem in qs if
+            not mem.is_expired() and not mem.is_inactive()
+        ]
+
+    return members
