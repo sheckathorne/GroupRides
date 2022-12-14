@@ -211,6 +211,26 @@ def get_event_comments(occurence_id, order_by):
 def get_members_by_type(tab_type, qs):
     if tab_type == "inactive":
         members = [
+            mem for mem in qs if
+            mem.is_expired() or mem.is_inactive()
+        ]
+    elif tab_type == "active":
+        members = [
+            mem for mem in qs if
+            not mem.is_expired() and not mem.is_inactive()
+        ]
+    else:
+        members = [
+            mem for mem in qs if
+            not mem.is_expired() and not mem.is_inactive()
+        ]
+
+    return members
+
+"""
+def get_members_by_type(tab_type, qs):
+    if tab_type == "inactive":
+        members = [
             {'member': mem, 'form': EditClubMemberForm(instance=mem)}
             for mem in qs if
             mem.is_expired() or mem.is_inactive()
@@ -229,3 +249,4 @@ def get_members_by_type(tab_type, qs):
         ]
 
     return members
+"""

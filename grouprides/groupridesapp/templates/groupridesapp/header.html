@@ -1,5 +1,6 @@
-{% load static %}
 <!DOCTYPE html>
+{% load static %}
+{% load unicorn %}
 <html>
 <head>
     <!-- Required meta tags -->
@@ -26,8 +27,10 @@
             integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
             crossorigin="anonymous">
     </script>
+    {% unicorn_scripts %}
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    {% csrf_token %}
     {% include 'groupridesapp/includes/navbar/navbar.html' %}
     <main role="main" class="container-xl">
         <div class="row">

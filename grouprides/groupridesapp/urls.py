@@ -6,7 +6,6 @@ from .decorators import user_is_ride_member, can_manage_club
 
 urlpatterns = [
     path("", views.homepage, name="homepage"),
-
     # Rides
     path("rides/", include([
         path("", views.available_rides, name="available_rides"),
@@ -45,7 +44,7 @@ urlpatterns = [
                     login_required(can_manage_club(ClubMemberManagement.as_view()), login_url='/login'),
                     name="edit_club_member"),
                 path(
-                    "<int:membership_id>/<str:tab_type>/activation/",
+                    "<int:membership_id>/activation/",
                     login_required(can_manage_club(views.deactivate_membership), login_url='/login'),
                     name="club_member_activation"),
             ]))

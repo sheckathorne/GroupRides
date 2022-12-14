@@ -3,6 +3,8 @@ import datetime
 from django.core.exceptions import ValidationError
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404, redirect
+from django_unicorn.components import UnicornView
+
 from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
@@ -381,14 +383,12 @@ class ClubMemberManagement(TemplateView):
 
         members = get_members_by_type(tab_type, aqs)
 
-        pagination = generate_pagination(request, qs=members, items_per_page=10)
         tab_classes = {'active': '', 'inactive': '', 'requests': '', tab_type: ' active'}
 
         return render(request=request,
                       template_name="groupridesapp/clubs/members/members_tabs.html",
                       context={
-                          "members": pagination["page_obj"],
-                          "pagination_items": pagination["pagination_items"],
+                          "members": members,
                           "user": request.user,
                           "slug": slug,
                           "club_id": club_id,
@@ -433,7 +433,7 @@ class ClubMemberManagement(TemplateView):
         )
 
 
-def deactivate_membership(request, _slug, club_id, membership_id, tab_type):
+def deactivate_membership(request, _slug, club_id, membership_id):
     membership = get_object_or_404(ClubMembership, pk=membership_id)
     requestor_membership = ClubMembership.objects.get(
         club=club_id,
@@ -445,10 +445,11 @@ def deactivate_membership(request, _slug, club_id, membership_id, tab_type):
     creator_role_type = ClubMembership.MemberType.Creator.value
 
     if member_role == creator_role_type and requestor_role > creator_role_type:
+        messages.error(request, "Only creators can modify a creator.")
+
         raise ValidationError(
             "Only creators can modify a creator."
         )
-
     else:
         membership.active = not membership.active
         membership.save()

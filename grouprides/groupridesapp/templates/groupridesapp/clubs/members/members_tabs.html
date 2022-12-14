@@ -1,4 +1,5 @@
 {% extends "groupridesapp/header.html" %}
+{% load unicorn %}
 {% block content %}
   <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">
@@ -19,10 +20,10 @@
   </ul>
   <div class="tab-content" id="myTabContent">
     <div class="tab-pane fade show active" id="member-tab-active-pane" role="tabpanel" aria-labelledby="member-tab-active" tabindex="0">
-      {% include 'groupridesapp/clubs/members/members_list.html' %}
+      {% unicorn 'member_search' members=members club_id=club_id slug=slug tab_type="active" %}
     </div>
     <div class="tab-pane fade" id="member-tab-expired-inactive-pane" role="tabpanel" aria-labelledby="member-tab-expired-inactive" tabindex="0">
-        {% include 'groupridesapp/clubs/members/members_list.html' %}
+        {% unicorn 'member_search' members=members club_id=club_id slug=slug tab_type="inactive" %}
     </div>
     <div class="tab-pane fade" id="member-tab-requests-pane" role="tabpanel" aria-labelledby="member-tab-requests" tabindex="0">
       Requests Content
