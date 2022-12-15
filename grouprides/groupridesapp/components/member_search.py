@@ -1,4 +1,3 @@
-from django.utils.functional import cached_property
 from django_unicorn.components import UnicornView
 from groupridesapp.forms import EditClubMemberForm
 from groupridesapp.utils import generate_pagination

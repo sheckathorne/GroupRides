@@ -1,10 +1,7 @@
 import datetime
-
 from django.core.exceptions import ValidationError
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404, redirect
-from django_unicorn.components import UnicornView
-
 from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
@@ -39,7 +36,7 @@ def homepage(request):
 def my_clubs(request):
     clubs = ClubMembership.objects.filter(
         user=request.user
-    )
+    ).order_by('membership_type')
 
     return render(request=request,
                   template_name="groupridesapp/clubs/my_clubs.html",
@@ -377,13 +374,12 @@ class ClubMemberManagement(TemplateView):
         slug = kwargs['_slug']
         tab_type = kwargs.get('tab_type', None)
 
-        aqs = ClubMembership.objects.select_related('user').filter(
+        aqs = ClubMembership.objects.filter(
             club=club_id
         ).order_by('membership_type', 'user__last_name', 'user__first_name')
 
         members = get_members_by_type(tab_type, aqs)
-
-        tab_classes = {'active': '', 'inactive': '', 'requests': '', tab_type: ' active'}
+        tab_classes = {'active': '', 'inactive': '', 'requests': '', tab_type: ' show active'}
 
         return render(request=request,
                       template_name="groupridesapp/clubs/members/members_tabs.html",

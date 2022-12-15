@@ -19,14 +19,18 @@
     </li>
   </ul>
   <div class="tab-content" id="myTabContent">
-    <div class="tab-pane fade show active" id="member-tab-active-pane" role="tabpanel" aria-labelledby="member-tab-active" tabindex="0">
+    {% if tab_type == "active" %}
+    <div class="tab-pane fade show{{ tab_classes.active }}" id="member-tab-active-pane" role="tabpanel" aria-labelledby="member-tab-active" tabindex="0">
       {% unicorn 'member_search' members=members club_id=club_id slug=slug tab_type=tab_type %}
     </div>
-    <div class="tab-pane fade" id="member-tab-expired-inactive-pane" role="tabpanel" aria-labelledby="member-tab-expired-inactive" tabindex="0">
+    {% elif tab_type == "inactive" %}
+    <div class="tab-pane fadeshow{{ tab_classes.inactive }}" id="member-tab-expired-inactive-pane" role="tabpanel" aria-labelledby="member-tab-expired-inactive" tabindex="0">
         {% unicorn 'member_search' members=members club_id=club_id slug=slug tab_type=tab_type %}
     </div>
-    <div class="tab-pane fade" id="member-tab-requests-pane" role="tabpanel" aria-labelledby="member-tab-requests" tabindex="0">
+    {% elif tab_type == "requests" %}
+    <div class="tab-pane fadeshow{{ tab_classes.requests }}" id="member-tab-requests-pane" role="tabpanel" aria-labelledby="member-tab-requests" tabindex="0">
       Requests Content
     </div>
+    {% endif %}
   </div>
 {% endblock content %}

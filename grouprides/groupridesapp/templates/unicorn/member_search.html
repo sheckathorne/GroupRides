@@ -7,7 +7,8 @@
             <input unicorn:model.debounce-500="membername" id="member_name_text" class="form-control" type="text" placeholder="Enter member name" id="member-name" />
         </div>
     </div>
-{% with searched_mems=searched_members pagination_items=searched_members.pagination_items tab_type=searched_members.tab_type %}
+{% with searched_mems=searched_members %}
+{% with pagination_items=searched_mems.pagination_items tab_type=searched_mems.tab_type %}
     <table class="table table-sm mt-4">
         <thead>
             <tr>
@@ -61,5 +62,6 @@
     {% if searched_mems.page_count > 1 %}
         {% include 'groupridesapp/pagination.html' %}
     {% endif %}
+{% endwith %}
 {% endwith %}
 </div>

@@ -106,6 +106,10 @@ class ClubMembership(models.Model):
         return not self.active
 
     @property
+    def level(self):
+        return ClubMembership.MemberType(self.membership_type).label
+
+    @property
     def expired(self):
         now = timezone.now().date()
         return self.membership_expires < now
