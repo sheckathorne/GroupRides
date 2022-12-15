@@ -1,7 +1,8 @@
 import datetime
-
+from django.utils import timezone
 import django_filters
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.forms import TextInput
 
 from .forms import EditClubMemberForm
@@ -209,21 +210,13 @@ def get_event_comments(occurence_id, order_by):
 
 
 def get_members_by_type(tab_type, qs):
+    now = timezone.now().date()
     if tab_type == "inactive":
-        members = [
-            mem for mem in qs if
-            mem.is_expired() or mem.is_inactive()
-        ]
+        members = qs.filter(Q(active=False) | Q(membership_expires__lt=now))
     elif tab_type == "active":
-        members = [
-            mem for mem in qs if
-            not mem.is_expired() and not mem.is_inactive()
-        ]
+        members = qs.filter(active=True, membership_expires__gte=now)
     else:
-        members = [
-            mem for mem in qs if
-            not mem.is_expired() and not mem.is_inactive()
-        ]
+        members = qs.filter(active=True, membership_expires__gte=now)
 
     return members
 

@@ -377,7 +377,7 @@ class ClubMemberManagement(TemplateView):
         slug = kwargs['_slug']
         tab_type = kwargs.get('tab_type', None)
 
-        aqs = ClubMembership.objects.filter(
+        aqs = ClubMembership.objects.select_related('user').filter(
             club=club_id
         ).order_by('membership_type', 'user__last_name', 'user__first_name')
 
