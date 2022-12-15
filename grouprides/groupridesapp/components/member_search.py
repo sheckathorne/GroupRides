@@ -11,6 +11,7 @@ class MemberSearchView(UnicornView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.members = kwargs.get('members', None)
+        self.tab_type = kwargs.get('tab_type', None)
 
     def searched_members(self):
         if(type(self.members[0])) is dict:
@@ -25,5 +26,6 @@ class MemberSearchView(UnicornView):
         return {
             "members": pagination["page_obj"].object_list,
             "page_count": pagination["page_obj"].paginator.num_pages,
-            "pagination_items": pagination["pagination_items"]
+            "pagination_items": pagination["pagination_items"],
+            "tab_type": self.tab_type,
         }

@@ -7,7 +7,7 @@
             <input unicorn:model.debounce-500="membername" id="member_name_text" class="form-control" type="text" placeholder="Enter member name" id="member-name" />
         </div>
     </div>
-{% with searched_mems=searched_members pagination_items=searched_members.pagination_items %}
+{% with searched_mems=searched_members pagination_items=searched_members.pagination_items tab_type=searched_members.tab_type %}
     <table class="table table-sm mt-4">
         <thead>
             <tr>
@@ -34,7 +34,7 @@
                     <a
                         href="#"
                         hx-post="{% url 'club_member_activation' _slug=slug club_id=club_id membership_id=mem.id %}"
-                        hx-confirm="Are you sure you want to {{ tab_is_active|yesno:'deactivate,activate' }} this user's membership?"
+                        hx-confirm="Are you sure you want to {{ tab_is_active|yesno:'deactivate,activate' }} {{ mem.user.first_name }} {{ mem.user.last_name }}'s membership?"
                         hx-target="body"
                     >
                         {% if tab_is_active %}
