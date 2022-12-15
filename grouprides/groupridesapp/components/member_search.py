@@ -13,23 +13,17 @@ class MemberSearchView(UnicornView):
         self.members = kwargs.get('members', None)
 
     def searched_members(self):
-        if self.membername:
+        if(type(self.members[0])) is dict:
             pks = [m['pk'] for m in self.members]
             mems = ClubMembership.objects.filter(pk__in=pks)
             members = [{'member': m, 'form': EditClubMemberForm(instance=m)} for m in mems
                        if self.membername.lower() in (m.user.first_name + ' ' + m.user.last_name).lower()]
-
-            pagination = generate_pagination(self.request, qs=members, items_per_page=1)
-            return {
-                "members": pagination["page_obj"].object_list,
-                "page_count": pagination["page_obj"].paginator.num_pages,
-                "pagination_items": pagination["pagination_items"]
-            }
         else:
             members = [{'member': m, 'form': EditClubMemberForm(instance=m)} for m in self.members]
-            pagination = generate_pagination(self.request, qs=members, items_per_page=1)
-            return {
-                "members": pagination["page_obj"].object_list,
-                "page_count": pagination["page_obj"].paginator.num_pages,
-                "pagination_items": pagination["pagination_items"]
-            }
+
+        pagination = generate_pagination(self.request, qs=members, items_per_page=10)
+        return {
+            "members": pagination["page_obj"].object_list,
+            "page_count": pagination["page_obj"].paginator.num_pages,
+            "pagination_items": pagination["pagination_items"]
+        }

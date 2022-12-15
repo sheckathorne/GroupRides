@@ -8,9 +8,6 @@
         </div>
     </div>
 {% with searched_mems=searched_members pagination_items=searched_members.pagination_items %}
-    {% if searched_mems.page_count > 1 %}
-        {% include 'groupridesapp/pagination.html' %}
-    {% endif %}
     <table class="table table-sm mt-4">
         <thead>
             <tr>
