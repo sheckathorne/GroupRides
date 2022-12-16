@@ -47,6 +47,11 @@ urlpatterns = [
                     "<int:membership_id>/activation/",
                     login_required(can_manage_club(views.deactivate_membership), login_url='/login'),
                     name="club_member_activation"),
+                path(
+                    "<int:membership_request_id>/reject/",
+                    login_required(can_manage_club(views.reject_membership_request), login_url='/login'),
+                    name="reject_membership_request"
+                )
             ]))
         ]))
     ])),

@@ -21,8 +21,7 @@
     <table class="table table-responsive-md mt-4">
         <thead>
             <tr>
-                <th scope="col" class="align-middle fit"></th>
-                <th scope="col" class="align-middle fit"></th>
+                <th scope="col" colspan="2" class="align-middle fit">Actions</th>
                 <th scope="col" class="align-middle">Name</th>
                 <th scope="col" class="align-middle">Request Date</th>
                 <th scope="col" class="align-middle">Status</th>
@@ -34,17 +33,21 @@
         {% for mem in searched_reqs.members %}
             <tr>
                 <td class="align-middle fit">
-                    <i class="fa-solid fa-check fa-lg" style="color: green;"></i>
+                    {% if mem.status_label == "Pending" %}
+                        <i class="fa-solid fa-check fa-lg" style="color: green;"></i>
+                    {% endif %}
                 </td>
                 <td class="align-middle fit">
+                    {% if mem.status_label == "Pending" %}
                     <a
                         href="#"
-                        hx-post=""
+                        hx-post="{% url 'reject_membership_request' _slug=slug club_id=club_id membership_request_id=mem.id %}"
                         hx-confirm="Are you sure you want to deny this membership request?"
                         hx-target="body"
                     >
                         <i class="fa-solid fa-x fa" style="color: red;"></i>
                     </a>
+                    {% endif %}
                 </td>
                 <td class="align-middle">{{mem.user.last_name}}, {{mem.user.first_name}}</td>
                 <td class="align-middle">{{mem.request_date|date:"M j, Y"}}</td>

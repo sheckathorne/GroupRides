@@ -379,14 +379,11 @@ class ClubMemberManagement(TemplateView):
         ).order_by('membership_type', 'user__last_name', 'user__first_name')
 
         reqs = ClubMembershipRequest.objects.filter(
-            club=club_id,
-            # status=ClubMembershipRequest.RequestStatus.Pending.value
+            club=club_id
         ).order_by('request_date')
 
         members = get_members_by_type(tab_type, aqs)
         tab_classes = {'active': '', 'inactive': '', 'requests': '', tab_type: ' show active'}
-
-
 
         return render(request=request,
                       template_name="groupridesapp/clubs/members/members_tabs.html",
@@ -462,5 +459,14 @@ def deactivate_membership(request, _slug, club_id, membership_id):
         return redirect(request.META['HTTP_REFERER'])
 
 
-def deny_club_request(request):
-    pass
+def reject_membership_request(request, membership_request_id, **kwargs):
+    membership_request = get_object_or_404(ClubMembershipRequest, pk=membership_request_id)
+
+    membership_request.status = ClubMembershipRequest.RequestStatus.Denied
+    membership_request.responder = request.user
+    membership_request.response_date = timezone.now()
+
+    membership_request.save()
+    messages.success(request, "Successfully rejected the membership request.")
+
+    return redirect(request.META['HTTP_REFERER'])

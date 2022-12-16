@@ -39,6 +39,7 @@ class MemberRequestSearchView(UnicornView):
 
     def searched_requests(self):
         status_choices = []
+
         for req in self.reqs.values_list('status', flat=True).distinct().order_by('status'):
             status_choices.append({'label': ClubMembershipRequest.RequestStatus(req).label, 'value': req})
 
