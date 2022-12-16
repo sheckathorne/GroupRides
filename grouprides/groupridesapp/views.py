@@ -380,11 +380,13 @@ class ClubMemberManagement(TemplateView):
 
         reqs = ClubMembershipRequest.objects.filter(
             club=club_id,
-            status=ClubMembershipRequest.RequestStatus.Pending.value
-        )
+            # status=ClubMembershipRequest.RequestStatus.Pending.value
+        ).order_by('request_date')
 
         members = get_members_by_type(tab_type, aqs)
         tab_classes = {'active': '', 'inactive': '', 'requests': '', tab_type: ' show active'}
+
+
 
         return render(request=request,
                       template_name="groupridesapp/clubs/members/members_tabs.html",

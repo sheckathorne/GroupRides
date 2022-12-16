@@ -1,13 +1,22 @@
 {% load groupridesapp_extras %}
 {% load static %}
+{% with searched_reqs=searched_requests %}
 <div>
     <div class="row mt-2 mb-4">
-        <div class="col">
+        <div class="col-md-6">
             <label for="member_name_text" class="form-label">Search Requests</label>
             <input unicorn:model.debounce-500="membername" id="member_name_text" class="form-control" type="text" placeholder="Enter member name" id="member-name" />
         </div>
+        <div class="col-md-6">
+            <label for="selected_status" class="form-label">Status</label>
+            <select unicorn:model="selected_status" id="selected_status" class="form-select" type="text" placeholder="Select Status" id="selected_status">
+                <option value="">Select Status</option>
+                {% for choice in searched_reqs.status_choices %}
+                    <option value="{{ choice.value }}">{{ choice.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
-{% with searched_reqs=searched_requests %}
 {% with pagination_items=searched_reqs.pagination_items tab_type=searched_reqs.tab_type %}
     <table class="table table-responsive-md mt-4">
         <thead>
