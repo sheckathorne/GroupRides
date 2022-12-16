@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404, redirect
 from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
-    EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership
+    EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership, ClubMembershipRequest
 from django.db.models import Q
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
@@ -378,6 +378,11 @@ class ClubMemberManagement(TemplateView):
             club=club_id
         ).order_by('membership_type', 'user__last_name', 'user__first_name')
 
+        reqs = ClubMembershipRequest.objects.filter(
+            club=club_id,
+            status=ClubMembershipRequest.RequestStatus.Pending.value
+        )
+
         members = get_members_by_type(tab_type, aqs)
         tab_classes = {'active': '', 'inactive': '', 'requests': '', tab_type: ' show active'}
 
@@ -385,6 +390,7 @@ class ClubMemberManagement(TemplateView):
                       template_name="groupridesapp/clubs/members/members_tabs.html",
                       context={
                           "members": members,
+                          "reqs": reqs,
                           "user": request.user,
                           "slug": slug,
                           "club_id": club_id,
@@ -452,3 +458,7 @@ def deactivate_membership(request, _slug, club_id, membership_id):
         messages.success(request, "Changed active status!")
 
         return redirect(request.META['HTTP_REFERER'])
+
+
+def deny_club_request(request):
+    pass

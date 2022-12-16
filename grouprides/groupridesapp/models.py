@@ -142,10 +142,15 @@ class ClubMembershipRequest(models.Model):
 
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, related_name="request_user", on_delete=models.CASCADE)
-    responder = models.ForeignKey(CustomUser, related_name="response_user", null=True, on_delete=models.CASCADE)
+    responder = models.ForeignKey(CustomUser, related_name="response_user", blank=True, null=True, on_delete=models.CASCADE)
     request_date = models.DateTimeField("Request Date", auto_now_add=True)
-    response_date = models.DateTimeField("Response Date", null=True)
-    status = models.IntegerField("Request Status", choices=RequestStatus.choices)
+    response_date = models.DateTimeField("Response Date", blank=True, null=True)
+    status = models.IntegerField("Request Status", choices=RequestStatus.choices,
+                                 default=RequestStatus.Pending)
+
+    @property
+    def status_label(self):
+        return ClubMembershipRequest.RequestStatus(self.status).label
 
     def __str__(self):
         return f"{self.user.last_name}, {self.user.first_name} to join {self.club.name}"

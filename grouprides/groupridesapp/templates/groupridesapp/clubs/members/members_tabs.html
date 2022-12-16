@@ -29,7 +29,7 @@
     </div>
     {% elif tab_type == "requests" %}
     <div class="tab-pane fadeshow{{ tab_classes.requests }}" id="member-tab-requests-pane" role="tabpanel" aria-labelledby="member-tab-requests" tabindex="0">
-      Requests Content
+      {% unicorn 'member_request_search' reqs=reqs club_id=club_id slug=slug tab_type=tab_type %}
     </div>
     {% endif %}
   </div>

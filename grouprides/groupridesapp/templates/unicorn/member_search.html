@@ -9,7 +9,7 @@
     </div>
 {% with searched_mems=searched_members %}
 {% with pagination_items=searched_mems.pagination_items tab_type=searched_mems.tab_type %}
-    <table class="table table-sm mt-4">
+    <table class="table table-responsive-md mt-4">
         <thead>
             <tr>
                 <th scope="col" class="align-middle fit"></th>
@@ -39,7 +39,7 @@
                         hx-target="body"
                     >
                         {% if tab_is_active %}
-                            <i class="fa-solid fa-circle-xmark" style="color: red;"></i>
+                            <i class="fa-solid fa-x fa" style="color: red;"></i>
                         {% else %}
                             <i class="fa-solid fa-circle-plus" style="color: green;"></i>
                         {% endif %}
@@ -47,7 +47,7 @@
                 </td>
                 <td class="align-middle">{{mem.user.last_name}}, {{mem.user.first_name}}</td>
                 <td class="align-middle">{{mem.membership_type_label}}</td>
-                <td class="align-middle">{{mem.create_date}}</td>
+                <td class="align-middle">{{mem.create_date|date:"M j, Y"}}</td>
                 {% if mem.expired %}
                     <td class="align-middle" style="color: red;">{{mem.membership_expires}}</td>
                 {% else %}
