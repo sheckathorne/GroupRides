@@ -2,6 +2,8 @@ import datetime
 from django.core.exceptions import ValidationError
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db.utils import IntegrityError
+
 from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership, ClubMembershipRequest
@@ -57,10 +59,10 @@ def my_rides(request):
     ).order_by('event_occurence__ride_date')
 
     f = RideFilter(
-            request.GET,
-            queryset=my_upcoming_rides,
-            filter_fields=get_filter_fields(my_upcoming_rides, TABLE_PREFIX)
-        )
+        request.GET,
+        queryset=my_upcoming_rides,
+        filter_fields=get_filter_fields(my_upcoming_rides, TABLE_PREFIX)
+    )
 
     page_number = request.GET.get('page') or 1
     page_obj = create_pagination(f, TABLE_PREFIX, page_number)
@@ -86,10 +88,10 @@ def available_rides(request):
     arq = gather_available_rides(user=request.user)
 
     f = RideFilter(
-            request.GET,
-            queryset=arq,
-            filter_fields=get_filter_fields(arq, TABLE_PREFIX)
-        )
+        request.GET,
+        queryset=arq,
+        filter_fields=get_filter_fields(arq, TABLE_PREFIX)
+    )
 
     page_number = request.GET.get('page') or 1
     page_obj = create_pagination(f, TABLE_PREFIX, page_number)
@@ -496,9 +498,14 @@ def create_club_member(request, _slug, club_id, membership_request_id):
                 "membership_type": form["membership_type"].value(),
             }
 
-            ClubMembership.objects.create(**data)
-            name = f"{membership_request.user.first_name} {membership_request.user.last_name}"
-            messages.success(request, f"Successfully added {name} to {club.name}.")
+            try:
+                name = f"{membership_request.user.first_name} {membership_request.user.last_name}"
+                ClubMembership.objects.create(**data)
+            except IntegrityError:
+                messages.error(request, f"Could not create club membership, {name} is already a member.")
+            else:
+                messages.success(request, f"Successfully added {name} to {club.name}.")
+
             return redirect(reverse("club_member_management", kwargs={
                 '_slug': _slug,
                 'club_id': club_id,
