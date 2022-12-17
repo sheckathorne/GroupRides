@@ -21,14 +21,29 @@
   <div class="tab-content" id="myTabContent">
     {% if tab_type == "active" %}
     <div class="tab-pane fade show{{ tab_classes.active }}" id="member-tab-active-pane" role="tabpanel" aria-labelledby="member-tab-active" tabindex="0">
+      <div class="row mt-4">
+        <div class="col">
+            <h4>{{ club_name }}</h4>
+        </div>
+      </div>
       {% unicorn 'member_search' members=members club_id=club_id slug=slug tab_type=tab_type %}
     </div>
     {% elif tab_type == "inactive" %}
     <div class="tab-pane fadeshow{{ tab_classes.inactive }}" id="member-tab-expired-inactive-pane" role="tabpanel" aria-labelledby="member-tab-expired-inactive" tabindex="0">
+      <div class="row mt-4">
+        <div class="col">
+            <h4>{{ club_name }}</h4>
+        </div>
+      </div>
         {% unicorn 'member_search' members=members club_id=club_id slug=slug tab_type=tab_type %}
     </div>
     {% elif tab_type == "requests" %}
     <div class="tab-pane fadeshow{{ tab_classes.requests }}" id="member-tab-requests-pane" role="tabpanel" aria-labelledby="member-tab-requests" tabindex="0">
+      <div class="row mt-4">
+        <div class="col">
+            <h4>{{ club_name }}</h4>
+        </div>
+      </div>
       {% unicorn 'member_request_search' reqs=reqs club_id=club_id slug=slug tab_type=tab_type %}
     </div>
     {% endif %}

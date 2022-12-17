@@ -4,11 +4,11 @@
 <div>
     <div class="row mt-2 mb-4">
         <div class="col-md-6">
-            <label for="member_name_text" class="form-label">Search Requests</label>
+            <label for="member_name_text" class="form-label">Search Join Requests</label>
             <input unicorn:model.debounce-500="membername" id="member_name_text" class="form-control" type="text" placeholder="Enter member name" id="member-name" />
         </div>
         <div class="col-md-6">
-            <label for="selected_status" class="form-label">Status</label>
+            <label for="selected_status" class="form-label">Filter Status</label>
             <select unicorn:model="selected_status" id="selected_status" class="form-select" type="text" placeholder="Select Status" id="selected_status">
                 <option value="">Select Status</option>
                 {% for choice in searched_reqs.status_choices %}
@@ -34,7 +34,12 @@
             <tr>
                 <td class="align-middle fit">
                     {% if mem.status_label == "Pending" %}
+                    <a
+                        href="#"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="Approve request">
                         <i class="fa-solid fa-check fa-lg" style="color: green;"></i>
+                    </a>
                     {% endif %}
                 </td>
                 <td class="align-middle fit">
@@ -44,6 +49,8 @@
                         hx-post="{% url 'reject_membership_request' _slug=slug club_id=club_id membership_request_id=mem.id %}"
                         hx-confirm="Are you sure you want to deny this membership request?"
                         hx-target="body"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="Reject request"
                     >
                         <i class="fa-solid fa-x fa" style="color: red;"></i>
                     </a>
@@ -67,4 +74,5 @@
     {% endif %}
 {% endwith %}
 {% endwith %}
+<script src="{% static 'groupridesapp/js/club_member_management.js' %}"></script>
 </div>

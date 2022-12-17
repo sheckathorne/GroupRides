@@ -12,8 +12,7 @@
     <table class="table table-responsive-md mt-4">
         <thead>
             <tr>
-                <th scope="col" class="align-middle fit"></th>
-                <th scope="col" class="align-middle fit"></th>
+                <th scope="col" colspan="2" class="align-middle fit">Actions</th>
                 <th scope="col" class="align-middle">Name</th>
                 <th scope="col" class="align-middle">Member Type</th>
                 <th scope="col" class="align-middle">Joined</th>
@@ -26,9 +25,11 @@
             {% include 'groupridesapp/clubs/members/edit_member_modal.html' %}
             <tr>
                 <td class="align-middle fit">
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#editMemberModal-{{ mem.id }}">
-                        <i class="fas fa-edit"></i>
-                    </a>
+                    <span data-bs-toggle="tooltip" data-bs-title="Edit membership">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#editMemberModal-{{ mem.id }}">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </span>
                 </td>
                 <td class="align-middle fit">
                     {% active_tab_is_selected tab_type=tab_type as tab_is_active %}
@@ -37,6 +38,8 @@
                         hx-post="{% url 'club_member_activation' _slug=slug club_id=club_id membership_id=mem.id %}"
                         hx-confirm="Are you sure you want to {{ tab_is_active|yesno:'deactivate,activate' }} {{ mem.user.first_name }} {{ mem.user.last_name }}'s membership?"
                         hx-target="body"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="{{ tab_is_active|yesno:'Deactivate,Activate' }} member"
                     >
                         {% if tab_is_active %}
                             <i class="fa-solid fa-x fa" style="color: red;"></i>
@@ -49,19 +52,19 @@
                 <td class="align-middle">{{mem.membership_type_label}}</td>
                 <td class="align-middle">{{mem.create_date|date:"M j, Y"}}</td>
                 {% if mem.expired %}
-                    <td class="align-middle" style="color: red;">{{mem.membership_expires}}</td>
+                    <td class="align-middle" style="color: red;">{{mem.membership_expires|date:"M j, Y"}}</td>
                 {% else %}
-                    <td class="align-middle">{{mem.membership_expires}}</td>
+                    <td class="align-middle">{{mem.membership_expires|date:"M j, Y"}}</td>
                 {% endif %}
             </tr>
             {% endwith %}
         {% endfor %}
         </tbody>
     </table>
-    <script src="{% static 'groupridesapp/js/club_member_management.js' %}"></script>
     {% if searched_mems.page_count > 1 %}
         {% include 'groupridesapp/pagination.html' %}
     {% endif %}
 {% endwith %}
 {% endwith %}
+<script src="{% static 'groupridesapp/js/club_member_management.js' %}"></script>
 </div>
