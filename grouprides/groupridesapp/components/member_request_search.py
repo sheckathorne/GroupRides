@@ -1,19 +1,23 @@
 from django_unicorn.components import UnicornView
 
+from groupridesapp.forms import ClubMembershipForm
 from groupridesapp.models import ClubMembershipRequest
 from groupridesapp.utils import generate_pagination
 
 
 def filter_membername(name, reqs):
     return [
-        m for m in reqs
+        {'request': m, 'form': ClubMembershipForm(membership_request_id=m.id)} for m in reqs
         if name.lower()
         in (m.user.first_name + ' ' + m.user.last_name).lower()
     ]
 
 
 def filter_status(status, reqs):
-    return [m for m in reqs if m.status == int(status)]
+    return [
+        {'request': m, 'form': ClubMembershipForm(membership_request_id=m.id)} for m in reqs
+        if m.status == int(status)
+    ]
 
 
 def filter_requests(name, status, reqs):
@@ -25,7 +29,7 @@ def filter_requests(name, status, reqs):
     elif status and not name:
         return filter_status(status, reqs)
     else:
-        return reqs
+        return [{'request': m, 'form': ClubMembershipForm(membership_request_id=m.id)} for m in reqs]
 
 
 class MemberRequestSearchView(UnicornView):
@@ -44,6 +48,7 @@ class MemberRequestSearchView(UnicornView):
             status_choices.append({'label': ClubMembershipRequest.RequestStatus(req).label, 'value': req})
 
         members = filter_requests(self.membername, self.selected_status, self.reqs)
+
         pagination = generate_pagination(self.request, qs=members, items_per_page=10)
 
         return {

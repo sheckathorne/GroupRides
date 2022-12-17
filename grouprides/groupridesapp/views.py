@@ -8,7 +8,7 @@ from .models import Club, EventOccurence, EventOccurenceMember, \
 from django.db.models import Q
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
-    CreateClubForm, CreateEventForm, CreateRouteForm, EditClubMemberForm
+    CreateClubForm, CreateEventForm, CreateRouteForm, ClubMembershipForm
 from .utils import days_from_today, gather_available_rides, get_filter_fields, \
     create_pagination, create_pagination_html, get_event_comments, generate_pagination, get_members_by_type
 from django.contrib.auth.decorators import login_required
@@ -408,7 +408,7 @@ class ClubMemberManagement(TemplateView):
         club_membership = get_object_or_404(ClubMembership, pk=membership_id)
 
         if request.method == "POST":
-            form = EditClubMemberForm(request.POST, user=request.user, club_id=club_id, instance=club_membership)
+            form = ClubMembershipForm(request.POST, user=request.user, club_id=club_id, instance=club_membership)
             if form.is_valid():
                 form.save()
                 messages.success(request, "Successfully updated membership details")
@@ -425,7 +425,7 @@ class ClubMemberManagement(TemplateView):
                     'club_id': club_id,
                     'tab_type': 'active'}))
         else:
-            form = EditClubMemberForm(user=request.user, instance=club_membership)
+            form = ClubMembershipForm(user=request.user, instance=club_membership)
 
         return render(
             request,
@@ -473,3 +473,33 @@ def reject_membership_request(request, membership_request_id, **kwargs):
     messages.success(request, "Successfully rejected the membership request.")
 
     return redirect(request.META['HTTP_REFERER'])
+
+
+def create_club_member(request, _slug, club_id, membership_request_id):
+    if request.method == "POST":
+        form = ClubMembershipForm(
+            request.POST,
+            user=request.user,
+            club_id=club_id,
+            membership_request_id=membership_request_id
+        )
+
+        if form.is_valid():
+            membership_request = ClubMembershipRequest.objects.get(pk=membership_request_id)
+            club = Club.objects.get(pk=club_id)
+
+            data = {
+                "user": membership_request.user,
+                "club": club,
+                "membership_expires": form["membership_expires"].value(),
+                "active": form["active"].value(),
+                "membership_type": form["membership_type"].value(),
+            }
+
+            ClubMembership.objects.create(**data)
+            name = f"{membership_request.user.first_name} {membership_request.user.last_name}"
+            messages.success(request, f"Successfully added {name} to {club.name}.")
+            return redirect(reverse("club_member_management", kwargs={
+                '_slug': _slug,
+                'club_id': club_id,
+                'tab_type': 'active'}))

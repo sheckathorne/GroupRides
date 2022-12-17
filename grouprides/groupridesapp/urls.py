@@ -44,6 +44,10 @@ urlpatterns = [
                     login_required(can_manage_club(ClubMemberManagement.as_view()), login_url='/login'),
                     name="edit_club_member"),
                 path(
+                    "<int:membership_request_id>/create/",
+                    login_required(can_manage_club(views.create_club_member), login_url='/login'),
+                    name="create_club_member"),
+                path(
                     "<int:membership_id>/activation/",
                     login_required(can_manage_club(views.deactivate_membership), login_url='/login'),
                     name="club_member_activation"),

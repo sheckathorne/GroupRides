@@ -1,11 +1,13 @@
-from datetime import datetime
+import datetime
 
+import pytz
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import Select, ModelChoiceField
+from django.utils import timezone
 
 from .models import EventOccurenceMember, EventOccurenceMessage, \
-    Club, Event, Route, ClubMembership
+    Club, Event, Route, ClubMembership, ClubMembershipRequest
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import (
     Layout,
@@ -60,7 +62,7 @@ class CreateEventOccurenceMessageForm(forms.ModelForm):
         self.fields['message'].label = ''
 
 
-class EditClubMemberForm(forms.ModelForm):
+class ClubMembershipForm(forms.ModelForm):
     class Meta:
         model = ClubMembership
         fields = ['membership_expires', 'active', 'membership_type']
@@ -70,25 +72,17 @@ class EditClubMemberForm(forms.ModelForm):
                 attrs={'class': 'form-control', 'type': 'date'})
         }
 
-    def clean(self):
-        data = super().clean()
-        requestor_membership = ClubMembership.objects.get(user=self.user, club=self.club_id)
-        requestor_role = requestor_membership.membership_type
-        new_role_type = data['membership_type']
-        creator_role_type = ClubMembership.MemberType.Creator.value
-
-        if new_role_type == creator_role_type and requestor_role > creator_role_type:
-            raise ValidationError(
-                "Only creators can promote others to the \'creator\' role."
-            )
-
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         self.club_id = kwargs.pop('club_id', None)
-        member = kwargs['instance']
-        member_dropdown_disabled = (member.membership_type == ClubMembership.MemberType.Creator.value)
+        self.membership_request_id = kwargs.pop('membership_request_id', None)
+        member = kwargs.get('instance', None)
+        member_dropdown_disabled = False
 
-        super(EditClubMemberForm, self).__init__(*args, **kwargs)
+        if member:
+            member_dropdown_disabled = (member.membership_type == ClubMembership.MemberType.Creator.value)
+
+        super(ClubMembershipForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             form_row(
@@ -137,6 +131,31 @@ class EditClubMemberForm(forms.ModelForm):
         self.fields['membership_type'].disabled = member_dropdown_disabled
         self.fields['membership_expires'].disabled = member_dropdown_disabled
         self.fields["active"].disabled = member_dropdown_disabled
+
+        if self.membership_request_id:
+            self.fields['membership_type'].initial = ClubMembership.MemberType.PaidMember
+            self.fields['membership_expires'].initial = datetime.date.today() + datetime.timedelta(weeks=52)
+            self.fields["active"].initial = True
+
+    def clean(self):
+        data = super().clean()
+        requestor_membership = ClubMembership.objects.get(user=self.user, club=self.club_id)
+        requestor_role = requestor_membership.membership_type
+        new_role_type = data['membership_type']
+        creator_role_type = ClubMembership.MemberType.Creator.value
+
+        if self.membership_request_id:
+            tz = pytz.timezone("America/Chicago")
+            membership_request = ClubMembershipRequest.objects.get(pk=self.membership_request_id)
+            membership_request.status = ClubMembershipRequest.RequestStatus.Approved
+            membership_request.responder = self.user
+            membership_request.response_date = datetime.datetime.now(tz)
+            membership_request.save()
+
+        if new_role_type == creator_role_type and requestor_role > creator_role_type:
+            raise ValidationError(
+                "Only creators can promote others to the \'creator\' role."
+            )
 
 
 class CreateClubForm(forms.ModelForm):

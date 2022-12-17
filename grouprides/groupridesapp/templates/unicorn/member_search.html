@@ -22,7 +22,7 @@
         <tbody>
         {% for member in searched_mems.members %}
             {% with mem=member.member form=member.form %}
-            {% include 'groupridesapp/clubs/members/edit_member_modal.html' %}
+            {% include 'groupridesapp/clubs/members/edit_membership_modal.html' %}
             <tr>
                 <td class="align-middle fit">
                     <span data-bs-toggle="tooltip" data-bs-title="Edit membership">

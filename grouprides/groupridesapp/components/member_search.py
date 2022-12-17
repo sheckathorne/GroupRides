@@ -1,5 +1,5 @@
 from django_unicorn.components import UnicornView
-from groupridesapp.forms import EditClubMemberForm
+from groupridesapp.forms import ClubMembershipForm
 from groupridesapp.utils import generate_pagination
 
 
@@ -13,10 +13,10 @@ class MemberSearchView(UnicornView):
 
     def searched_members(self):
         if self.membername:
-            members = [{'member': m, 'form': EditClubMemberForm(instance=m)} for m in self.members
+            members = [{'member': m, 'form': ClubMembershipForm(instance=m)} for m in self.members
                        if self.membername.lower() in (m.user.first_name + ' ' + m.user.last_name).lower()]
         else:
-            members = [{'member': m, 'form': EditClubMemberForm(instance=m)} for m in self.members]
+            members = [{'member': m, 'form': ClubMembershipForm(instance=m)} for m in self.members]
 
         pagination = generate_pagination(self.request, qs=members, items_per_page=10)
         return {
