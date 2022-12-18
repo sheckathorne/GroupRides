@@ -1,5 +1,7 @@
 from django import template
 
+from groupridesapp.models import ClubMembershipRequest
+
 register = template.Library()
 
 
@@ -9,10 +11,19 @@ def can_register_to_ride(user, event_occurence):
 
 
 @register.simple_tag
-def active_tab_is_selected(tab_type):
-    return tab_type == "active"
+def say_deactivate(tab_type, active):
+    return tab_type == active or active
 
 
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.simple_tag
+def contains_pending_requests(members):
+    for member in members:
+        if member["request"].status == ClubMembershipRequest.RequestStatus.Pending:
+            return True
+
+    return False

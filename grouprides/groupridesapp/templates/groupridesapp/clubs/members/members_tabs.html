@@ -14,7 +14,14 @@
     </li>
     <li class="nav-item" role="presentation">
       <a href="{% url 'club_member_management' _slug=slug club_id=club_id tab_type='requests' %}">
-        <button class="nav-link{{ tab_classes.requests }}" id="member-tab-requests" data-bs-toggle="tab" data-bs-target="#member-tab-requests-pane" type="button" role="tab" aria-controls="member-tab-requests-pane" aria-selected="false">Join Requests</button>
+        <button class="nav-link{{ tab_classes.requests }}" id="member-tab-requests" data-bs-toggle="tab" data-bs-target="#member-tab-requests-pane" type="button" role="tab" aria-controls="member-tab-requests-pane" aria-selected="false">Join Requests
+          {% if pending_count > 0 %}
+          <span class="badge rounded-pill bg-danger">
+            {{ pending_count }}
+            <span class="visually-hidden">join requests</span>
+          </span>
+          {% endif %}
+        </button>
       </a>
     </li>
   </ul>

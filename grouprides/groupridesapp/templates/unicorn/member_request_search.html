@@ -17,11 +17,14 @@
             </select>
         </div>
     </div>
-{% with pagination_items=searched_reqs.pagination_items tab_type=searched_reqs.tab_type %}
-    <table class="table table-responsive-md mt-4">
+{% with pagination_items=searched_reqs.pagination_items tab_type=searched_reqs.tab_type members_on_page=searched_reqs.members %}
+    {% contains_pending_requests members=members_on_page as page_has_pending_requests %}
+    <table class="table table-responsive-md table-hover mt-4">
         <thead>
             <tr>
-                <th scope="col" colspan="2" class="align-middle fit">Actions</th>
+                {% if page_has_pending_requests %}
+                    <th scope="col" colspan="2" class="align-middle fit">Actions</th>
+                {% endif %}
                 <th scope="col" class="align-middle">Name</th>
                 <th scope="col" class="align-middle">Request Date</th>
                 <th scope="col" class="align-middle">Status</th>
@@ -30,33 +33,35 @@
             </tr>
         </thead>
         <tbody>
-        {% for member in searched_reqs.members %}
+        {% for member in members_on_page %}
         {% with mem=member.request form=member.form %}
         {% include 'groupridesapp/clubs/members/create_membership_modal.html' %}
             <tr>
-                <td class="align-middle fit">
-                    {% if mem.status_label == "Pending" %}
-                    <span data-bs-toggle="tooltip" data-bs-title="Approve request">
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#editMemberModal-{{ mem.id }}">
-                            <i class="fa-solid fa-check fa-lg" style="color: green;"></i>
+                {% if page_has_pending_requests %}
+                    <td class="align-middle fit">
+                        {% if mem.status_label == "Pending" %}
+                        <span data-bs-toggle="tooltip" data-bs-title="Approve request">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#editMemberModal-{{ mem.id }}">
+                                <i class="fa-solid fa-check fa-lg" style="color: green;"></i>
+                            </a>
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="align-middle fit">
+                        {% if mem.status_label == "Pending" %}
+                        <a
+                            href="#"
+                            hx-post="{% url 'reject_membership_request' _slug=slug club_id=club_id membership_request_id=mem.id %}"
+                            hx-confirm="Are you sure you want to deny this membership request?"
+                            hx-target="body"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="Reject request"
+                        >
+                            <i class="fa-solid fa-x fa" style="color: red;"></i>
                         </a>
-                    </span>
-                    {% endif %}
-                </td>
-                <td class="align-middle fit">
-                    {% if mem.status_label == "Pending" %}
-                    <a
-                        href="#"
-                        hx-post="{% url 'reject_membership_request' _slug=slug club_id=club_id membership_request_id=mem.id %}"
-                        hx-confirm="Are you sure you want to deny this membership request?"
-                        hx-target="body"
-                        data-bs-toggle="tooltip"
-                        data-bs-title="Reject request"
-                    >
-                        <i class="fa-solid fa-x fa" style="color: red;"></i>
-                    </a>
-                    {% endif %}
-                </td>
+                        {% endif %}
+                    </td>
+                {% endif %}
                 <td class="align-middle">{{mem.user.last_name}}, {{mem.user.first_name}}</td>
                 <td class="align-middle">{{mem.request_date|date:"M j, Y"}}</td>
                 <td class="align-middle">{{mem.status_label}}</td>

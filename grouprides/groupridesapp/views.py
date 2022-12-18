@@ -7,7 +7,7 @@ from django.db.utils import IntegrityError
 from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership, ClubMembershipRequest
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
     CreateClubForm, CreateEventForm, CreateRouteForm, ClubMembershipForm
@@ -15,7 +15,7 @@ from .utils import days_from_today, gather_available_rides, get_filter_fields, \
     create_pagination, create_pagination_html, get_event_comments, generate_pagination, get_members_by_type
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -386,6 +386,11 @@ class ClubMemberManagement(TemplateView):
             club=club_id
         ).order_by('request_date')
 
+        pending_count = ClubMembershipRequest.objects.filter(
+            club=club_id,
+            status=ClubMembershipRequest.RequestStatus.Pending
+        ).count()
+
         members = get_members_by_type(tab_type, aqs)
         tab_classes = {'active': '', 'inactive': '', 'requests': '', tab_type: ' show active'}
 
@@ -394,6 +399,7 @@ class ClubMemberManagement(TemplateView):
                       context={
                           "members": members,
                           "reqs": reqs,
+                          "pending_count": pending_count,
                           "user": request.user,
                           "slug": slug,
                           "club_id": club_id,
@@ -439,7 +445,7 @@ class ClubMemberManagement(TemplateView):
         )
 
 
-def deactivate_membership(request, _slug, club_id, membership_id):
+def deactivate_membership(request, _slug, club_id, membership_id, tab_type):
     membership = get_object_or_404(ClubMembership, pk=membership_id)
     requestor_membership = ClubMembership.objects.get(
         club=club_id,
@@ -461,7 +467,14 @@ def deactivate_membership(request, _slug, club_id, membership_id):
         membership.save()
         messages.success(request, "Changed active status!")
 
-        return redirect(request.META['HTTP_REFERER'])
+        response = HttpResponse()
+
+        response["HX-Redirect"] = reverse("club_member_management", kwargs={
+                '_slug': _slug,
+                'club_id': club_id,
+                'tab_type': tab_type})
+
+        return response
 
 
 def reject_membership_request(request, membership_request_id, **kwargs):

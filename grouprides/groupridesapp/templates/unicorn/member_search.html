@@ -9,7 +9,7 @@
     </div>
 {% with searched_mems=searched_members %}
 {% with pagination_items=searched_mems.pagination_items tab_type=searched_mems.tab_type %}
-    <table class="table table-responsive-md mt-4">
+    <table class="table table-responsive-md table-hover mt-4">
         <thead>
             <tr>
                 <th scope="col" colspan="2" class="align-middle fit">Actions</th>
@@ -32,16 +32,16 @@
                     </span>
                 </td>
                 <td class="align-middle fit">
-                    {% active_tab_is_selected tab_type=tab_type as tab_is_active %}
+                    {% say_deactivate tab_type=tab_type active=mem.active as say_deactivate %}
                     <a
                         href="#"
-                        hx-post="{% url 'club_member_activation' _slug=slug club_id=club_id membership_id=mem.id %}"
-                        hx-confirm="Are you sure you want to {{ tab_is_active|yesno:'deactivate,activate' }} {{ mem.user.first_name }} {{ mem.user.last_name }}'s membership?"
+                        hx-post="{% url 'club_member_activation' _slug=slug club_id=club_id membership_id=mem.id tab_type=tab_type %}"
+                        hx-confirm="Are you sure you want to {{ say_deactivate|yesno:'deactivate,activate' }} {{ mem.user.first_name }} {{ mem.user.last_name }}'s membership?"
                         hx-target="body"
                         data-bs-toggle="tooltip"
-                        data-bs-title="{{ tab_is_active|yesno:'Deactivate,Activate' }} member"
+                        data-bs-title="{{ say_deactivate|yesno:'Deactivate,Activate' }} member"
                     >
-                        {% if tab_is_active %}
+                        {% if tab_type == "active" or mem.active == True %}
                             <i class="fa-solid fa-x fa" style="color: red;"></i>
                         {% else %}
                             <i class="fa-solid fa-circle-plus" style="color: green;"></i>
