@@ -11,6 +11,18 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import environ
+import os
+
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+DEBUG = env('DEBUG')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,9 +33,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-282=q7fit$4r@yq40(am26^h$^@2_laz_n1yxz20$arwkcn5fi'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -167,5 +176,5 @@ TINYMCE_DEFAULT_CONFIG = {
 AUTHENTICATION_BACKENDS = ['users.backends.EmailBackend']
 
 RECAPTCHA_PUBLIC_KEY = '6LdImaEjAAAAADRlgYmUu07upE6c1DpzEjpd1fUS'
-RECAPTCHA_PRIVATE_KEY = '6LdImaEjAAAAAK8bZZtVIhTVjjOfPKDMDr_IpgzD'
+RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_PRIVATE_KEY")
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
