@@ -26,14 +26,14 @@ $(document).ready(function() {
     }
 })
 
-var conditional_fields = $("#div_id_club");
-conditional_fields.hide();
+var conditional_fields = [$("#div_id_club")];
+conditional_fields.each(field => field.hide())
 
 $("#event_create_privacy").change(function() {
     if ($(this).val() === "5") {
-        conditional_fields.show();
+        conditional_fields[0].show();
     } else {
-        conditional_fields.hide();
+        conditional_fields[0].hide();
     }
 });
 

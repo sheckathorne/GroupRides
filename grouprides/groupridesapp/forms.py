@@ -234,11 +234,14 @@ class CreateEventForm(forms.ModelForm):
                      form_row(text_input("start_date", "event"), dropdown("time_zone", "event"), padding_bottom=2),
                      form_row(text_input("end_date", "event"), text_input("ride_time", "event"), padding_bottom=2),
                      form_row(dropdown("frequency", "event", margin_bottom=2), padding_bottom=2),
-                     form_row(InlineCheckboxes("weekdays"), padding_bottom=2), padding_bottom=2),
+                     form_row(InlineCheckboxes("weekdays", label=""), padding_bottom=4)
+                     ),
             form_row(
                 Div(StrictButton('Create Ride', value="Create Ride", type="submit", css_class="btn-primary w-100"),
                     css_class="col-md-4", ))
         )
+
+        self.fields["weekdays"].label = ''
 
     def fields_required(self, fields):
         for field in fields:
@@ -247,10 +250,19 @@ class CreateEventForm(forms.ModelForm):
                 self.add_error(field, msg)
 
     def clean(self):
+        required_fields = []
+
         private = self.cleaned_data.get('privacy')
+        frequency = self.cleaned_data.get('frequency')
 
         if private == Event.EventMemberType.Members:
-            self.fields_required(['club'])
+            required_fields.append('club')
+
+        if frequency in [Event.RecurrenceFrequency.Weekly, Event.RecurrenceFrequency.Biweekly]:
+            required_fields.append('weekdays')
+
+        if len(required_fields) > 0:
+            self.fields_required(required_fields)
 
         return self.cleaned_data
 

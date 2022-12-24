@@ -11,6 +11,7 @@ from dateutil.relativedelta import relativedelta
 from django.db.models import Q, Count
 from tinymce.models import HTMLField
 from django.core.exceptions import ValidationError
+from datetime import timedelta
 
 
 def length_of_five(value):
@@ -51,6 +52,31 @@ def membership_is_expired(expiration_date, event_date):
 def not_member_of_club(membership_exists):
     if not membership_exists:
         raise ValidationError('Must be a club member to join this event')
+
+
+def daterange(start_date, end_date):
+    # +1 on next line to be date inclusive
+    for n in range(int((end_date - start_date).days) + 1):
+        yield start_date + timedelta(n)
+
+
+def create_occurence_from_event(event, event_date):
+    EventOccurence.objects.create(
+        event=event,
+        occurence_name=event.name,
+        created_by=event.created_by,
+        privacy=event.privacy,
+        club=event.club,
+        ride_date=event_date,
+        ride_time=event.ride_time,
+        time_zone=event.time_zone,
+        max_riders=event.max_riders,
+        is_canceled=event.is_canceled,
+        route=event.route,
+        group_classification=event.group_classification,
+        lower_pace_range=event.lower_pace_range,
+        upper_pace_range=event.upper_pace_range
+    )
 
 
 class Club(models.Model):
@@ -209,7 +235,6 @@ class Event(models.Model):
         UnpaidMember = (6, "Unpaid Member")
         NonMember = (7, 'Non-Member')
 
-
     class EventMemberType(models.IntegerChoices):
         Members = (ClubMembership.MemberType.PaidMember.value, "Current Members")
         Open = (ClubMembership.MemberType.NonMember.value, "Open")
@@ -240,7 +265,7 @@ class Event(models.Model):
     def __str__(self):
         return self.name
 
-    def clean(self, *args, **kwargs):
+    def clean(self):
         six_months_from(self.start_date, self.end_date)
         upper_greater_than_lower_pace(self.lower_pace_range, self.upper_pace_range)
 
@@ -249,41 +274,18 @@ class Event(models.Model):
         self.full_clean()
         super(Event, self).save(*args, **kwargs)
         if created:
-            if self.frequency == 0:
-                EventOccurence.objects.create(
-                    event=self,
-                    occurence_name=self.name,
-                    created_by=self.created_by,
-                    privacy=self.privacy,
-                    club=self.club,
-                    ride_date=self.start_date + datetime.timedelta(days=0),
-                    ride_time=self.ride_time,
-                    time_zone=self.time_zone,
-                    max_riders=self.max_riders,
-                    is_canceled=self.is_canceled,
-                    route=self.route,
-                    group_classification=self.group_classification,
-                    lower_pace_range=self.lower_pace_range,
-                    upper_pace_range=self.upper_pace_range
-                )
+            event_freq = Event.RecurrenceFrequency(self.frequency)
+            if event_freq is self.RecurrenceFrequency.Zero:
+                event_date = self.start_date + datetime.timedelta(days=0)
+                create_occurence_from_event(self, event_date)
             else:
-                for i in range(0, (self.end_date - self.start_date).days + 1, self.frequency):
-                    EventOccurence.objects.create(
-                        event=self,
-                        occurence_name=self.name,
-                        created_by=self.created_by,
-                        privacy=self.privacy,
-                        club=self.club,
-                        ride_date=self.start_date + datetime.timedelta(days=i),
-                        ride_time=self.ride_time,
-                        time_zone=self.time_zone,
-                        max_riders=self.max_riders,
-                        is_canceled=self.is_canceled,
-                        route=self.route,
-                        group_classification=self.group_classification,
-                        lower_pace_range=self.lower_pace_range,
-                        upper_pace_range=self.upper_pace_range
-                    )
+                selected_weekdays = [int(x) for x in self.weekdays]
+                for event_date in daterange(self.start_date, self.end_date):
+                    if event_freq is self.RecurrenceFrequency.Daily:
+                        create_occurence_from_event(self, event_date)
+                    else:
+                        if event_date.weekday() in selected_weekdays:
+                            create_occurence_from_event(self, event_date)
 
 
 class EventOccurence(models.Model):

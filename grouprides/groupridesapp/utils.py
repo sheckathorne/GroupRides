@@ -36,6 +36,14 @@ def gather_available_rides(user):
     )
 
 
+def distinct_errors(errors_list):
+    new_list = []
+    for error in errors_list:
+        if error not in new_list:
+            new_list.append(error)
+
+    return new_list
+
 def generate_pagination(request, qs=None, items_per_page=10):
     paginator = Paginator(qs, items_per_page)
     page_number = request.GET.get('page') or 1

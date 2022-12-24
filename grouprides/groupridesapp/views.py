@@ -7,12 +7,13 @@ from django.db.utils import IntegrityError
 from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership, ClubMembershipRequest
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
     CreateClubForm, CreateEventForm, CreateRouteForm, ClubMembershipForm
 from .utils import days_from_today, gather_available_rides, get_filter_fields, \
-    create_pagination, create_pagination_html, get_event_comments, generate_pagination, get_members_by_type
+    create_pagination, create_pagination_html, get_event_comments, generate_pagination, get_members_by_type, \
+    distinct_errors
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
@@ -326,11 +327,12 @@ class CreateEvent(TemplateView):
                 messages.success(request, 'Successfully created your ride!')
                 return HttpResponseRedirect(reverse('my_rides'))
             else:
-                for error in list(form.errors.values()):
+                errors = distinct_errors(form.errors.values())
+                for error in errors:
                     messages.error(request, error)
 
-        form = CreateEventForm(user_clubs, user_routes, request.user, request.POST)
-        
+        form = CreateEventForm(user_clubs, user_routes, request.POST)
+
         return render(
             request=request,
             template_name="groupridesapp/events/create_event.html",
