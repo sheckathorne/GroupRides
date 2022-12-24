@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'tinymce',
     'django_filters',
     'django_unicorn',
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -162,3 +163,9 @@ TINYMCE_DEFAULT_CONFIG = {
     'theme': 'silver',
     'image_caption': True,
 }
+
+AUTHENTICATION_BACKENDS = ['users.backends.EmailBackend']
+
+RECAPTCHA_PUBLIC_KEY = '6LdImaEjAAAAADRlgYmUu07upE6c1DpzEjpd1fUS'
+RECAPTCHA_PRIVATE_KEY = '6LdImaEjAAAAAK8bZZtVIhTVjjOfPKDMDr_IpgzD'
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']

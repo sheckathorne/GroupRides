@@ -2,8 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import UserRegistrationForm
-from django.contrib.auth.forms import AuthenticationForm
+from .forms import UserRegistrationForm, UserLoginForm
 
 
 def register(request):
@@ -43,7 +42,8 @@ def custom_login(request):
         return redirect('homepage')
 
     if request.method == "POST":
-        form = AuthenticationForm(request=request, data=request.POST)
+        form = UserLoginForm(request=request, data=request.POST)
+
         if form.is_valid():
             user = authenticate(
                 username=form.cleaned_data['username'],
@@ -56,8 +56,14 @@ def custom_login(request):
             else:
                 for error in list(form.errors.values()):
                     messages.error(request, error)
+        else:
+            for key, error in list(form.errors.items()):
+                if key == 'captcha' and error[0] == 'This field is required.':
+                    messages.error(request, "You must pass the reCAPTCHA test")
+                    continue
+                messages.error(request, error)
 
-    form = AuthenticationForm()
+    form = UserLoginForm()
 
     return render(
         request=request,

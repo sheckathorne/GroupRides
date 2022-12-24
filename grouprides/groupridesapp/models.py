@@ -1,5 +1,6 @@
 import datetime
 import pytz
+from django.contrib.auth import get_user_model
 
 from django.utils import timezone
 from django.db import models
@@ -57,7 +58,7 @@ class Club(models.Model):
     zip_code = models.CharField("Zip Code", max_length=5, validators=[numeric_chars, length_of_five])
     private = models.BooleanField("Private")
     create_date = models.DateField("Date Created", auto_now_add=True)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     slug = models.SlugField()
 
     def save(self, *args, **kwargs):
@@ -86,7 +87,7 @@ class ClubMembership(models.Model):
         UnpaidMember = (6, "Unpaid Member")
         NonMember = (7, 'Non-Member')
 
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
     create_date = models.DateField("Date Joined", auto_now_add=True)
     membership_expires = models.DateField("Membership Expires")
@@ -141,8 +142,8 @@ class ClubMembershipRequest(models.Model):
         Denied = (3, 'Denied')
 
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
-    user = models.ForeignKey(CustomUser, related_name="request_user", on_delete=models.CASCADE)
-    responder = models.ForeignKey(CustomUser, related_name="response_user", blank=True, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), related_name="request_user", on_delete=models.CASCADE)
+    responder = models.ForeignKey(get_user_model(), related_name="response_user", blank=True, null=True, on_delete=models.CASCADE)
     request_date = models.DateTimeField("Request Date", auto_now_add=True)
     response_date = models.DateTimeField("Response Date", blank=True, null=True)
     status = models.IntegerField("Request Status", choices=RequestStatus.choices,
@@ -162,7 +163,7 @@ class Route(models.Model):
     url = models.CharField("Route URL", max_length=255)
     distance = models.DecimalField("Distance", max_digits=7, decimal_places=2)
     elevation = models.IntegerField("Elevation")
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     shared = models.BooleanField("Share With Club", default=False)
     club = models.ForeignKey(Club, blank=True, null=True, on_delete=models.CASCADE)
     date_created = models.DateField("Date Created", auto_now_add=True)
@@ -211,7 +212,7 @@ class Event(models.Model):
         Open = (ClubMembership.MemberType.NonMember.value, "Open")
 
     name = models.CharField("Event Name", max_length=100)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     privacy = models.IntegerField("Privacy", choices=EventMemberType.choices)
     club = models.ForeignKey(Club, on_delete=models.CASCADE,
                              blank=True, null=True, help_text="Only required if ride is private")
@@ -296,7 +297,7 @@ class EventOccurence(models.Model):
 
     event = models.ForeignKey(Event, null=True, blank=True, on_delete=models.CASCADE)
     occurence_name = models.CharField("Event Name", max_length=100)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     privacy = models.IntegerField("Privacy", choices=EventMemberType.choices)
     club = models.ForeignKey(Club, null=True, blank=True,
                              help_text="Only required if private is selected", on_delete=models.CASCADE)

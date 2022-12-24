@@ -132,6 +132,7 @@ class ClubMembershipForm(forms.ModelForm):
         self.fields['membership_expires'].disabled = member_dropdown_disabled
         self.fields["active"].disabled = member_dropdown_disabled
 
+        # When approving join rquest, set initial values in form.
         if self.membership_request_id:
             self.fields['membership_type'].initial = ClubMembership.MemberType.PaidMember
             self.fields['membership_expires'].initial = datetime.date.today() + datetime.timedelta(weeks=52)
@@ -144,6 +145,7 @@ class ClubMembershipForm(forms.ModelForm):
         new_role_type = data['membership_type']
         creator_role_type = ClubMembership.MemberType.Creator.value
 
+        # When approving join request, set the approver details when the form is submitted
         if self.membership_request_id:
             tz = pytz.timezone("America/Chicago")
             membership_request = ClubMembershipRequest.objects.get(pk=self.membership_request_id)
@@ -216,8 +218,9 @@ class CreateEventForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Fieldset('Ride Info',
-                     form_row(text_input("name", "event"), dropdown("privacy", "event")),
-                     form_row(dropdown("route", "event"), dropdown("club", "event")),
+                     form_row(text_input("name", "event")),
+                     form_row(dropdown("privacy", "event"), dropdown("club", "event")),
+                     form_row(dropdown("route", "event")),
                      form_row(text_input("max_riders", "event")),
                      css_class='mt-4'),
             Fieldset('Pace',
@@ -230,7 +233,7 @@ class CreateEventForm(forms.ModelForm):
             Fieldset('Date / Time / Recurring',
                      form_row(text_input("start_date", "event"), dropdown("time_zone", "event")),
                      form_row(text_input("end_date", "event"), text_input("ride_time", "event")),
-                     form_row(dropdown("frequency", "event")),
+                     form_row(dropdown("frequency", "event", margin_bottom=2)),
                      css_class='mt-4'),
             form_row(
                 Div(StrictButton('Create Ride', value="Create Ride", type="submit", css_class="btn-primary w-100"),
