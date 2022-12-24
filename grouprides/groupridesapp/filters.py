@@ -35,7 +35,7 @@ class RideForm(forms.ModelForm):
                              onchange="form.submit()"),
                          text_input("distance__lt", "rides", width=3, margin_bottom=2),
                          text_input("distance__gt", "rides", width=3, margin_bottom=2),
-                         bottom_margin=1),
+                         padding_bottom=1),
                          css_class="col-lg-10"),
                          Div(StrictButton(
                              'Filter',
@@ -43,7 +43,7 @@ class RideForm(forms.ModelForm):
                              type="submit",
                              css_class="btn-primary w-100 mb-2"),
                              css_class="col-lg-1 col-md-6"),
-                         bottom_margin=2,
+                         padding_bottom=2,
                          row_id="ride-filter-parent"
                      ),
                      css_class=''),)

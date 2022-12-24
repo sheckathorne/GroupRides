@@ -299,6 +299,7 @@ class CreateEvent(TemplateView):
     def post(request):
         user_routes = get_user_and_club_routes(request.user)
         user_clubs = get_user_clubs(request.user, ClubMembership.MemberType.RideLeader)
+
         if request.method == 'POST':
             form = CreateEventForm(user_clubs, user_routes, request.POST)
             if form.is_valid():
@@ -318,13 +319,18 @@ class CreateEvent(TemplateView):
                     'lower_pace_range': form['lower_pace_range'].value(),
                     'upper_pace_range': form['upper_pace_range'].value(),
                     'route': Route.objects.get(pk=form['route'].value()),
+                    'weekdays': form.cleaned_data.get('weekdays')
                 }
 
                 Event.objects.create(**data)
                 messages.success(request, 'Successfully created your ride!')
                 return HttpResponseRedirect(reverse('my_rides'))
+            else:
+                for error in list(form.errors.values()):
+                    messages.error(request, error)
 
-        form = CreateEventForm(request.user, request.POST)
+        form = CreateEventForm(user_clubs, user_routes, request.user, request.POST)
+        
         return render(
             request=request,
             template_name="groupridesapp/events/create_event.html",

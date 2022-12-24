@@ -4,7 +4,6 @@ import pytz
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import Select, ModelChoiceField
-from django.utils import timezone
 
 from .models import EventOccurenceMember, EventOccurenceMessage, \
     Club, Event, Route, ClubMembership, ClubMembershipRequest
@@ -15,7 +14,7 @@ from crispy_forms.layout import (
     Fieldset,
     Div
 )
-from crispy_forms.bootstrap import StrictButton
+from crispy_forms.bootstrap import StrictButton, InlineCheckboxes
 from django.utils.html import mark_safe
 
 
@@ -35,9 +34,9 @@ def dropdown(field_name, id_name, height=38, width=4, margin_bottom=0, onchange=
     )
 
 
-def form_row(*args, bottom_margin=3, **kwargs):
+def form_row(*args, padding_bottom=3, **kwargs):
     row_id = 'generic-row' if 'row_id' not in kwargs else kwargs['row_id']
-    return Div(*args, css_class=f"row mb-{bottom_margin},", id=row_id)
+    return Div(*args, css_class=f"row pb-{padding_bottom}", id=row_id)
 
 
 class DeleteRideRegistrationForm(forms.ModelForm):
@@ -87,7 +86,8 @@ class ClubMembershipForm(forms.ModelForm):
         self.helper.layout = Layout(
             form_row(
                 dropdown("membership_type", "member", width=12, margin_bottom=2),),
-            form_row(Div(Field("membership_expires", id=f"member_create_membership_expires"), css_class=f"col-md-12 mb-2", )),
+            form_row(Div(Field("membership_expires", id=f"member_create_membership_expires"),
+                         css_class=f"col-md-12", )),
             form_row(Div(Field("active"), css_class="mb-1")),
             Div(
                 StrictButton('Close', value="Close", type="button", css_class="btn-secondary", data_bs_dismiss="modal"),
@@ -218,23 +218,23 @@ class CreateEventForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Fieldset('Ride Info',
-                     form_row(text_input("name", "event")),
-                     form_row(dropdown("privacy", "event"), dropdown("club", "event")),
-                     form_row(dropdown("route", "event")),
-                     form_row(text_input("max_riders", "event")),
+                     form_row(text_input("name", "event"), padding_bottom=2),
+                     form_row(dropdown("privacy", "event"), dropdown("club", "event"), padding_bottom=2),
+                     form_row(dropdown("route", "event"), padding_bottom=2),
+                     form_row(text_input("max_riders", "event"), padding_bottom=2),
                      css_class='mt-4'),
             Fieldset('Pace',
                      form_row(
-                         dropdown("group_classification", "event")),
+                         dropdown("group_classification", "event"), padding_bottom=2),
                      form_row(
                          text_input("lower_pace_range", "event"),
-                         text_input("upper_pace_range", "event")),
+                         text_input("upper_pace_range", "event"), padding_bottom=2),
                      css_class='mt-4'),
             Fieldset('Date / Time / Recurring',
-                     form_row(text_input("start_date", "event"), dropdown("time_zone", "event")),
-                     form_row(text_input("end_date", "event"), text_input("ride_time", "event")),
-                     form_row(dropdown("frequency", "event", margin_bottom=2)),
-                     css_class='mt-4'),
+                     form_row(text_input("start_date", "event"), dropdown("time_zone", "event"), padding_bottom=2),
+                     form_row(text_input("end_date", "event"), text_input("ride_time", "event"), padding_bottom=2),
+                     form_row(dropdown("frequency", "event", margin_bottom=2), padding_bottom=2),
+                     form_row(InlineCheckboxes("weekdays"), padding_bottom=2), padding_bottom=2),
             form_row(
                 Div(StrictButton('Create Ride', value="Create Ride", type="submit", css_class="btn-primary w-100"),
                     css_class="col-md-4", ))

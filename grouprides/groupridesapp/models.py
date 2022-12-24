@@ -4,9 +4,11 @@ from django.contrib.auth import get_user_model
 
 from django.utils import timezone
 from django.db import models
+
+from groupridesapp.fields import ChoiceArrayField, DaysOfWeek
 from users.models import CustomUser
 from dateutil.relativedelta import relativedelta
-from django.db.models import Q, Count, F
+from django.db.models import Q, Count
 from tinymce.models import HTMLField
 from django.core.exceptions import ValidationError
 
@@ -207,6 +209,7 @@ class Event(models.Model):
         UnpaidMember = (6, "Unpaid Member")
         NonMember = (7, 'Non-Member')
 
+
     class EventMemberType(models.IntegerChoices):
         Members = (ClubMembership.MemberType.PaidMember.value, "Current Members")
         Open = (ClubMembership.MemberType.NonMember.value, "Open")
@@ -221,6 +224,12 @@ class Event(models.Model):
     ride_time = models.TimeField("Ride Time")
     time_zone = models.CharField("Time Zone", default="America/Chicago", choices=TIMEZONE_CHOICES, max_length=100)
     frequency = models.IntegerField("Recurrence", choices=RecurrenceFrequency.choices)
+    weekdays = ChoiceArrayField(
+        models.IntegerField("Weekdays", choices=DaysOfWeek.choices),
+        default=list,
+        null=True,
+        blank=True,
+    )
     max_riders = models.PositiveIntegerField("Max Riders")
     is_canceled = models.BooleanField("Canceled", default=False)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
