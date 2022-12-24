@@ -258,7 +258,7 @@ class CreateEventForm(forms.ModelForm):
         if private == Event.EventMemberType.Members:
             required_fields.append('club')
 
-        if frequency in [Event.RecurrenceFrequency.Weekly, Event.RecurrenceFrequency.Biweekly]:
+        if frequency is Event.RecurrenceFrequency.Weekly:
             required_fields.append('weekdays')
 
         if len(required_fields) > 0:

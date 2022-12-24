@@ -4,19 +4,10 @@
     {% endwith %}
     <div class="row">
         <div class="col-lg-4 col-sm-12">
-            {% with num_riders=event_occurence.number_of_riders %}
             <div class="row mb-3 d-flex align-items-center">
-                <div class="col-lg-3 col-3 d-flex justify-content-center">
-                    <i class="fa-solid fa-2xl fa-person-circle-plus{{ canceled }}"></i></div>
-                <div class="col-lg-9 col-9">
-                    <div class="progress" style="border: 1px solid gray; height: 28px;">
-                        <div class="{{ event_occurence.progress_bar_class }}" role="progressbar" style="width: {{ event_occurence.percentage_full }}%" aria-valuenow={{ num_riders }} aria-valuemin="0" aria-valuemax={{ event_occurence.max_riders }}>
-                            {{ num_riders }} / {{ event_occurence.max_riders }}
-                        </div>
-                    </div>
-                </div>
+                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-route{{ canceled }}"></i></div>
+                <div class="col-lg-9 col-9{{ canceled }}"><a class="{{ canceled }}" href="{{ event_occurence.route.url }}" target="_blank">{{ event_occurence.route.name }}</a></div>
             </div>
-            {% endwith %}
             <div class="row mb-3 d-flex align-items-center">
                 {% if event_occurence.is_canceled %}
                 <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-gauge-high canceled"></i></div>
@@ -43,10 +34,20 @@
                 <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-location-dot{{ canceled }}"></i></div>
                 <div class="col-lg-9 col-9{{ canceled }}">{{ event_occurence.route.start_location_name }}</div>
             </div>
+            {% with num_riders=event_occurence.number_of_riders %}
             <div class="row mb-3 d-flex align-items-center">
-                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-route{{ canceled }}"></i></div>
-                <div class="col-lg-9 col-9{{ canceled }}"><a class="{{ canceled }}" href="{{ event_occurence.route.url }}" target="_blank">{{ event_occurence.route.name }}</a></div>
+                <div class="col-lg-3 col-3 d-flex justify-content-center">
+                    <i class="fa-solid fa-2xl fa-person-circle-plus{{ canceled }}"></i>
+                </div>
+                <div class="col-lg-9 col-9">
+                    <div class="progress" style="border: 1px solid gray; height: 28px;">
+                        <div class="{{ event_occurence.progress_bar_class }}" role="progressbar" style="width: {{ event_occurence.percentage_full }}%" aria-valuenow={{ num_riders }} aria-valuemin="0" aria-valuemax={{ event_occurence.max_riders }}>
+                            {{ num_riders }} / {{ event_occurence.max_riders }}
+                        </div>
+                    </div>
+                </div>
             </div>
+            {% endwith %}
         </div>
     </div>
 </div>

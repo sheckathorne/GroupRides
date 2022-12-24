@@ -41,7 +41,7 @@
             </div>
             <div class="col">
                 <span>
-                    {{ event_occurence.ride_date|date:"M d, Y" }} - {{ event_occurence.ride_time|time:"g:i A" }} {{ event_occurence.time_until_ride }}
+                    {{ event_occurence.ride_date|date:"l - M d, Y" }} - {{ event_occurence.ride_time|time:"g:i A" }} {{ event_occurence.time_until_ride }}
                 </span>
                 {% if ride_is_canceled %}
                 <span class="badge rounded-pill bg-danger">

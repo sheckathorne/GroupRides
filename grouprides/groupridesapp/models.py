@@ -79,6 +79,15 @@ def create_occurence_from_event(event, event_date):
     )
 
 
+def create_occurences_by_frequency(event, event_freq):
+    selected_weekdays = [int(x) for x in event.weekdays]
+    for event_date in daterange(event.start_date, event.end_date):
+        if event_freq is event.RecurrenceFrequency.Daily:
+            create_occurence_from_event(event, event_date)
+        elif event_freq is event.RecurrenceFrequency.Weekly and event_date.weekday() in selected_weekdays:
+            create_occurence_from_event(event, event_date)
+
+
 class Club(models.Model):
     name = models.CharField("Name", max_length=255)
     web_url = models.CharField("Website", max_length=255)
@@ -216,7 +225,6 @@ class Event(models.Model):
         Zero = (0, "None")
         Daily = (1, "Daily")
         Weekly = (7, "Weekly")
-        Biweekly = (14, "Bi-Weekly")
 
     class GroupClassification(models.TextChoices):
         A = ("A", "A")
@@ -279,13 +287,7 @@ class Event(models.Model):
                 event_date = self.start_date + datetime.timedelta(days=0)
                 create_occurence_from_event(self, event_date)
             else:
-                selected_weekdays = [int(x) for x in self.weekdays]
-                for event_date in daterange(self.start_date, self.end_date):
-                    if event_freq is self.RecurrenceFrequency.Daily:
-                        create_occurence_from_event(self, event_date)
-                    else:
-                        if event_date.weekday() in selected_weekdays:
-                            create_occurence_from_event(self, event_date)
+                create_occurences_by_frequency(self, event_freq)
 
 
 class EventOccurence(models.Model):
