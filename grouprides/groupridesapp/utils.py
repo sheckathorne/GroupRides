@@ -136,11 +136,10 @@ def remove_page_from_url(full_path):
         return full_path[:full_path.find('page') - 1]
 
 
-def filter_club(queryset, _club, value):
-    return queryset.filter(club=value.id)
-
-
 def get_filter_fields(qs, table_prefix):
+    def filter_club(queryset, _club, value):
+        return queryset.filter(**{F"{table_prefix}club": value.id})
+
     clubs_queryset = Club.objects.filter(pk__in=qs.values(f"{table_prefix}club")).distinct()
     classification_choices = EventOccurence.GroupClassification.choices
     available_choices = qs.values_list(f"{table_prefix}group_classification", flat=True)
@@ -191,7 +190,6 @@ def get_filter_fields(qs, table_prefix):
 def create_pagination(f, table_prefix, page_number):
     paginator = Paginator(f.qs.order_by(f"{table_prefix}ride_date", f"{table_prefix}ride_time"), 4)
     page_obj = paginator.get_page(page_number)
-
     return page_obj
 
 

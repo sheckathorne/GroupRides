@@ -379,7 +379,10 @@ class EventOccurence(models.Model):
                 Q(privacy=EventOccurence.EventMemberType.Members),
                 Q(club__in=ClubMembership.objects.filter(
                     user=user,
-                    membership_type__lte=EventOccurence.EventMemberType.Members.value).values('club'))
+                    membership_type__lte=EventOccurence.EventMemberType.Members.value,
+                    membership_expires__gte=self.ride_date,
+                    active=True,
+                ).values('club'))
             ) |
             Q(
                 Q(privacy=EventOccurence.EventMemberType.Open),

@@ -23,17 +23,17 @@
                         {% include 'groupridesapp/rides/ride_card/discussion_menu_item.html' %}
                         <li><a class="dropdown-item" href="{% url 'ride_attendees' ride.id %}">View Attendees</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item link-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ ride.id }}">Cancel Registration</a></li>
+                        <li><a class="dropdown-item link-danger" href="#" data-bs-toggle="modal" data-bs-target="#leaveRideModal" data-bs-rideId="{{ ride.id }}">Cancel Registration</a></li>
                     </div>
                     {% endwith %}
                 </div>
                 {% else %}
                     {% if user_can_register %}
-                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createModal-{{ event_occurence.id }}">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#joinRideModal" data-bs-occurenceid="{{ event_occurence.id }}">
                             <i class="bi bi-plus-lg"></i>
                         </button>
                     {% else %}
-                        <button type="button" class="btn btn-secondary" disabled>
+                        <button type="button" class="btn btn-secondary no-hover" data-bs-toggle="modal" data-bs-target="#cannotJoinModal" >
                             <i class="bi bi-plus-lg"></i>
                         </button>
                     {% endif %}

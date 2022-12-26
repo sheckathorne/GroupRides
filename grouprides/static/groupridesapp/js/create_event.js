@@ -5,6 +5,35 @@ function showHelpText(el, url) {
 
 }
 
+function hideOrShowFields(arr, action) {
+    if ( action === "hide" ) {
+        arr.forEach(item => {
+            item.field.hide()
+        })
+    } else if ( action === "show") {
+        arr.forEach(item => {
+            item.field.show()
+        })
+    }
+}
+
+function hideOrShowOneField(arr, fieldName, action) {
+    item = arr.find(item => item.name === fieldName)
+
+    if ( action === "hide" ) {
+        item.field.hide()
+    } else if ( action === "show") {
+        item.field.show()
+    }
+}
+
+var conditional_fields = [
+    { name: "club", field: $("#div_id_club") },
+    { name: "weekdays", field: $('#div_id_weekdays') }
+];
+
+hideOrShowFields(conditional_fields, "hide");
+
 $(document).ready(function() {
     var option = $('#event_create_route').find(':selected');
     var url = option.data('url');
@@ -19,21 +48,32 @@ $(document).ready(function() {
     }
 
 
-    if ($("#event_create_privacy").val() === "5") {
-        conditional_fields.show();
+    if ( $("#event_create_privacy").val() === "5" ) {
+        hideOrShowOneField(conditional_fields, "club", "show");
     } else {
-        conditional_fields.hide();
+        hideOrShowOneField(conditional_fields, "club", "hide");
+    }
+
+    if ( ["7","14"].includes($("#event_create_frequency").val()) ) {
+        hideOrShowOneField(conditional_fields, "weekdays", "show");
+    } else {
+        hideOrShowOneField(conditional_fields, "weekdays", "hide");
     }
 })
 
-var conditional_fields = [$("#div_id_club")];
-conditional_fields.each(field => field.hide())
-
 $("#event_create_privacy").change(function() {
     if ($(this).val() === "5") {
-        conditional_fields[0].show();
+        hideOrShowOneField(conditional_fields, "club", "show");
     } else {
-        conditional_fields[0].hide();
+        hideOrShowOneField(conditional_fields, "club", "hide");
+    }
+});
+
+$("#event_create_frequency").change(function() {
+    if (["7", "14"].includes($(this).val())) {
+        hideOrShowOneField(conditional_fields, "weekdays", "show");
+    } else {
+        hideOrShowOneField(conditional_fields, "weekdays", "hide");
     }
 });
 

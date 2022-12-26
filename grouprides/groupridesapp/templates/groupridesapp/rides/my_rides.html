@@ -5,12 +5,31 @@
 <form method="get">
     {% crispy form %}
 </form>
+<div class="modal fade" id="leaveRideModal" tabindex="-1" aria-labelledby="leaveRideModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="leaveRideModalLabel">Cancel Reservation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel your registration for this ride?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <form id="leaveRideForm" method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirm</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% if my_upcoming_rides.paginator.num_pages > 1 %}
     {% include 'groupridesapp/pagination.html' %}
 {% endif %}
 {% for ride in my_upcoming_rides %}
     {% with event_occurence=ride.event_occurence %}
-        {% include 'groupridesapp/rides/ride_card/delete_confirm_modal.html' %}
         {% include 'groupridesapp/rides/ride_card/ride_card.html' with is_registered=True user=user %}
     {% endwith %}
 {% empty %}
@@ -19,5 +38,7 @@
 {% if my_upcoming_rides.paginator.num_pages > 1 %}
     {% include 'groupridesapp/pagination.html' %}
 {% endif %}
+
 <script src="{% static 'groupridesapp/js/filter_rides.js' %}"></script>
+<script src="{% static 'groupridesapp/js/join_leave_ride.js' %}"></script>
 {% endblock content %}
