@@ -24,13 +24,13 @@ from django.utils.text import slugify
 
 @login_required(login_url='/login')
 def homepage(request):
-    items = [str(x) for x in range(1, 20)]
+    items = [str(x) for x in range(1, 21)]
 
     url = remove_page_from_url(request.get_full_path())
     paginator = CustomPaginator(items, 1)
     page_num = request.GET.get('page', 1)
     display_items = paginator.page(page_num)
-    page_items = paginator.get_elided_page_range(page_num, on_each_side=3, on_ends=2)
+    page_items = paginator.get_elided_page_range(page_num, on_each_side=2, on_ends=1)
 
     x = 0
     items = []
