@@ -1,11 +1,14 @@
 {% extends "groupridesapp/header.html" %}
 {% block content %}
     <div class="card border-primary mt-2">
-        <h5 class="card-header bg-primary bg-gradient text-light">My Clubs</h5>
-        {% for club in my_clubs %}
-            <div class="card-body">
-                <h6 class="card-title">{{ club.name }}</h6>
-            </div>
+        <ul>
+        {% for item in display_items %}
+            <li>{{ item }}</li>
         {% endfor %}
+        </ul>
     </div>
+<h1>node count: {{ node_count }}</h1>
+{% if display_items.paginator.num_pages > 1 %}
+    {% include 'groupridesapp/pagination.html' %}
+{% endif %}
 {% endblock content %}

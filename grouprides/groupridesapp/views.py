@@ -11,9 +11,10 @@ from django.db.models import Q
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
     CreateClubForm, CreateEventForm, CreateRouteForm, ClubMembershipForm
+from .paginators import CustomPaginator
 from .utils import days_from_today, gather_available_rides, get_filter_fields, \
     create_pagination, create_pagination_html, get_event_comments, generate_pagination, get_members_by_type, \
-    distinct_errors
+    distinct_errors, remove_page_from_url, bootstrap_pagination
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
@@ -23,15 +24,28 @@ from django.utils.text import slugify
 
 @login_required(login_url='/login')
 def homepage(request):
-    homepage_clubs = Club.objects.filter(
-        clubmembership__user=request.user
-    )
+    items = [str(x) for x in range(1, 20)]
+
+    url = remove_page_from_url(request.get_full_path())
+    paginator = CustomPaginator(items, 1)
+    page_num = request.GET.get('page', 1)
+    display_items = paginator.page(page_num)
+    page_items = paginator.get_elided_page_range(page_num, on_each_side=3, on_ends=2)
+
+    x = 0
+    items = []
+    for item in page_items:
+        items.append(item)
+        x = x + 1
+
+    bootstrap_items = bootstrap_pagination(items, page_num, paginator.num_pages, current_url=url)
 
     return render(request=request,
                   template_name="groupridesapp/home.html",
                   context={
-                      "my_clubs": homepage_clubs,
-                      "user": request.user
+                      "pagination_items": bootstrap_items,
+                      "display_items": display_items,
+                      "node_count": x
                   })
 
 

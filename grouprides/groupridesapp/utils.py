@@ -1,4 +1,6 @@
 import datetime
+
+from django.core import paginator
 from django.utils import timezone
 import django_filters
 from django.core.paginator import Paginator
@@ -44,6 +46,7 @@ def distinct_errors(errors_list):
 
     return new_list
 
+
 def generate_pagination(request, qs=None, items_per_page=10):
     paginator = Paginator(qs, items_per_page)
     page_number = request.GET.get('page') or 1
@@ -60,6 +63,45 @@ def generate_pagination(request, qs=None, items_per_page=10):
         )
 
     return {"page_obj": page_obj, "pagination_items": pagination_items}
+
+
+def bootstrap_pagination(pagination_list, page, page_count, current_url=""):
+    pagination_items = list()
+    active_page = int(page)
+
+    prev_page = 1 if active_page == 1 else active_page - 1
+    prev_disabled = " disabled" if active_page == 1 else ""
+    next_page = page_count if active_page == page_count else active_page + 1
+    next_disabled = " disabled" if active_page == page_count else ""
+
+    qm_index = current_url.find("?")
+    query = "?"
+
+    if qm_index > 0:
+        query = query + current_url[qm_index + 1:] + "&"
+
+    prev_button = f"<li class=\"page-item{prev_disabled}\">" \
+                  f"<a class=\"page-link\" href=\"{query}page={prev_page}\">&laquo;</a></li>"
+
+    pagination_items.append(prev_button)
+
+    for item in pagination_list:
+        if item == Paginator.ELLIPSIS:
+            ellipses = f"<li class=\"page-item\"><a class=\"page-link\" href=\"#\">...</a></li>"
+            pagination_items.append(ellipses)
+        else:
+            active = " active" if item == active_page else ""
+            num_button = f"<li class=\"page-item{active}\">" \
+                         f"<a class=\"page-link\" href=\"{query}page={item}\">{item}</a>" \
+                         f"</li>"
+            pagination_items.append(num_button)
+
+    next_button = f"<li class=\"page-item{next_disabled}\">" \
+                  f"<a class=\"page-link\" href=\"{query}page={next_page}\">&raquo;</a></li>"
+
+    pagination_items.append(next_button)
+
+    return pagination_items
 
 
 def generate_pagination_items(page_count=1, active_page=1, delta=2, current_url=""):
@@ -84,20 +126,19 @@ def generate_pagination_items(page_count=1, active_page=1, delta=2, current_url=
     qm_index = current_url.find("?")
     query = "?"
 
+    prev_button = f"<li class=\"page-item{prev_disabled}\">" \
+                  f"<a class=\"page-link\" href=\"{query}page={prev_page}\">&laquo;</a></li>"
+
+    next_button = f"<li class=\"page-item{next_disabled}\">" \
+                  f"<a class=\"page-link\" href=\"{query}page={next_page}\">&raquo;</a></li>"
+
+    ellipses = f"<li class=\"page-item\"><a class=\"page-link\" href=\"#\">...</a></li>"
+
     if qm_index > 0:
         query = query + current_url[qm_index + 1:] + "&"
 
     for i in range(0, page_count + 2):
         active = " active" if i == active_page else ""
-
-        prev_button = f"<li class=\"page-item{ prev_disabled }\">" \
-                      f"<a class=\"page-link\" href=\"{query}page={prev_page}\">&laquo;</a></li>"
-
-        next_button = f"<li class=\"page-item{ next_disabled }\">" \
-                      f"<a class=\"page-link\" href=\"{query}page={next_page}\">&raquo;</a></li>"
-
-        ellipses = f"<li class=\"page-item\"><a class=\"page-link\" href=\"#\">...</a></li>"
-
         num_button = f"<li class=\"page-item{ active }\"><a class=\"page-link\" href=\"{query}page={i}\">{i}</a></li>"
 
         if i == 0:
