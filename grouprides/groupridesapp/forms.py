@@ -30,7 +30,8 @@ def dropdown(field_name, id_name, height=38, width=4, margin_bottom=0, onchange=
             css_class="w-100",
             style=f"height: {height}px;",
             onchange=onchange,),
-        css_class=f"col-md-{width} mb-{margin_bottom}"
+        css_class=f"col-md-{width} mb-{margin_bottom}",
+        id=f"div-{id_name}_create_{field_name}",
     )
 
 

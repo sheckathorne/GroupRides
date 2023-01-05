@@ -54,6 +54,8 @@ $(document).ready(function() {
         hideOrShowOneField(conditional_fields, "club", "hide");
     }
 
+    console.log($("#event_create_frequency").val())
+
     if ( ["7","14"].includes($("#event_create_frequency").val()) ) {
         hideOrShowOneField(conditional_fields, "weekdays", "show");
     } else {

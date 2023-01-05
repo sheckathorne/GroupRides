@@ -48,13 +48,13 @@ $(document).ready(function() {
     }
 
 
-    if ( $("#event_create_privacy").val() === "5" ) {
+    if ( $("#event_create_privacy").find("div > select").val() === "5" ) {
         hideOrShowOneField(conditional_fields, "club", "show");
     } else {
         hideOrShowOneField(conditional_fields, "club", "hide");
     }
 
-    if ( ["7","14"].includes($("#event_create_frequency").val()) ) {
+    if ( ["7","14"].includes($("#event_create_frequency").find("div > select").val()) ) {
         hideOrShowOneField(conditional_fields, "weekdays", "show");
     } else {
         hideOrShowOneField(conditional_fields, "weekdays", "hide");
@@ -62,7 +62,9 @@ $(document).ready(function() {
 })
 
 $("#event_create_privacy").change(function() {
-    if ($(this).val() === "5") {
+    const select = $(this).find("div > select")
+
+    if (select.val() === "5") {
         hideOrShowOneField(conditional_fields, "club", "show");
     } else {
         hideOrShowOneField(conditional_fields, "club", "hide");
@@ -70,7 +72,9 @@ $("#event_create_privacy").change(function() {
 });
 
 $("#event_create_frequency").change(function() {
-    if (["7", "14"].includes($(this).val())) {
+    const select = $(this).find("div > select")
+
+    if (["7", "14"].includes(select.val())) {
         hideOrShowOneField(conditional_fields, "weekdays", "show");
     } else {
         hideOrShowOneField(conditional_fields, "weekdays", "hide");
