@@ -4,15 +4,14 @@
     <div class="content-section">
         <form method="POST">
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Log In</legend>
                     {% crispy form %}
             </fieldset>
         </form>
         <div class="border-top pt-3">
             <small class="text-muted">
-                Need An Account? <a class="ml-2" href="{% url 'register' %}">Sign Up Now</a>
+                Need An Account? <a class="ml-2 text-blue-700 underline" href="{% url 'register' %}">Sign Up Now</a>
             </small><br>
-            <small class="text-muted">
+            <small class="text-muted text-blue-700 underline">
                 <a href="/">Forgot password?</a>
             </small>
         </div>

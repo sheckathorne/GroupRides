@@ -1,3 +1,3 @@
 setTimeout(function () {
-    $('.message-alert').alert('close');
+    $('.message-alert').hide()
 }, 5000);
