@@ -1,7 +1,5 @@
-<nav aria-label="Page navigation example">
-    <ul class="pagination">
-        {% for item in pagination_items %}
-            {{ item|safe }}
-        {% endfor %}
-    </ul>
-</nav>
+<div class="flex items-center space-x-1 w-full mb-2">
+    {% for item in pagination_items %}
+        {{ item }}
+    {% endfor %}
+</div>

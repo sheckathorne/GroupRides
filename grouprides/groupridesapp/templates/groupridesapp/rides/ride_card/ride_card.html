@@ -1,71 +1,78 @@
 {% with ride_is_canceled=event_occurence.is_canceled canceled=event_occurence.is_canceled|yesno:" canceled,," %}
-<div class="card mb-3 border-dark">
-    <h6 class="card-header{{ canceled }}">
-        <div class="row d-flex align-items-center">
-            <div class="col-auto">
-                {% if is_registered %}
-                <div class="btn-group dropleft">
-                    {% load groupridesapp_extras %}
-                    {% with new_message_count=ride.comments|get_item:"new" %}
-                    {% if new_message_count > 0 %}
-                        <button type="button" class="btn btn-outline-dark dropdown-toggle no-dropdown-arrow" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-bars fa-xl"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle" style="font-size: .5em;">
-                                <span class="visually-hidden">New alerts</span>
-                            </span>
-                        </button>
-                    {% else %}
-                        <button type="button" class="btn btn-outline-dark dropdown-toggle no-dropdown-arrow" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-bars fa-xl"></i>
-                        </button>
-                    {% endif %}
-                    <div class="dropdown-menu">
-                        {% include 'groupridesapp/rides/ride_card/discussion_menu_item.html' %}
-                        <li><a class="dropdown-item" href="{% url 'ride_attendees' ride.id %}">View Attendees</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item link-danger" href="#" data-bs-toggle="modal" data-bs-target="#leaveRideModal" data-bs-rideId="{{ ride.id }}">Cancel Registration</a></li>
-                    </div>
-                    {% endwith %}
-                </div>
-                {% else %}
-                    {% if user_can_register %}
-                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#joinRideModal" data-bs-occurenceid="{{ event_occurence.id }}">
-                            <i class="bi bi-plus-lg"></i>
-                        </button>
-                    {% else %}
-                        <button type="button" class="btn btn-secondary no-hover" data-bs-toggle="modal" data-bs-target="#cannotJoinModal" >
-                            <i class="bi bi-plus-lg"></i>
-                        </button>
-                    {% endif %}
-                {% endif %}
+<div class="2xl:w-3/6 xl:w-5/6 sm:w-full w-full">
+  <div class="relative mb-4 rounded-lg bg-white shadow-lg">
+    <!-- row -->
+      <div class="flex flex-row items-center rounded-t-lg py-2 pl-4 pr-2 bg-blue-200 text-gray-700">
+        <div class="pr-4">
+          {% if is_registered %}
+            {% load groupridesapp_extras %}
+            {% with new_message_count=ride.comments|get_item:"new" %}
+            {% if new_message_count > 0 %}
+              <button type="button" data-dropdown-toggle="dropdown-{{ride.id}}">
+                <span class="relative inline-block">
+                  <i class="fa-solid fa-bars fa-xl hover:text-white"></i>
+                  <span class="absolute top-0 right-0 inline-block w-3 h-3 transform translate-x-1/2 -translate-y-1/3 bg-red-600 rounded-full"></span>
+                </span>
+                <!-- https://tailwind-starter-kit.vercel.app/docs/badges -->
+              </button>
+            {% else %}
+              <button type="button" data-dropdown-toggle="dropdown-{{ride.id}}">
+                <span class="relative inline-block">
+                  <i class="fa-solid fa-bars fa-xl hover:text-white"></i>
+                </span>
+              </button>
+            {% endif %}
+            <!-- dropdown menu -->
+            <div id="dropdown-{{ride.id}}" class="z-10 hidden bg-white divide-y divide-gray-100 rounded shadow w-44 dark:bg-gray-700">
+                <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                    {% include 'groupridesapp/rides/ride_card/discussion_menu_item.html' %}
+                  <li>
+                    <a href="{% url 'ride_attendees' ride.id %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">View Attendees</a>
+                  </li>
+                </ul>
+                  <div class="py-1">
+                    <a href="#" onClick="leaveRideClick(this)" data-bs-rideId="{{ ride.id }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-red-400">Cancel Registration</a>
+                  </div>
             </div>
-            <div class="col">
-                <span>
-                    {{ event_occurence.ride_date|date:"l - M d, Y" }} - {{ event_occurence.ride_time|time:"g:i A" }} {{ event_occurence.time_until_ride }}
-                </span>
-                {% if ride_is_canceled %}
-                <span class="badge rounded-pill bg-danger">
-                    <span class="visually-hidden"></span>
-                    Ride Canceled
-                </span>
-                {% else %}
-                {% with bgclass=event_occurence.is_private|yesno:"bg-primary,bg-success" %}
-                <span class="badge rounded-pill {{ bgclass }}">
-                {% endwith %}
-                    {{ event_occurence.is_private|yesno:"Private Ride,Open Ride"}}
-                    <span class="visually-hidden">{{ event_occurence.is_private|yesno:"Private Ride,Open Ride"}}</span>
-                </span>
-                {% endif %}
-            </div>
+            <!-- end dropdown -->
+            {% endwith %}
+          {% else %}
+            {% if user_can_register %}
+                <button type="button" onClick="joinRideClick(this)" class="rounded-lg text-white bg-green-500 hover:bg-green-300 hover:text-gray-700 px-2 py-1 font-sans font-semibold text-xs" data-bs-rideid="{{ event_occurence.id }}">
+                    Join
+                </button>
+            {% else %}
+                <button type="button" class="rounded-lg text-white bg-gray-400 px-2 py-1 font-sans font-semibold text-xs" data-bs-toggle="modal" data-modal-target="cannotJoinModal" data-modal-show="cannotJoinModal">
+                  Join
+                </button>
+            {% endif %}
+          {% endif %}
         </div>
-    </h6>
-    {% include 'groupridesapp/rides/ride_card/ride_card_body.html' %}
-    <div class="card-footer">
-        {% if event_occurence.club is not None %}
-            <small class="fw-bold">{{ event_occurence.club.name}}</small>
-        {% else %}
-            <small class="fw-bold">No club affiliation</small>
-        {% endif %}
-    </div>
+        <div>
+          <p class="align-middle">{{ event_occurence.ride_date|date:"l, M j, Y" }} - {{ event_occurence.ride_time|time:"g:i A" }} {{ event_occurence.time_until_ride }}
+            {% if ride_is_canceled %}
+              {% include 'groupridesapp/includes/pill_button.html' with color='bg-red-600' label='Canceled' %}
+            {% else %}
+              {% if event_occurence.is_private %}
+                {% include 'groupridesapp/includes/pill_button.html' with color='bg-blue-600' label='Private Ride' %}
+              {% else %}
+                {% include 'groupridesapp/includes/pill_button.html' with color='bg-green-600' label='Open Ride' %}
+              {% endif %}
+            {% endif %}
+          <p>
+        </div>
+      </div>
+      {% include 'groupridesapp/rides/ride_card/ride_card_body.html' %}
+      <!-- CARD FOOTER -->
+      <div class="flex flex-row rounded-b-lg pl-4 pr-2 pb-1 bg-white border-t border-gray-400 text-gray-700">
+        <div class="pr-4">
+          {% if event_occurence.club is not None %}
+              <small class="fw-bold">{{ event_occurence.club.name}}</small>
+          {% else %}
+              <small class="fw-bold">No club affiliation</small>
+          {% endif %}
+        </div>
+      </div>
+  </div>
 </div>
 {% endwith %}

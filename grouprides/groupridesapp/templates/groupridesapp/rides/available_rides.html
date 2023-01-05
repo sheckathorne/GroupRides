@@ -3,57 +3,25 @@
 {% block content %}
 {% load groupridesapp_extras %}
 {% load crispy_forms_tags %}
-<form method="get">
-    {% crispy form %}
-</form>
-<div class="modal fade" id="cannotJoinModal" tabindex="-1" aria-labelledby="cannotJoinModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <i class="fa-solid fa-xl fa-circle-exclamation fa-fw" style="color: red;"></i>
-                <h1 class="modal-title fs-5 pl-2" id="cannotJoinModalLabel">Cannot Join</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Some things to check:<br><br>
-                Does your <a href='{% url "my_clubs" %}'>membership expire before the ride, or is it currently inactive?</a><br><br>
-                Is the ride open only to paying members?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
+<div class="w-full">
+    <form method="get">
+        {% crispy form %}
+    </form>
 </div>
-<div class="modal fade" id="joinRideModal" tabindex="-1" aria-labelledby="joinRideModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="joinRideModalLabel">Confirm Reservation</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to register for this ride?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <form id="joinRideForm" method="post" action="">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-primary">Confirm</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+{% include 'groupridesapp/rides/modals/leave_ride.html' %}
+{% include 'groupridesapp/rides/modals/cannot_join.html' %}
+{% include 'groupridesapp/rides/modals/join_ride.html' %}
 {% if event_occurences.paginator.num_pages > 1 %}
     {% include 'groupridesapp/pagination.html' %}
 {% endif %}
+<div class="grid flex-grid grid-cols-1 w-full gap-2">
 {% for event_occurence in event_occurences %}
     {% can_register_to_ride user=user event_occurence=event_occurence as user_can_register %}
     {% include 'groupridesapp/rides/ride_card/ride_card.html' with event_occurence=event_occurence is_registered=False %}
 {% empty %}
     No rides available for you to join
 {% endfor %}
+</div>
 {% if event_occurences.paginator.num_pages > 1 %}
     {% include 'groupridesapp/pagination.html' %}
 {% endif %}

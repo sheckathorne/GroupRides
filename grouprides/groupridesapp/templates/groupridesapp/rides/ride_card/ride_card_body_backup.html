@@ -1,0 +1,53 @@
+<div class="card-body">
+    {% with yesno_args=event_occurence.ride_leader_name|add:", no one" %}
+    <h6 class="card-title{{ canceled }}">{{ event_occurence.occurence_name }} led by {{ event_occurence.ride_leader_name|yesno:yesno_args }}</h6>
+    {% endwith %}
+    <div class="row">
+        <div class="col-lg-4 col-sm-12">
+            <div class="row mb-3 d-flex align-items-center">
+                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-route{{ canceled }}"></i></div>
+                <div class="col-lg-9 col-9{{ canceled }}"><a class="{{ canceled }}" href="{{ event_occurence.route.url }}" target="_blank">{{ event_occurence.route.name }}</a></div>
+            </div>
+            <div class="row mb-3 d-flex align-items-center">
+                {% if event_occurence.is_canceled %}
+                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-gauge-high canceled"></i></div>
+                {% else %}
+                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-gauge-high group-class-{{ event_occurence.group_classification_name }}"></i></div>
+                {% endif %}
+                <div class="col-lg-9 col-9"><span class="fw-bolder{{ canceled }}">{{ event_occurence.group_classification_name }} / {{ event_occurence.lower_pace_range }} - {{ event_occurence.upper_pace_range }}mph</span></div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-sm-12">
+            {% with distance=event_occurence.route.distance %}
+            <div class="row mb-3 d-flex align-items-center">
+                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-ruler-horizontal{{ canceled }}"></i></div>
+                <div class="col-lg-9 col-9{{ canceled }}">{{ distance }} mile{{ distance|pluralize }}</div>
+            </div>
+            {% endwith %}
+            <div class="row mb-3 d-flex align-items-center">
+                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-mountain{{ canceled }}"></i></div>
+                <div class="col-lg-9 col-9{{ canceled }}">{{ event_occurence.route.elevation }}ft</div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-sm-12">
+            <div class="row mb-3 d-flex align-items-center">
+                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-location-dot{{ canceled }}"></i></div>
+                <div class="col-lg-9 col-9{{ canceled }}">{{ event_occurence.route.start_location_name }}</div>
+            </div>
+            {% with num_riders=event_occurence.number_of_riders %}
+            <div class="row mb-3 d-flex align-items-center">
+                <div class="col-lg-3 col-3 d-flex justify-content-center">
+                    <i class="fa-solid fa-2xl fa-person-circle-plus{{ canceled }}"></i>
+                </div>
+                <div class="col-lg-9 col-9">
+                    <div class="progress" style="border: 1px solid gray; height: 28px;">
+                        <div class="{{ event_occurence.progress_bar_class }}" role="progressbar" style="width: {{ event_occurence.percentage_full }}%" aria-valuenow={{ num_riders }} aria-valuemin="0" aria-valuemax={{ event_occurence.max_riders }}>
+                            {{ num_riders }} / {{ event_occurence.max_riders }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+        </div>
+    </div>
+</div>

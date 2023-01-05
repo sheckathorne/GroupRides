@@ -8,13 +8,13 @@ from .filters import RideFilter
 from .models import Club, EventOccurence, EventOccurenceMember, \
     EventOccurenceMessage, EventOccurenceMessageVisit, Event, Route, ClubMembership, ClubMembershipRequest
 from django.db.models import Q
-from django.urls import reverse
+from django.urls import reverse, resolve
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
     CreateClubForm, CreateEventForm, CreateRouteForm, ClubMembershipForm
 from .paginators import CustomPaginator
 from .utils import days_from_today, gather_available_rides, get_filter_fields, \
     create_pagination, create_pagination_html, get_event_comments, generate_pagination, get_members_by_type, \
-    distinct_errors, remove_page_from_url, bootstrap_pagination
+    distinct_errors, remove_page_from_url
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
@@ -26,26 +26,19 @@ from django.utils.text import slugify
 def homepage(request):
     items = [str(x) for x in range(1, 21)]
 
-    url = remove_page_from_url(request.get_full_path())
-    paginator = CustomPaginator(items, 1)
-    page_num = request.GET.get('page', 1)
-    display_items = paginator.page(page_num)
-    page_items = paginator.get_elided_page_range(page_num, on_each_side=2, on_ends=1)
-
-    x = 0
-    items = []
-    for item in page_items:
-        items.append(item)
-        x = x + 1
-
-    bootstrap_items = bootstrap_pagination(items, page_num, paginator.num_pages, current_url=url)
+    pagination = CustomPaginator(
+        request,
+        items,
+        1,
+        on_each_side=2,
+        on_ends=1
+    )
 
     return render(request=request,
                   template_name="groupridesapp/home.html",
                   context={
-                      "pagination_items": bootstrap_items,
-                      "display_items": display_items,
-                      "node_count": x
+                      "pagination_items": pagination.html_list,
+                      "display_items": pagination.item_list
                   })
 
 
@@ -76,22 +69,30 @@ def my_rides(request):
     f = RideFilter(
         request.GET,
         queryset=my_upcoming_rides,
-        filter_fields=get_filter_fields(my_upcoming_rides, TABLE_PREFIX)
+        filter_fields=get_filter_fields(my_upcoming_rides, TABLE_PREFIX),
     )
 
-    page_number = request.GET.get('page') or 1
-    page_obj = create_pagination(f, TABLE_PREFIX, page_number)
-    pagination_items = create_pagination_html(request, page_obj, page_number)
+    ride_queryset = f.qs.order_by(f"{TABLE_PREFIX}ride_date", f"{TABLE_PREFIX}ride_time")
 
-    for ride in page_obj:
+    pagination = CustomPaginator(
+        request,
+        ride_queryset,
+        4,
+        on_each_side=2,
+        on_ends=1
+    )
+
+    item_list = pagination.item_list
+
+    for ride in item_list:
         ride.comments = ride.num_comments(user=request.user)
 
     return render(request=request,
                   template_name="groupridesapp/rides/my_rides.html",
                   context={
                       "form": f.form,
-                      "pagination_items": pagination_items,
-                      "my_upcoming_rides": page_obj,
+                      "pagination_items": pagination.html_list,
+                      "my_upcoming_rides": item_list,
                       "user": request.user
                   })
 
@@ -108,15 +109,23 @@ def available_rides(request):
         filter_fields=get_filter_fields(arq, TABLE_PREFIX)
     )
 
-    page_number = request.GET.get('page') or 1
-    page_obj = create_pagination(f, TABLE_PREFIX, page_number)
-    pagination_items = create_pagination_html(request, page_obj, page_number)
+    ride_queryset = f.qs.order_by(f"{TABLE_PREFIX}ride_date", f"{TABLE_PREFIX}ride_time")
+
+    pagination = CustomPaginator(
+        request,
+        ride_queryset,
+        4,
+        on_each_side=2,
+        on_ends=1
+    )
 
     return render(request=request,
                   template_name="groupridesapp/rides/available_rides.html",
-                  context={"form": f.form,
-                           "pagination_items": pagination_items,
-                           "event_occurences": page_obj})
+                  context={
+                      "form": f.form,
+                      "pagination_items": pagination.html_list,
+                      "event_occurences": pagination.item_list
+                  })
 
 
 @login_required(login_url='/login')
@@ -193,15 +202,23 @@ class EventComments(TemplateView):
         form = CreateEventOccurenceMessageForm()
         event = get_object_or_404(EventOccurence, id=event_occurence_id)
         event_comments = get_event_comments(occurence_id=event_occurence_id, order_by='create_date')
-        pagination = generate_pagination(request, qs=event_comments, items_per_page=5)
+
+        pagination = CustomPaginator(
+            request,
+            event_comments,
+            5,
+            on_each_side=2,
+            on_ends=1
+        )
 
         return render(request=request,
                       template_name="groupridesapp/rides/ride_comments.html",
                       context={
-                          "event_comments": pagination["page_obj"],
-                          "pagination_items": pagination["pagination_items"],
+                          "event_comments": pagination.item_list,
+                          "pagination_items": pagination.html_list,
                           "event": event,
-                          "form": form})
+                          "form": form
+                      })
 
     @staticmethod
     def post(request, **kwargs):

@@ -6,7 +6,10 @@ import django_filters
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.forms import TextInput
+from django.utils.safestring import mark_safe
+
 from .models import EventOccurence, EventOccurenceMember, ClubMembership, Club, EventOccurenceMessage
+from .paginators import CustomPaginator
 
 
 def days_from_today(n):
@@ -47,22 +50,21 @@ def distinct_errors(errors_list):
     return new_list
 
 
-def generate_pagination(request, qs=None, items_per_page=10):
-    paginator = Paginator(qs, items_per_page)
-    page_number = request.GET.get('page') or 1
-    page_obj = paginator.get_page(page_number)
+def generate_pagination(request, qs=None, items_per_page=10, on_each_side=2, on_ends=1):
+    url = remove_page_from_url(request.get_full_path())
+    page_num = request.GET.get('page', 1)
+    pag = CustomPaginator(qs, items_per_page)
+    page_obj = pag.get_page(page_num)
+    pagination_html = []
 
-    page_count = page_obj.paginator.num_pages
-    pagination_items = []
+    if page_obj.paginator.num_pages > 0:
+        page_list = pag.get_elided_page_range(page_num, on_each_side=on_each_side, on_ends=on_ends)
+        pagination_html = tailwind_pagination(page_list, page_num, pag.num_pages, current_url=url)
 
-    if page_count > 1:
-        pagination_items = generate_pagination_items(
-            page_count=page_obj.paginator.num_pages,
-            active_page=page_number,
-            delta=2
-        )
-
-    return {"page_obj": page_obj, "pagination_items": pagination_items}
+    return {
+        "item_list": page_obj,
+        "html_list": pagination_html
+    }
 
 
 def bootstrap_pagination(pagination_list, page, page_count, current_url=""):
@@ -104,72 +106,6 @@ def bootstrap_pagination(pagination_list, page, page_count, current_url=""):
     return pagination_items
 
 
-def generate_pagination_items(page_count=1, active_page=1, delta=2, current_url=""):
-    pagination_items = list()
-    active_page = int(active_page)
-
-    right_items = 3 - (active_page - delta)
-    left_items = (active_page + 2 + delta) - page_count
-
-    extra_items_to_right = right_items if right_items > 0 else 0
-    extra_items_to_left = left_items if left_items > 0 else 0
-
-    middle_ellipses = bool(extra_items_to_right) or bool(extra_items_to_left)
-    left_ellipses = not bool(extra_items_to_right) and not bool(extra_items_to_left)
-    right_ellipses = not bool(extra_items_to_right) and not bool(extra_items_to_left)
-
-    prev_page = 1 if active_page == 1 else active_page - 1
-    prev_disabled = " disabled" if active_page == 1 else ""
-    next_page = page_count if active_page == page_count else active_page + 1
-    next_disabled = " disabled" if active_page == page_count else ""
-
-    qm_index = current_url.find("?")
-    query = "?"
-
-    prev_button = f"<li class=\"page-item{prev_disabled}\">" \
-                  f"<a class=\"page-link\" href=\"{query}page={prev_page}\">&laquo;</a></li>"
-
-    next_button = f"<li class=\"page-item{next_disabled}\">" \
-                  f"<a class=\"page-link\" href=\"{query}page={next_page}\">&raquo;</a></li>"
-
-    ellipses = f"<li class=\"page-item\"><a class=\"page-link\" href=\"#\">...</a></li>"
-
-    if qm_index > 0:
-        query = query + current_url[qm_index + 1:] + "&"
-
-    for i in range(0, page_count + 2):
-        active = " active" if i == active_page else ""
-        num_button = f"<li class=\"page-item{ active }\"><a class=\"page-link\" href=\"{query}page={i}\">{i}</a></li>"
-
-        if i == 0:
-            pagination_items.append(prev_button)
-        elif i == page_count + 1:
-            pagination_items.append(next_button)
-        elif ((1 < i < page_count
-               and active_page - delta - extra_items_to_left <= i <= active_page + delta + extra_items_to_right)
-              or i == 1
-              or i == page_count):
-            pagination_items.append(num_button)
-        elif middle_ellipses:
-            pagination_items.append(ellipses)
-            middle_ellipses = not middle_ellipses
-        elif (left_ellipses and active_page > i) or (right_ellipses and active_page < i):
-            if active_page > i:
-                left_ellipses = not left_ellipses
-                if active_page - 1 == delta + 2:
-                    pagination_items.append(num_button)
-                else:
-                    pagination_items.append(ellipses)
-            else:
-                right_ellipses = not right_ellipses
-                if page_count - active_page == delta + 2:
-                    pagination_items.append(num_button)
-                else:
-                    pagination_items.append(ellipses)
-
-    return pagination_items
-
-
 def remove_page_from_url(full_path):
     if 'page' not in full_path:
         return full_path
@@ -201,7 +137,7 @@ def get_filter_fields(qs, table_prefix):
         lookup_expr='exact',
         field_name=f"{table_prefix}group_classification",
         choices=group_classification_choices,
-        empty_label='Select Classification'
+        empty_label='Select Classification',
     )
 
     distance__lt = django_filters.NumberFilter(
@@ -210,7 +146,7 @@ def get_filter_fields(qs, table_prefix):
         label='',
         widget=TextInput(attrs={
             'placeholder': 'Distance Less Than'
-        })
+        }),
     )
 
     distance__gt = django_filters.NumberFilter(
@@ -219,7 +155,7 @@ def get_filter_fields(qs, table_prefix):
         label='',
         widget=TextInput(attrs={
             'placeholder': 'Distance Greater Than'
-        })
+        }),
     )
 
     return [('club', club),
@@ -229,8 +165,8 @@ def get_filter_fields(qs, table_prefix):
 
 
 def create_pagination(f, table_prefix, page_number):
-    paginator = Paginator(f.qs.order_by(f"{table_prefix}ride_date", f"{table_prefix}ride_time"), 4)
-    page_obj = paginator.get_page(page_number)
+    page = CustomPaginator(f.qs.order_by(f"{table_prefix}ride_date", f"{table_prefix}ride_time"), 4)
+    page_obj = page.get_page(page_number)
     return page_obj
 
 

@@ -1,6 +1,6 @@
 from django_unicorn.components import UnicornView
 from groupridesapp.forms import ClubMembershipForm
-from groupridesapp.utils import generate_pagination
+from groupridesapp.paginators import CustomPaginator
 
 
 class MemberSearchView(UnicornView):
@@ -18,10 +18,17 @@ class MemberSearchView(UnicornView):
         else:
             members = [{'member': m, 'form': ClubMembershipForm(instance=m)} for m in self.members]
 
-        pagination = generate_pagination(self.request, qs=members, items_per_page=10)
+        pagination = CustomPaginator(
+            self.request,
+            members,
+            10,
+            on_each_side=2,
+            on_ends=1
+        )
+
         return {
-            "members": pagination["page_obj"].object_list,
-            "page_count": pagination["page_obj"].paginator.num_pages,
-            "pagination_items": pagination["pagination_items"],
+            "members": pagination.item_list,
+            "page_count": pagination.num_pages,
+            "pagination_items": pagination.html_list,
             "tab_type": self.tab_type,
         }

@@ -50,11 +50,20 @@ INSTALLED_APPS = [
     'users',
     'fontawesomefree',
     'crispy_forms',
+    'crispy_tailwind',
     'tinymce',
     'django_filters',
     'django_unicorn',
     'captcha',
+    'compressor',
+    'theme',
 ]
+
+COMPRESS_ROOT = BASE_DIR / 'static'
+
+COMPRESS_ENABLED = True
+
+STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -134,16 +143,31 @@ USE_I18N = True
 
 USE_TZ = True
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+INTERNAL_IPS = [
+    "127.0.0.1"
+]
 
+CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+CRISPY_TEMPLATE_PACK = 'tailwind'
 LOGIN_REDIRECT_URL = '/'
+
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+]
+
 STATIC_URL = 'static/'
 STATIC_ROOT = 'static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'node_modules', ),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

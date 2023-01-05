@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 {% load static %}
 {% load unicorn %}
-<html>
+{% load compress %}
+<html class="dark">
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -10,18 +11,15 @@
     <!-- Link to page favicon.ico to display in location Bar-->
     <link rel="icon" href="{% static 'images/favicon.png' %}">
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    {% compress css %}
+    <link rel="stylesheet" href="{% static 'src/output.css' %}">
+    {% endcompress %}
 
     <!-- reference to your installed Font Awesome Free package's files here -->
     <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
     <link href="{% static 'fontawesomefree/css/all.min.css' %}" rel="stylesheet" type="text/css">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'groupridesapp/css/main.css' %}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
     <script
             src="https://code.jquery.com/jquery-3.6.1.min.js"
             integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
@@ -29,21 +27,16 @@
     </script>
     {% unicorn_scripts %}
 </head>
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<body class="bg-gray-100" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     {% csrf_token %}
     {% include 'groupridesapp/includes/navbar/navbar.html' %}
-    <main role="main" class="container-xl">
-        <div class="row">
-            <div class="col-lg-12 col-md-12-p-0 col-sm-12">
-                {% include 'groupridesapp/includes/messaging.html' %}
-                {% block content %}
-                {% endblock %}
-            </div>
-        </div>
+    <main role="main" class="container flex flex-wrap sm:mx-auto mx-2">
+        {% include 'groupridesapp/includes/messaging.html' %}
+        {% block content %}
+        {% endblock %}
     </main>
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <script src="{% static 'flowbite/dist/flowbite.js' %}"></script>
     <script src="{% static 'groupridesapp/htmx/htmx.min.js' %}"></script>
 </body>
 </html>

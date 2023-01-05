@@ -1,14 +1,4 @@
 {% extends "groupridesapp/header.html" %}
 {% block content %}
-    <div class="card border-primary mt-2">
-        <ul>
-        {% for item in display_items %}
-            <li>{{ item }}</li>
-        {% endfor %}
-        </ul>
-    </div>
-<h1>node count: {{ node_count }}</h1>
-{% if display_items.paginator.num_pages > 1 %}
-    {% include 'groupridesapp/pagination.html' %}
-{% endif %}
+
 {% endblock content %}

@@ -1,19 +1,16 @@
-<form method="post" action="{% url 'ride_comments_click' event_occurence_id=event_occurence.id %}">
+<form method="post" action="{% url 'ride_comments_click' event_occurence_id=event_occurence.id %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
     {% load groupridesapp_extras %}
     {% csrf_token %}
     {% if new_message_count > 0 %}
         <li>
-            <button class="btn-transparent dropdown-item" type="submit" href="{% url 'ride_comments' ride.id %}">
-                Ride Discussion
-                    <span class="badge rounded-pill bg-danger">
-                        {{ new_message_count }}
-                        <span class="visually-hidden">new messages</span>
-                    </span>
+            <button type="submit" href="{% url 'ride_comments' ride.id %}">
+                <span class="mr-2">Ride Discussion</span>
+                <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">{{ new_message_count }}</span>
             </button>
         </li>
     {% else %}
         <li>
-            <button class="btn-transparent dropdown-item" type="submit" href="{% url 'ride_comments' ride.id %}">
+            <button type="submit" href="{% url 'ride_comments' ride.id %}">
                 Ride Discussion
             </button>
         </li>

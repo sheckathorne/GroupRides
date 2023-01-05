@@ -1,24 +1,58 @@
 const joinRideModal = document.getElementById('joinRideModal')
 const leaveRideModal = document.getElementById('leaveRideModal')
 
-if ( joinRideModal ) {
-    joinRideModal.addEventListener('show.bs.modal', e => {
-        const button = e.relatedTarget
-        const occurenceid = button.getAttribute('data-bs-occurenceid')
-        const modalForm = joinRideModal.querySelector('#joinRideForm')
-        const actionUrl = `/rides/registration/${occurenceid}/create/`
+function instantiateModal(e, modalId, formId, attributeName, action, modalAction) {
+    const targetEl = document.getElementById(modalId)
 
-        modalForm.action = actionUrl
-    })
+    if ( modalAction === 'show' ) {
+        options = {
+            onShow: () => {
+                const attributeValue = e.getAttribute(attributeName)
+                const modalForm = targetEl.querySelector(formId)
+                const actionUrl = buildActionUrl(action, attributeValue)
+                modalForm.action = actionUrl
+            },
+        }
+    } else if ( modalAction === 'hide') {
+       options = {
+            onHide: () => {
+                const backdrop = document.querySelector('modal-backdrop')
+                document.querySelector('modal-backdrop').remove();
+            },
+        }
+    }
+
+    const modal = new Modal(targetEl, options)
+
+    return modal
 }
 
-if ( leaveRideModal ) {
-    leaveRideModal.addEventListener('show.bs.modal', e => {
-        const button = e.relatedTarget
-        const rideId = button.getAttribute('data-bs-rideId')
-        const modalForm = leaveRideModal.querySelector('#leaveRideForm')
-        const actionUrl = `/rides/registration/${rideId}/delete/`
+function buildActionUrl(action, id) {
+    if ( action === 'delete' ) {
+        return `/rides/registration/${id}/delete/`
+    } else if ( action === 'create' ) {
+        return `/rides/registration/${id}/create/`
+    } else {
+        return ''
+    }
+}
 
-        modalForm.action = actionUrl
-    })
+function leaveRideClick(e) {
+    const modal = instantiateModal(e, 'leaveRideModal', '#leaveRideForm', 'data-bs-rideid', 'delete', 'show')
+    modal.show()
+}
+
+function closeLeaveModalClick(e) {
+    const modal = instantiateModal(e, 'leaveRideModal', '#leaveRideForm', 'data-bs-rideid', 'delete', 'hide')
+    modal.hide()
+}
+
+function joinRideClick(e) {
+    const modal = instantiateModal(e, 'joinRideModal','#joinRideForm', 'data-bs-rideid', 'create', 'show')
+    modal.show()
+}
+
+function closeJoinModal(e) {
+    const modal = instantiateModal(e, 'joinRideModal','#joinRideForm', 'data-bs-rideid', 'create', 'hide')
+    modal.hide()
 }

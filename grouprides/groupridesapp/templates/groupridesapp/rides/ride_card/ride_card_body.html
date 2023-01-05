@@ -1,53 +1,59 @@
-<div class="card-body">
+<div class="pl-4 pr-2 text-gray-700">
     {% with yesno_args=event_occurence.ride_leader_name|add:", no one" %}
-    <h6 class="card-title{{ canceled }}">{{ event_occurence.occurence_name }} led by {{ event_occurence.ride_leader_name|yesno:yesno_args }}</h6>
+    <div class="my-1">
+        <h6 class="card-title{{ canceled }}">{{ event_occurence.occurence_name }} led by {{ event_occurence.ride_leader_name|yesno:yesno_args }}</h6>
+    </div>
     {% endwith %}
-    <div class="row">
-        <div class="col-lg-4 col-sm-12">
-            <div class="row mb-3 d-flex align-items-center">
-                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-route{{ canceled }}"></i></div>
-                <div class="col-lg-9 col-9{{ canceled }}"><a class="{{ canceled }}" href="{{ event_occurence.route.url }}" target="_blank">{{ event_occurence.route.name }}</a></div>
+    <div class="grid grid-cols-12">
+        <div class="py-2 lg:col-span-4 sm:col-span-12 col-span-12 flex flex-row items-center">
+            <div class="lg:w-1/6 sm:w-1/12 w-1/12">
+                <i class="fa-solid fa-xl fa-route{{ canceled }}"></i>
             </div>
-            <div class="row mb-3 d-flex align-items-center">
-                {% if event_occurence.is_canceled %}
-                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-gauge-high canceled"></i></div>
-                {% else %}
-                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-gauge-high group-class-{{ event_occurence.group_classification_name }}"></i></div>
-                {% endif %}
-                <div class="col-lg-9 col-9"><span class="fw-bolder{{ canceled }}">{{ event_occurence.group_classification_name }} / {{ event_occurence.lower_pace_range }} - {{ event_occurence.upper_pace_range }}mph</span></div>
+            <div class="lg:w-5/6 sm:w-11/12 w-11/12">
+                <a class="{{ canceled }}" href="{{ event_occurence.route.url }}" target="_blank">{{ event_occurence.route.name }}</a>
             </div>
         </div>
-        <div class="col-lg-4 col-sm-12">
-            {% with distance=event_occurence.route.distance %}
-            <div class="row mb-3 d-flex align-items-center">
-                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-ruler-horizontal{{ canceled }}"></i></div>
-                <div class="col-lg-9 col-9{{ canceled }}">{{ distance }} mile{{ distance|pluralize }}</div>
+        <div class="py-2 lg:col-span-4 sm:col-span-12 col-span-12 flex flex-row items-center">
+            {% if event_occurence.is_canceled %}
+            <div class="lg:w-1/6 sm:w-1/12 w-1/12">
+                <i class="fa-solid fa-xl fa-gauge-high canceled"></i>
             </div>
-            {% endwith %}
-            <div class="row mb-3 d-flex align-items-center">
-                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-mountain{{ canceled }}"></i></div>
-                <div class="col-lg-9 col-9{{ canceled }}">{{ event_occurence.route.elevation }}ft</div>
+            {% else %}
+            <div class="lg:w-1/6 sm:w-1/12 w-1/12">
+                <i class="fa-solid fa-xl fa-gauge-high group-class-{{ event_occurence.group_classification_name }}"></i>
+            </div>
+            {% endif %}
+            <div class="lg:w-5/6 sm:w-11/12 w-11/12">
+                <span class="fw-bolder{{ canceled }}">{{ event_occurence.group_classification_name }} / {{ event_occurence.lower_pace_range }} - {{ event_occurence.upper_pace_range }}mph</span>
             </div>
         </div>
-        <div class="col-lg-4 col-sm-12">
-            <div class="row mb-3 d-flex align-items-center">
-                <div class="col-lg-3 col-3 d-flex justify-content-center"><i class="fa-solid fa-2xl fa-location-dot{{ canceled }}"></i></div>
-                <div class="col-lg-9 col-9{{ canceled }}">{{ event_occurence.route.start_location_name }}</div>
+        {% with distance=event_occurence.route.distance %}
+        <div class="py-2 lg:col-span-4 sm:col-span-12 col-span-12 flex flex-row items-center">
+            <div class="lg:w-1/6 sm:w-1/12 w-1/12">
+                <i class="fa-solid fa-xl fa-ruler-horizontal{{ canceled }}"></i>
             </div>
-            {% with num_riders=event_occurence.number_of_riders %}
-            <div class="row mb-3 d-flex align-items-center">
-                <div class="col-lg-3 col-3 d-flex justify-content-center">
-                    <i class="fa-solid fa-2xl fa-person-circle-plus{{ canceled }}"></i>
-                </div>
-                <div class="col-lg-9 col-9">
-                    <div class="progress" style="border: 1px solid gray; height: 28px;">
-                        <div class="{{ event_occurence.progress_bar_class }}" role="progressbar" style="width: {{ event_occurence.percentage_full }}%" aria-valuenow={{ num_riders }} aria-valuemin="0" aria-valuemax={{ event_occurence.max_riders }}>
-                            {{ num_riders }} / {{ event_occurence.max_riders }}
-                        </div>
-                    </div>
+            <div class="lg:w-5/6 sm:w-11/12 w-11/12">
+                {{ distance }} mile{{ distance|pluralize }}
+            </div>
+        </div>
+        {% endwith %}
+    </div>
+    <div class="grid grid-cols-12">
+        <div class="py-2 lg:col-span-4 sm:col-span-12 col-span-12 flex flex-row items-center">
+            <div class="lg:w-1/6 sm:w-1/12 w-1/12"><i class="fa-solid fa-xl fa-mountain{{ canceled }}"></i></div>
+            <div class="lg:w-5/6 sm:w-11/12 w-11/12">{{ event_occurence.route.elevation }}ft</div>
+        </div>
+        <div class="py-2 lg:col-span-4 sm:col-span-12 col-span-12 flex flex-row items-center">
+            <div class="lg:w-1/6 sm:w-1/12 w-1/12"><i class="fa-solid fa-xl fa-location-dot{{ canceled }}"></i></div>
+            <div class="lg:w-5/6 sm:w-11/12 w-11/12">{{ event_occurence.route.start_location_name }}</div>
+        </div>
+        <div class="py-2 lg:col-span-4 sm:col-span-12 col-span-12 flex flex-row items-center">
+            <div class="lg:w-1/6 sm:w-1/12 w-1/12"><i class="fa-solid fa-xl fa-person-circle-plus{{ canceled }}"></i></div>
+            <div class="lg:w-5/6 sm:w-11/12 w-11/12">
+                <div class="lg:w-full md:w-3/4 sm:w-5/6 bg-gray-200 rounded-full h-4 dark:bg-gray-500 align-middle">
+                  <div class="bg-blue-600 h-4 rounded-full" style="width: {{ event_occurence.percentage_full }}%"></div>
                 </div>
             </div>
-            {% endwith %}
         </div>
     </div>
 </div>
