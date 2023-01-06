@@ -1,5 +1,7 @@
 import datetime
 
+from crispy_forms.layout import Field, Div
+from crispy_tailwind.tailwind import CSSContainer
 from django.core import paginator
 from django.utils import timezone
 import django_filters
@@ -48,62 +50,6 @@ def distinct_errors(errors_list):
             new_list.append(error)
 
     return new_list
-
-
-def generate_pagination(request, qs=None, items_per_page=10, on_each_side=2, on_ends=1):
-    url = remove_page_from_url(request.get_full_path())
-    page_num = request.GET.get('page', 1)
-    pag = CustomPaginator(qs, items_per_page)
-    page_obj = pag.get_page(page_num)
-    pagination_html = []
-
-    if page_obj.paginator.num_pages > 0:
-        page_list = pag.get_elided_page_range(page_num, on_each_side=on_each_side, on_ends=on_ends)
-        pagination_html = tailwind_pagination(page_list, page_num, pag.num_pages, current_url=url)
-
-    return {
-        "item_list": page_obj,
-        "html_list": pagination_html
-    }
-
-
-def bootstrap_pagination(pagination_list, page, page_count, current_url=""):
-    pagination_items = list()
-    active_page = int(page)
-
-    prev_page = 1 if active_page == 1 else active_page - 1
-    prev_disabled = " disabled" if active_page == 1 else ""
-    next_page = page_count if active_page == page_count else active_page + 1
-    next_disabled = " disabled" if active_page == page_count else ""
-
-    qm_index = current_url.find("?")
-    query = "?"
-
-    if qm_index > 0:
-        query = query + current_url[qm_index + 1:] + "&"
-
-    prev_button = f"<li class=\"page-item{prev_disabled}\">" \
-                  f"<a class=\"page-link\" href=\"{query}page={prev_page}\">&laquo;</a></li>"
-
-    pagination_items.append(prev_button)
-
-    for item in pagination_list:
-        if item == Paginator.ELLIPSIS:
-            ellipses = f"<li class=\"page-item\"><a class=\"page-link\" href=\"#\">...</a></li>"
-            pagination_items.append(ellipses)
-        else:
-            active = " active" if item == active_page else ""
-            num_button = f"<li class=\"page-item{active}\">" \
-                         f"<a class=\"page-link\" href=\"{query}page={item}\">{item}</a>" \
-                         f"</li>"
-            pagination_items.append(num_button)
-
-    next_button = f"<li class=\"page-item{next_disabled}\">" \
-                  f"<a class=\"page-link\" href=\"{query}page={next_page}\">&raquo;</a></li>"
-
-    pagination_items.append(next_button)
-
-    return pagination_items
 
 
 def remove_page_from_url(full_path):
@@ -170,22 +116,6 @@ def create_pagination(f, table_prefix, page_number):
     return page_obj
 
 
-def create_pagination_html(request, page_obj, page_number):
-    url = remove_page_from_url(request.get_full_path())
-    page_count = page_obj.paginator.num_pages
-    pagination_items = []
-
-    if page_count > 1:
-        pagination_items = generate_pagination_items(
-            page_count=page_count,
-            active_page=page_number,
-            delta=2,
-            current_url=url
-        )
-
-    return pagination_items
-
-
 def get_event_comments(occurence_id, order_by):
     return EventOccurenceMessage.objects.filter(event_occurence__id=occurence_id).order_by(order_by)
 
@@ -200,3 +130,66 @@ def get_members_by_type(tab_type, qs):
         members = qs.filter(active=True, membership_expires__gte=now)
 
     return members
+
+
+def css_container():
+    base_input = (
+        "bg-white focus:outline-none border border-gray-300 rounded py-2 px-4 block w-full "
+        "appearance-none leading-normal text-gray-700"
+    )
+
+    default_styles = {
+        "text": base_input,
+        "number": base_input,
+        "radioselect": "",
+        "email": base_input,
+        "url": base_input,
+        "password": base_input,
+        "hidden": "",
+        "multiplehidden": "",
+        "file": "",
+        "clearablefile": "",
+        "textarea": base_input,
+        "date": base_input,
+        "datetime": base_input,
+        "time": base_input,
+        "checkbox": "",
+        "select": base_input,
+        "nullbooleanselect": "",
+        "selectmultiple": base_input,
+        "checkboxselectmultiple": "",
+        "multi": "",
+        "splitdatetime": "text-gray-700 bg-white focus:outline border border-gray-300 leading-normal px-4 "
+                         "appearance-none rounded-lg py-2 focus:outline-none mr-2",
+        "splithiddendatetime": "",
+        "selectdate": "",
+        "error_border": "border-red-500",
+    }
+
+    css = CSSContainer(default_styles)
+    css -= {'text': 'rounded-lg'}
+    css += {'text': 'rounded'}
+
+    return css
+
+
+def text_input(field_name, id_name, width=4):
+    return Field(
+        field_name,
+        id=f"{id_name}_create_{field_name}",
+        css_class="w-full shadow",
+        wrapper_class=f"md:col-span-{width}")
+
+
+def dropdown(field_name, id_name, width=4, onchange=""):
+    return Field(
+        field_name,
+        id=f"{id_name}_create_{field_name}",
+        css_class="w-full",
+        wrapper_class=f"md:col-span-{width} shadow-parent cursor-pointer",
+        onchange=onchange, )
+
+
+def form_row(*args, padding_bottom=0, **kwargs):
+    row_id = 'generic-row' if 'row_id' not in kwargs else kwargs['row_id']
+    return Div(*args, css_class=f"grid gap-2 md:grid-cols-12 pb-{padding_bottom}", id=row_id)

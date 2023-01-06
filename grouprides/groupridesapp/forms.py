@@ -1,6 +1,7 @@
 import datetime
 
 import pytz
+from crispy_tailwind.tailwind import CSSContainer
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import Select, ModelChoiceField
@@ -16,28 +17,7 @@ from crispy_forms.layout import (
 )
 from crispy_forms.bootstrap import StrictButton, InlineCheckboxes
 from django.utils.html import mark_safe
-
-
-def text_input(field_name, id_name, width=4, margin_bottom=0):
-    return Div(Field(field_name, id=f"{id_name}_create_{field_name}"), css_class=f"col-md-{width} mb-{margin_bottom}", )
-
-
-def dropdown(field_name, id_name, height=38, width=4, margin_bottom=0, onchange=""):
-    return Div(
-        Field(
-            field_name,
-            id=f"{id_name}_create_{field_name}",
-            css_class="w-100",
-            style=f"height: {height}px;",
-            onchange=onchange,),
-        css_class=f"col-md-{width} mb-{margin_bottom}",
-        id=f"div-{id_name}_create_{field_name}",
-    )
-
-
-def form_row(*args, padding_bottom=3, **kwargs):
-    row_id = 'generic-row' if 'row_id' not in kwargs else kwargs['row_id']
-    return Div(*args, css_class=f"row pb-{padding_bottom}", id=row_id)
+from .utils import css_container, text_input, dropdown, form_row
 
 
 class DeleteRideRegistrationForm(forms.ModelForm):
@@ -211,12 +191,13 @@ class RouteChoiceField(ModelChoiceField):
 
 class CreateEventForm(forms.ModelForm):
     def __init__(self, user_clubs, user_routes, *args, **kwargs):
+        css = css_container()
         super(CreateEventForm, self).__init__(*args, **kwargs)
         self.fields['frequency'].label = 'Recurrence'
         self.fields['route'].queryset = user_routes
         self.fields['club'].queryset = user_clubs
-
         self.helper = FormHelper(self)
+        self.helper.css_container = css
         self.helper.layout = Layout(
             Fieldset('Ride Info',
                      form_row(text_input("name", "event"), padding_bottom=2),
@@ -234,7 +215,7 @@ class CreateEventForm(forms.ModelForm):
             Fieldset('Date / Time / Recurring',
                      form_row(text_input("start_date", "event"), dropdown("time_zone", "event"), padding_bottom=2),
                      form_row(text_input("end_date", "event"), text_input("ride_time", "event"), padding_bottom=2),
-                     form_row(dropdown("frequency", "event", margin_bottom=2), padding_bottom=2),
+                     form_row(dropdown("frequency", "event"), padding_bottom=2),
                      form_row(InlineCheckboxes("weekdays", label=""), padding_bottom=4)
                      ),
             form_row(
