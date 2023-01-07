@@ -434,6 +434,9 @@ class ClubMemberManagement(TemplateView):
         members = get_members_by_type(tab_type, aqs)
         tab_classes = {'active': '', 'inactive': '', 'requests': '', tab_type: ' show active'}
 
+        for member in members:
+            print(member)
+
         return render(request=request,
                       template_name="groupridesapp/clubs/members/members_tabs.html",
                       context={

@@ -62,17 +62,27 @@ class ClubMembershipForm(forms.ModelForm):
         if member:
             member_dropdown_disabled = (member.membership_type == ClubMembership.MemberType.Creator.value)
 
-        super(ClubMembershipForm, self).__init__(*args, **kwargs)
+        css = css_container()
+        super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
+        self.helper.css_container = css
         self.helper.layout = Layout(
             form_row(
-                dropdown("membership_type", "member", width=12, margin_bottom=2),),
+                dropdown("membership_type", "member", width="col-span-12"), padding_bottom="pb-4"),
             form_row(Div(Field("membership_expires", id=f"member_create_membership_expires"),
-                         css_class=f"col-md-12", )),
-            form_row(Div(Field("active"), css_class="mb-1")),
+                         css_class=f"md:col-span-12", ), padding_bottom="pb-4"),
+            form_row(Div(Field("active", wrapper_class="flex flex-row items-center", css_class="ml-4"),
+                         css_class="col-span-12 mb-1"),
+                     padding_bottom="pb-4"),
             Div(
-                StrictButton('Close', value="Close", type="button", css_class="btn-secondary", data_bs_dismiss="modal"),
-                StrictButton('Confirm', value="Confirm", type="submit", css_class="btn-primary"),
+                StrictButton('Confirm', value="Confirm", type="submit",
+                             css_class="w-full bg-white "
+                                       "hover:bg-gradient-to-r "
+                                       "from-sky-300 to-blue-200 "
+                                       "text-gray-800 font-semibold py-2 "
+                                       "px-4 border "
+                                       "border-gray-400 rounded shadow-lg mb-4"),
+
                 css_class="modal-footer"
             ),
         )
@@ -192,7 +202,7 @@ class RouteChoiceField(ModelChoiceField):
 class CreateEventForm(forms.ModelForm):
     def __init__(self, user_clubs, user_routes, *args, **kwargs):
         css = css_container()
-        super(CreateEventForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['frequency'].label = 'Recurrence'
         self.fields['route'].queryset = user_routes
         self.fields['club'].queryset = user_clubs
@@ -204,23 +214,28 @@ class CreateEventForm(forms.ModelForm):
                      form_row(dropdown("privacy", "event"), dropdown("club", "event"), padding_bottom="pb-2"),
                      form_row(dropdown("route", "event"), padding_bottom="pb-2"),
                      form_row(text_input("max_riders", "event"), padding_bottom="pb-2"),
-                     css_class='mt-4'),
+                     css_class='my-4'),
             Fieldset('Pace',
                      form_row(
                          dropdown("group_classification", "event"), padding_bottom="pb-2"),
                      form_row(
                          text_input("lower_pace_range", "event"),
                          text_input("upper_pace_range", "event"), padding_bottom="pb-2"),
-                     css_class='mt-4'),
+                     css_class='my-4'),
             Fieldset('Date / Time / Recurring',
-                     form_row(text_input("start_date", "event"), dropdown("time_zone", "event"), padding_bottom="pb-2"),
-                     form_row(text_input("end_date", "event"), text_input("ride_time", "event"), padding_bottom="pb-2"),
+                     form_row(text_input("start_date", "event"), text_input("end_date", "event"),
+                              padding_bottom="pb-2"),
+                     form_row(dropdown("time_zone", "event"), text_input("ride_time", "event"), padding_bottom="pb-2"),
                      form_row(dropdown("frequency", "event"), padding_bottom="pb-2"),
-                     form_row(InlineCheckboxes("weekdays", label=""), padding_bottom="pb-4")
-                     ),
+                     InlineCheckboxes("weekdays", label="", wrapper_class="mb-3"), padding_bottom="pb-4"),
             form_row(
-                Div(StrictButton('Create Ride', value="Create Ride", type="submit", css_class="btn-primary w-100"),
-                    css_class="col-md-4", ))
+                Div(StrictButton('Create Ride', value="Create Ride", type="submit",
+                                 css_class="w-full bg-white "
+                                           "hover:bg-gradient-to-r "
+                                           "from-sky-300 to-blue-200 "
+                                           "text-gray-800 font-semibold py-2 px-4 border "
+                                           "border-gray-400 rounded shadow-lg mb-4"),
+                    css_class="col-span-4", ))
         )
 
         self.fields["weekdays"].label = ''
