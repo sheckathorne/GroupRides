@@ -5,7 +5,6 @@ from crispy_forms.bootstrap import StrictButton
 
 from .models import EventOccurence
 from django import forms
-from .forms import form_row, dropdown, text_input
 from crispy_forms.helper import FormHelper
 
 from .utils import css_container, form_row, dropdown, text_input
@@ -30,15 +29,15 @@ class RideForm(forms.ModelForm):
                         dropdown(
                             "club",
                             "rides",
-                            width=3,
+                            width="md:col-span-3",
                             onchange="form.submit()"),
                         dropdown(
                             "group_classification",
                             "rides",
-                            width=3,
+                            width="md:col-span-3",
                             onchange="form.submit()"),
-                        text_input("distance__lt", "rides", width=3, ),
-                        text_input("distance__gt", "rides", width=3, ), ),
+                        text_input("distance__lt", "rides", width="md:col-span-3", ),
+                        text_input("distance__gt", "rides", width="md:col-span-3", ), ),
                         css_class="md:col-span-12 lg:col-span-10", ),
                     Div(form_row(
                         Div(
@@ -59,7 +58,7 @@ class RideForm(forms.ModelForm):
                         row_id="ride-filter-parent"
                     ),
                         css_class="md:col-span-12 lg:col-span-2"),
-                    padding_bottom=2,
+                    padding_bottom="pb-2",
                     css_class="pb-2"
                 )
             )

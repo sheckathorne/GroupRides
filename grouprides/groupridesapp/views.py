@@ -321,6 +321,7 @@ class CreateEvent(TemplateView):
             return HttpResponseRedirect('/')
         else:
             form = CreateEventForm(user_clubs, user_routes)
+
             return render(
                 request=request,
                 template_name="groupridesapp/events/create_event.html",

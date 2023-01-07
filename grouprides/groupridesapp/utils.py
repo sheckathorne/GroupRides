@@ -132,11 +132,13 @@ def get_members_by_type(tab_type, qs):
     return members
 
 
+def base_input_style():
+    return f"bg-white shadow focus:outline-none border border-gray-300 rounded py-2 px-4 " \
+           f"block w-full appearance-none leading-normal text-gray-700"
+
+
 def css_container():
-    base_input = (
-        "bg-white focus:outline-none border border-gray-300 rounded py-2 px-4 block w-full "
-        "appearance-none leading-normal text-gray-700"
-    )
+    base_input = base_input_style()
 
     default_styles = {
         "text": base_input,
@@ -173,23 +175,22 @@ def css_container():
     return css
 
 
-def text_input(field_name, id_name, width=4):
+def text_input(field_name, id_name, width="md:col-span-4"):
     return Field(
         field_name,
         id=f"{id_name}_create_{field_name}",
         css_class="w-full shadow",
-        wrapper_class=f"md:col-span-{width}")
+        wrapper_class=width)
 
 
-def dropdown(field_name, id_name, width=4, onchange=""):
+def dropdown(field_name, id_name, width="md:col-span-4", onchange=""):
     return Field(
         field_name,
         id=f"{id_name}_create_{field_name}",
-        css_class="w-full",
-        wrapper_class=f"md:col-span-{width} shadow-parent cursor-pointer",
+        wrapper_class=f"{width} cursor-pointer",
         onchange=onchange, )
 
 
-def form_row(*args, padding_bottom=0, **kwargs):
+def form_row(*args, padding_bottom="pb-0", **kwargs):
     row_id = 'generic-row' if 'row_id' not in kwargs else kwargs['row_id']
-    return Div(*args, css_class=f"grid gap-2 md:grid-cols-12 pb-{padding_bottom}", id=row_id)
+    return Div(*args, css_class=f"grid gap-2 md:grid-cols-12 {padding_bottom}", id=row_id)

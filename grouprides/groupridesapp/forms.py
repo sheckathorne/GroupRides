@@ -17,7 +17,7 @@ from crispy_forms.layout import (
 )
 from crispy_forms.bootstrap import StrictButton, InlineCheckboxes
 from django.utils.html import mark_safe
-from .utils import css_container, text_input, dropdown, form_row
+from .utils import css_container, text_input, dropdown, form_row, base_input_style
 
 
 class DeleteRideRegistrationForm(forms.ModelForm):
@@ -180,7 +180,7 @@ class SelectWithOptionAttribute(Select):
 
 
 class RouteChoiceField(ModelChoiceField):
-    widget = SelectWithOptionAttribute
+    widget = SelectWithOptionAttribute(attrs={"class": base_input_style()})
 
     def label_from_instance(self, obj):
         return {
@@ -200,23 +200,23 @@ class CreateEventForm(forms.ModelForm):
         self.helper.css_container = css
         self.helper.layout = Layout(
             Fieldset('Ride Info',
-                     form_row(text_input("name", "event"), padding_bottom=2),
-                     form_row(dropdown("privacy", "event"), dropdown("club", "event"), padding_bottom=2),
-                     form_row(dropdown("route", "event"), padding_bottom=2),
-                     form_row(text_input("max_riders", "event"), padding_bottom=2),
+                     form_row(text_input("name", "event"), padding_bottom="pb-2"),
+                     form_row(dropdown("privacy", "event"), dropdown("club", "event"), padding_bottom="pb-2"),
+                     form_row(dropdown("route", "event"), padding_bottom="pb-2"),
+                     form_row(text_input("max_riders", "event"), padding_bottom="pb-2"),
                      css_class='mt-4'),
             Fieldset('Pace',
                      form_row(
-                         dropdown("group_classification", "event"), padding_bottom=2),
+                         dropdown("group_classification", "event"), padding_bottom="pb-2"),
                      form_row(
                          text_input("lower_pace_range", "event"),
-                         text_input("upper_pace_range", "event"), padding_bottom=2),
+                         text_input("upper_pace_range", "event"), padding_bottom="pb-2"),
                      css_class='mt-4'),
             Fieldset('Date / Time / Recurring',
-                     form_row(text_input("start_date", "event"), dropdown("time_zone", "event"), padding_bottom=2),
-                     form_row(text_input("end_date", "event"), text_input("ride_time", "event"), padding_bottom=2),
-                     form_row(dropdown("frequency", "event"), padding_bottom=2),
-                     form_row(InlineCheckboxes("weekdays", label=""), padding_bottom=4)
+                     form_row(text_input("start_date", "event"), dropdown("time_zone", "event"), padding_bottom="pb-2"),
+                     form_row(text_input("end_date", "event"), text_input("ride_time", "event"), padding_bottom="pb-2"),
+                     form_row(dropdown("frequency", "event"), padding_bottom="pb-2"),
+                     form_row(InlineCheckboxes("weekdays", label=""), padding_bottom="pb-4")
                      ),
             form_row(
                 Div(StrictButton('Create Ride', value="Create Ride", type="submit", css_class="btn-primary w-100"),
@@ -270,7 +270,7 @@ class CreateEventForm(forms.ModelForm):
         }
 
         help_texts = {
-            'route': mark_safe("<a id='route_url_id' href='' target='_blank'>Add</a>")
+            'route': mark_safe("<a id='route_url_id' class='underline text-blue-700' href='' target='_blank'>Add</a>")
         }
 
 
