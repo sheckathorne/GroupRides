@@ -1,58 +1,46 @@
 {% extends "groupridesapp/header.html" %}
 {% load unicorn %}
 {% block content %}
-  <ul class="nav nav-tabs" id="myTab" role="tablist">
-    <li class="nav-item" role="presentation">
-      <a href="{% url 'club_member_management' _slug=slug club_id=club_id tab_type='active' %}">
-        <button class="nav-link{{ tab_classes.active }}" id="member-tab-active" data-bs-toggle="tab" data-bs-target="#member-tab-active-pane" type="button" role="tab" aria-controls="member-tab-active-pane" aria-selected="true">Active</button>
-      </a>
-    </li>
-    <li class="nav-item" role="presentation">
-      <a href="{% url 'club_member_management' _slug=slug club_id=club_id tab_type='inactive' %}">
-        <button class="nav-link{{ tab_classes.inactive }}" id="member-tab-expired-inactive" data-bs-toggle="tab" data-bs-target="#member-tab-expired-inactive-pane" type="button" role="tab" aria-controls="member-tab-expired-inactive-pane" aria-selected="false">Inactive/Expired</button>
-      </a>
-    </li>
-    <li class="nav-item" role="presentation">
-      <a href="{% url 'club_member_management' _slug=slug club_id=club_id tab_type='requests' %}">
-        <button class="nav-link{{ tab_classes.requests }}" id="member-tab-requests" data-bs-toggle="tab" data-bs-target="#member-tab-requests-pane" type="button" role="tab" aria-controls="member-tab-requests-pane" aria-selected="false">Join Requests
-          {% if pending_count > 0 %}
-          <span class="badge rounded-pill bg-danger">
-            {{ pending_count }}
-            <span class="visually-hidden">join requests</span>
-          </span>
-          {% endif %}
-        </button>
-      </a>
-    </li>
-  </ul>
-  <div class="tab-content" id="myTabContent">
+<div class="w-full">
+    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400">
+        <li id="active-tab" class="mr-2 sm:w-auto w-full">
+            <a href="{% url 'club_member_management' _slug=slug club_id=club_id tab_type='active' %}" class="inline-flex p-4 {{ tab_classes.active.a }}">
+                <svg aria-hidden="true" class="w-5 h-5 mr-2 {{ tab_classes.active.svg }}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd"></path></svg>
+              Active
+            </a>
+        </li>
+        <li id="inactive-tab" class="mr-2 sm:w-auto w-full">
+            <a href="{% url 'club_member_management' _slug=slug club_id=club_id tab_type='inactive' %}" class="inline-flex p-4 {{ tab_classes.inactive.a }}" aria-current="page">
+                <svg aria-hidden="true" class="w-5 h-5 mr-2 {{ tab_classes.inactive.svg }}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+              Inactive/Expired
+            </a>
+        </li>
+        <li id="requests-tab" class="mr-2 sm:w-auto w-full">
+            <a href="{% url 'club_member_management' _slug=slug club_id=club_id tab_type='requests' %}" class="inline-flex p-4 {{ tab_classes.requests.a }}">
+                <svg aria-hidden="true" class="w-5 h-5 mr-2 {{ tab_classes.requests.svg }}" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"></path></svg>
+              Join Requests
+            </a>
+        </li>
+    </ul>
+    <div class="my-4">
+        <span class="font-medium text-lg">{{ club_name }}</span>
+    </div>
+    <div class="tab-content" id="myTabContent">
     {% if tab_type == "active" %}
-    <div class="tab-pane fade show{{ tab_classes.active }}" id="member-tab-active-pane" role="tabpanel" aria-labelledby="member-tab-active" tabindex="0">
-      <div class="row mt-4">
-        <div class="col">
-            <h4>{{ club_name }}</h4>
-        </div>
-      </div>
+    <div class="tab-pane" id="member-tab-active-pane" role="tabpanel" aria-labelledby="member-tab-active" tabindex="0">
       {% unicorn 'member_search' members=members club_id=club_id slug=slug tab_type=tab_type %}
     </div>
     {% elif tab_type == "inactive" %}
-    <div class="tab-pane fadeshow{{ tab_classes.inactive }}" id="member-tab-expired-inactive-pane" role="tabpanel" aria-labelledby="member-tab-expired-inactive" tabindex="0">
-      <div class="row mt-4">
-        <div class="col">
-            <h4>{{ club_name }}</h4>
-        </div>
-      </div>
+    <div class="tab-pane" id="member-tab-expired-inactive-pane" role="tabpanel" aria-labelledby="member-tab-expired-inactive" tabindex="0">
         {% unicorn 'member_search' members=members club_id=club_id slug=slug tab_type=tab_type %}
     </div>
     {% elif tab_type == "requests" %}
-    <div class="tab-pane fadeshow{{ tab_classes.requests }}" id="member-tab-requests-pane" role="tabpanel" aria-labelledby="member-tab-requests" tabindex="0">
-      <div class="row mt-4">
-        <div class="col">
-            <h4>{{ club_name }}</h4>
-        </div>
-      </div>
+    <div class="tab-pane" id="member-tab-requests-pane" role="tabpanel" aria-labelledby="member-tab-requests" tabindex="0">
       {% unicorn 'member_request_search' reqs=reqs club_id=club_id slug=slug tab_type=tab_type %}
     </div>
     {% endif %}
   </div>
+</div>
+
+
 {% endblock content %}

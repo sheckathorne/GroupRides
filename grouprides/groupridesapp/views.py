@@ -431,11 +431,24 @@ class ClubMemberManagement(TemplateView):
             status=ClubMembershipRequest.RequestStatus.Pending
         ).count()
 
-        members = get_members_by_type(tab_type, aqs)
-        tab_classes = {'active': '', 'inactive': '', 'requests': '', tab_type: ' show active'}
+        inactive_class = {
+            "a": "border-b-2 border-transparent rounded-t-lg text-gray-800 hover:text-blue-300 "
+                 "hover:border-blue-400 group",
+            "svg": "text-gray-800 group-hover:text-blue-300"
+        }
 
-        for member in members:
-            print(member)
+        active_class = {
+            "a": "text-blue-600 border-b-2 border-blue-600 rounded-t-lg active group",
+            "svg": "text-blue-600"
+        }
+
+        members = get_members_by_type(tab_type, aqs)
+
+        tab_classes = {
+            'active': inactive_class,
+            'inactive': inactive_class,
+            'requests': inactive_class,
+            tab_type: active_class}
 
         return render(request=request,
                       template_name="groupridesapp/clubs/members/members_tabs.html",
@@ -513,9 +526,9 @@ def deactivate_membership(request, _slug, club_id, membership_id, tab_type):
         response = HttpResponse()
 
         response["HX-Redirect"] = reverse("club_member_management", kwargs={
-                '_slug': _slug,
-                'club_id': club_id,
-                'tab_type': tab_type})
+            '_slug': _slug,
+            'club_id': club_id,
+            'tab_type': tab_type})
 
         return response
 

@@ -1,66 +1,71 @@
 {% load groupridesapp_extras %}
 {% load static %}
-<div>
-    <div class="row mt-2 mb-4">
-        <div class="col-md-6">
-            <label for="member_name_text" class="form-label">Search Members</label>
-            <input unicorn:model.debounce-500="membername" id="member_name_text" class="form-control" type="text" placeholder="Enter member name" id="member-name" />
-        </div>
-    </div>
+<div class="mx-auto">
 {% with searched_mems=searched_members %}
 {% with pagination_items=searched_mems.pagination_items tab_type=searched_mems.tab_type %}
-    <table class="table table-responsive-md table-hover mt-4">
-        <thead>
-            <tr>
-                <th scope="col" colspan="2" class="align-middle fit">Actions</th>
-                <th scope="col" class="align-middle">Name</th>
-                <th scope="col" class="align-middle">Member Type</th>
-                <th scope="col" class="align-middle">Joined</th>
-                <th scope="col" class="align-middle">Exp. Date</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for member in searched_mems.members %}
-            {% with mem=member.member form=member.form %}
-            {% include 'groupridesapp/clubs/members/edit_membership_modal.html' %}
-            <tr>
-                <td class="align-middle fit">
-                    <span data-bs-toggle="tooltip" data-bs-title="Edit membership">
-                        <a href="#" data-modal-target="editMemberModal-{{ mem.id }}" data-modal-toggle="editMemberModal-{{ mem.id }}">
-                            <i class="fas fa-edit"></i>
+    <div class="pb-2 bg-transparent">
+        <label for="member_name_text" class="sr-only">Search</label>
+        <div class="relative mt-1">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
+            </div>
+            <input unicorn:model.debounce-500="membername" id="member_name_text" class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 shadow-lg" placeholder="Member search">
+        </div>
+    </div>
+    <div class="relative overflow-x-auto rounded-lg shadow-md mb-2">
+        <table class="w-full shadow-lg text-sm text-left text-gray-700 bg-white">
+            <thead class="text-xs text-gray-100 uppercase bg-gray-700">
+                <tr>
+                    <th scope="col" colspan="2" class="px-6 py-3">Actions</th>
+                    <th scope="col" class="px-6 py-3">Name</th>
+                    <th scope="col" class="px-6 py-3">Member Type</th>
+                    <th scope="col" class="px-6 py-3">Joined</th>
+                    <th scope="col" class="px-6 py-3">Exp. Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for member in searched_mems.members %}
+                {% with mem=member.member form=member.form %}
+                {% include 'groupridesapp/clubs/members/edit_membership_modal.html' %}
+                <tr class="bg-white border-b hover:bg-blue-100">
+                    <td class="px-6 py-4" width="50px">
+                        <span data-bs-toggle="tooltip" data-bs-title="Edit membership">
+                            <a href="#" data-modal-target="editMemberModal-{{ mem.id }}" data-modal-toggle="editMemberModal-{{ mem.id }}">
+                                <i class="fas fa-edit text-blue-700"></i>
+                            </a>
+                        </span>
+                    </td>
+                    <td class="px-6 py-4" width="50px">
+                        {% say_deactivate tab_type=tab_type active=mem.active as say_deactivate %}
+                        <a
+                            href="#"
+                            hx-post="{% url 'club_member_activation' _slug=slug club_id=club_id membership_id=mem.id tab_type=tab_type %}"
+                            hx-confirm="Are you sure you want to {{ say_deactivate|yesno:'deactivate,activate' }} {{ mem.user.first_name }} {{ mem.user.last_name }}'s membership?"
+                            hx-target="body"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="{{ say_deactivate|yesno:'Deactivate,Activate' }} member"
+                        >
+                            {% if tab_type == "active" or mem.active == True %}
+                                <i class="fa-solid fa-x fa" style="color: red;"></i>
+                            {% else %}
+                                <i class="fa-solid fa-circle-plus" style="color: green;"></i>
+                            {% endif %}
                         </a>
-                    </span>
-                </td>
-                <td class="align-middle fit">
-                    {% say_deactivate tab_type=tab_type active=mem.active as say_deactivate %}
-                    <a
-                        href="#"
-                        hx-post="{% url 'club_member_activation' _slug=slug club_id=club_id membership_id=mem.id tab_type=tab_type %}"
-                        hx-confirm="Are you sure you want to {{ say_deactivate|yesno:'deactivate,activate' }} {{ mem.user.first_name }} {{ mem.user.last_name }}'s membership?"
-                        hx-target="body"
-                        data-bs-toggle="tooltip"
-                        data-bs-title="{{ say_deactivate|yesno:'Deactivate,Activate' }} member"
-                    >
-                        {% if tab_type == "active" or mem.active == True %}
-                            <i class="fa-solid fa-x fa" style="color: red;"></i>
-                        {% else %}
-                            <i class="fa-solid fa-circle-plus" style="color: green;"></i>
-                        {% endif %}
-                    </a>
-                </td>
-                <td class="align-middle">{{mem.user.last_name}}, {{mem.user.first_name}}</td>
-                <td class="align-middle">{{mem.membership_type_label}}</td>
-                <td class="align-middle">{{mem.create_date|date:"M j, Y"}}</td>
-                {% if mem.expired %}
-                    <td class="align-middle" style="color: red;">{{mem.membership_expires|date:"M j, Y"}}</td>
-                {% else %}
-                    <td class="align-middle">{{mem.membership_expires|date:"M j, Y"}}</td>
-                {% endif %}
-            </tr>
-            {% endwith %}
-        {% endfor %}
-        </tbody>
-    </table>
+                    </td>
+                    <td class="px-6 py-4">{{mem.user.last_name}}, {{mem.user.first_name}}</td>
+                    <td class="px-6 py-4">{{mem.membership_type_label}}</td>
+                    <td class="px-6 py-4">{{mem.create_date|date:"M j, Y"}}</td>
+                    {% if mem.expired %}
+                        <td class="px-6 py-4" style="color: red;">{{mem.membership_expires|date:"M j, Y"}}</td>
+                    {% else %}
+                        <td class="px-6 py-4">{{mem.membership_expires|date:"M j, Y"}}</td>
+                    {% endif %}
+                </tr>
+                {% endwith %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% if searched_mems.page_count > 1 %}
         {% include 'groupridesapp/pagination.html' %}
     {% endif %}
