@@ -4,22 +4,16 @@
 {% load compress %}
 <html class="dark">
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Link to page favicon.ico to display in location Bar-->
     <link rel="icon" href="{% static 'images/favicon.png' %}">
 
     {% compress css %}
     <link rel="stylesheet" href="{% static 'src/output.css' %}">
     {% endcompress %}
 
-    <!-- reference to your installed Font Awesome Free package's files here -->
     <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
     <link href="{% static 'fontawesomefree/css/all.min.css' %}" rel="stylesheet" type="text/css">
-
-    <!-- Custom CSS -->
     <script
             src="https://code.jquery.com/jquery-3.6.1.min.js"
             integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
@@ -36,7 +30,6 @@
             {% block content %}
             {% endblock %}
         </main>
-        <!-- Bootstrap JS -->
         <script src="{% static 'flowbite/dist/flowbite.js' %}"></script>
         <script src="{% static 'groupridesapp/htmx/htmx.min.js' %}"></script>
     </div>

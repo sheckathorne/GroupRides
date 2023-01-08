@@ -87,38 +87,12 @@ class ClubMembershipForm(forms.ModelForm):
             ),
         )
 
-        info_icon = '<i class="fa-solid fa-circle-info"></i>'
-        popover_content = (f"<i>Each role includes the abilities of the roles below them, "
-                           f"even if not explicitly specified.</i><br><br>"
-                           f"<b>Creator</b> - The founder of the club. Has complete management control over the club, "
-                           f"including the ability to disband it altogether. Once made a creator, the member cannot be "
-                           f"removed or demoted to a lesser role.<br><br>"
-                           f"<b>Admin</b> - Can modify members&#39; roles, respond to membership "
-                           f"requests, and remove members.<br><br>"
-                           f"<b>Ride Leader</b> - Can create events and rides that "
-                           f"are associated with the club.<br><br>"
-                           f"<b>Route Contributor</b> - Can create routes to be used in rides that are "
-                           f"associated with the club. Any route created by a <i>Route Contributor</i> are available "
-                           f"to all <i>Ride Leader</i>s for use in their rides.<br><br>"
-                           f"<b>Paid Member</b> - Can join members-only rides that "
-                           f"are associated with the club.<br><br>"
-                           f"<b>Unpaid Member</b> - Can view club rides but cannot join them unles they are set "
-                           f"to &#39Open&#39.<br><br>"
-                           f"<b>Non-Member</b> - Has no club priveleges.")
+        info_icon = f"<button data-popover-target='membership-popover' data-popover-placement='bottom' " \
+                    f"data-popover-trigger='click' type='button'><i class='fa-solid fa-circle-info'></i></button>"
 
-        popover = (
-            f"<a "
-            f"tabindex='0' "
-            f"role='button' "
-            f"data-bs-html=true "
-            f"data-bs-toggle='popover' "
-            f"data-bs-trigger='focus' "
-            f"data-bs-title='<h5>Member Types</h5>' "
-            f"data-bs-content='{popover_content}'>"
-            f"{info_icon}</a>")
         membership_type_label = self.fields['membership_type'].label + " "
 
-        self.fields['membership_type'].label = membership_type_label + popover
+        self.fields['membership_type'].label = membership_type_label + info_icon
         self.fields['membership_type'].disabled = member_dropdown_disabled
         self.fields['membership_expires'].disabled = member_dropdown_disabled
         self.fields["active"].disabled = member_dropdown_disabled

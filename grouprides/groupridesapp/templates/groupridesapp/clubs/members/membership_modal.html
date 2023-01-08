@@ -1,6 +1,8 @@
 {% load crispy_forms_tags %}
-<div id="editMemberModal-{{ mem.id }}" data-modal-target="editMemberModal-{{ mem.id }}" tabindex="-1" aria-hidden="true" data-modal-placement="center-center"
+
+<div id="editMemberModal-{{ mem.id }}" data-modal-target="editMemberModal-{{ mem.id }}" tabindex="-1" aria-hidden="true" data-modal-placement="top-center"
      class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full">
+    {% include 'groupridesapp/clubs/members/membership_popover.html' %}
     <form method="post" action="{% url 'edit_club_member' _slug=slug club_id=club_id membership_id=mem.id %}">
     <div class="relative w-full h-full max-w-md md:h-auto">
         <div class="relative bg-white rounded-lg shadow">
