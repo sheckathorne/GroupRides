@@ -1,6 +1,3 @@
-const joinRideModal = document.getElementById('joinRideModal')
-const leaveRideModal = document.getElementById('leaveRideModal')
-
 function instantiateModal(e, modalId, formId, attributeName, action, modalAction) {
     const targetEl = document.getElementById(modalId)
 
@@ -16,8 +13,10 @@ function instantiateModal(e, modalId, formId, attributeName, action, modalAction
     } else if ( modalAction === 'hide') {
        options = {
             onHide: () => {
-                const backdrop = document.querySelector('modal-backdrop')
-                document.querySelector('modal-backdrop').remove();
+                const backdrop = document.querySelector('[modal-backdrop]')
+                if ( backdrop ) {
+                    backdrop.remove();
+                }
             },
         }
     }

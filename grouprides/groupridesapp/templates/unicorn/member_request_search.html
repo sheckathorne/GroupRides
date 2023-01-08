@@ -1,45 +1,54 @@
 {% load groupridesapp_extras %}
 {% load static %}
 {% with searched_reqs=searched_requests %}
-<div>
-    <div class="grid md:grid-cols-12">
-        <div class="md:col-span-6">
-            <label for="member_name_text" class="form-label">Search Join Requests</label>
-            <input unicorn:model.debounce-500="membername" id="member_name_text" class="form-control" type="text" placeholder="Enter member name" id="member-name" />
+<div class="mx-auto">
+    <div class="grid md:grid-cols-12 gap-2 mb-2">
+        <div class="xl:col-span-4 md:col-span-6 col-span-12">
+            <div class="bg-transparent">
+                <label for="member_name_text" class="sr-only">Search</label>
+                <div class="relative mt-1">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
+                    </div>
+                    <input unicorn:model.debounce-500="membername" id="member_name_text" class="w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 shadow-lg" placeholder="Member search">
+                </div>
+            </div>
         </div>
-        <div class="col-md-6">
-            <label for="selected_status" class="form-label">Filter Status</label>
-            <select unicorn:model="selected_status" id="selected_status" class="form-select" type="text" placeholder="Select Status" id="selected_status">
-                <option value="">Select Status</option>
-                {% for choice in searched_reqs.status_choices %}
-                    <option value="{{ choice.value }}">{{ choice.label }}</option>
-                {% endfor %}
-            </select>
+        <div class="xl:col-span-4 md:col-span-6 col-span-12">
+            <label for="selected_status" class="sr-only">Filter Status</label>
+            <div class="relative mt-1 w-full">
+                <select unicorn:model="selected_status" id="selected_status" class="select w-full p-2 pl-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 shadow-lg" placeholder="Select Status" id="selected_status">
+                    <option value="" class="text-gray-200">Select Status</option>
+                    {% for choice in searched_reqs.status_choices %}
+                        <option value="{{ choice.value }}">{{ choice.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
     </div>
 {% with pagination_items=searched_reqs.pagination_items tab_type=searched_reqs.tab_type members_on_page=searched_reqs.members %}
     {% contains_pending_requests members=members_on_page as page_has_pending_requests %}
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left text-gray-500">
-            <thead>
+    <div class="relative overflow-x-auto rounded-lg shadow-md mb-2">
+        <table class="w-full shadow-lg text-sm text-left text-gray-700 bg-white">
+            <thead class="text-xs text-gray-100 uppercase bg-gray-700">
                 <tr>
                     {% if page_has_pending_requests %}
-                        <th scope="col" colspan="2" class="align-middle fit">Actions</th>
+                        <th scope="col" colspan="2" class="px-6 py-3">Actions</th>
                     {% endif %}
-                    <th scope="col" class="align-middle">Name</th>
-                    <th scope="col" class="align-middle">Request Date</th>
-                    <th scope="col" class="align-middle">Status</th>
-                    <th scope="col" class="align-middle">Response Date</th>
-                    <th scope="col" class="align-middle">Responder</th>
+                    <th scope="col" class="px-6 py-3">Name</th>
+                    <th scope="col" class="px-6 py-3">Request Date</th>
+                    <th scope="col" class="px-6 py-3">Status</th>
+                    <th scope="col" class="px-6 py-3">Response Date</th>
+                    <th scope="col" class="px-6 py-3">Responder</th>
                 </tr>
             </thead>
             <tbody>
             {% for member in members_on_page %}
             {% with mem=member.request form=member.form %}
-            {% include 'groupridesapp/clubs/members/create_membership_modal.html' %}
-                <tr>
+            {% include 'groupridesapp/clubs/members/membership_modal.html' %}
+                <tr class="bg-white border-b hover:bg-blue-100">
                     {% if page_has_pending_requests %}
-                        <td class="align-middle fit">
+                        <td class="px-6 py-4" width="50px">
                             {% if mem.status_label == "Pending" %}
                             <span data-bs-toggle="tooltip" data-bs-title="Approve request">
                                 <a href="#" data-bs-toggle="modal" data-bs-target="#editMemberModal-{{ mem.id }}">
@@ -48,7 +57,7 @@
                             </span>
                             {% endif %}
                         </td>
-                        <td class="align-middle fit">
+                        <td class="px-6 py-4" width="50px">
                             {% if mem.status_label == "Pending" %}
                             <a
                                 href="#"
@@ -63,12 +72,12 @@
                             {% endif %}
                         </td>
                     {% endif %}
-                    <td class="align-middle">{{mem.user.last_name}}, {{mem.user.first_name}}</td>
-                    <td class="align-middle">{{mem.request_date|date:"M j, Y"}}</td>
-                    <td class="align-middle">{{mem.status_label}}</td>
-                    <td class="align-middle">{{mem.response_date|date:"M j, Y"}}</td>
+                    <td class="px-6 py-4">{{mem.user.last_name}}, {{mem.user.first_name}}</td>
+                    <td class="px-6 py-4">{{mem.request_date|date:"M j, Y"}}</td>
+                    <td class="px-6 py-4">{{mem.status_label}}</td>
+                    <td class="px-6 py-4">{{mem.response_date|date:"M j, Y"}}</td>
                     {% if mem.responder %}
-                        <td class="align-middle">{{mem.responder.last_name}}, {{mem.responder.first_name}}</td>
+                        <td class="px-6 py-4">{{mem.responder.last_name}}, {{mem.responder.first_name}}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -83,5 +92,4 @@
     {% endif %}
 {% endwith %}
 {% endwith %}
-<script src="{% static 'groupridesapp/js/club_member_management.js' %}"></script>
 </div>
