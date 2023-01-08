@@ -1,7 +1,6 @@
 import datetime
 
 import pytz
-from crispy_tailwind.tailwind import CSSContainer
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import Select, ModelChoiceField
@@ -62,10 +61,9 @@ class ClubMembershipForm(forms.ModelForm):
         if member:
             member_dropdown_disabled = (member.membership_type == ClubMembership.MemberType.Creator.value)
 
-        css = css_container()
         super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
-        self.helper.css_container = css
+        self.helper.css_container = css_container()
         self.helper.layout = Layout(
             form_row(
                 dropdown("membership_type", "member", width="col-span-12"), padding_bottom="pb-4"),
@@ -133,6 +131,7 @@ class CreateClubForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CreateClubForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
+        self.helper.css_container = css_container()
         self.helper.layout = Layout(
             Field('name', wrapper_class='mb-3', label='Club Name'),
             Field('web_url', wrapper_class='mb-3'),
@@ -175,13 +174,13 @@ class RouteChoiceField(ModelChoiceField):
 
 class CreateEventForm(forms.ModelForm):
     def __init__(self, user_clubs, user_routes, *args, **kwargs):
-        css = css_container()
+
         super().__init__(*args, **kwargs)
         self.fields['frequency'].label = 'Recurrence'
         self.fields['route'].queryset = user_routes
         self.fields['club'].queryset = user_clubs
         self.helper = FormHelper(self)
-        self.helper.css_container = css
+        self.helper.css_container = css_container()
         self.helper.layout = Layout(
             Fieldset('Ride Info',
                      form_row(text_input("name", "event"), padding_bottom="pb-2"),
@@ -272,22 +271,31 @@ class CreateRouteForm(forms.ModelForm):
         self.fields['elevation'].label = 'Elevation (ft)'
         self.fields['club'].queryset = user_clubs
         self.helper = FormHelper(self)
+        self.helper.css_container = css_container()
         self.helper.layout = Layout(
             Fieldset('Route Info',
-                     form_row(text_input("name", "route"), text_input("start_location_name", "route")),
-                     form_row(text_input("url", "route")),
+                     form_row(text_input("name", "route"), text_input("start_location_name", "route"),
+                              padding_bottom="pb-2"),
+                     form_row(text_input("url", "route"), padding_bottom="pb-2"),
                      css_class='mt-4'),
             Fieldset('Distance / Elevation',
                      form_row(
                          text_input("distance", "route"),
-                         text_input("elevation", "route")),
+                         text_input("elevation", "route"), padding_bottom="pb-2"),
                      css_class='mt-4'),
             Fieldset('Sharing',
-                     form_row(text_input("shared", "route")),
-                     form_row(dropdown("club", "route"))),
+                     form_row(Div(Field("shared", id="route_create_shared", wrapper_class="flex flex-row items-center",
+                                        css_class="ml-4"),
+                                  css_class="col-span-12 mb-1"), padding_bottom="pb-2"),
+                     form_row(dropdown("club", "route"), padding_bottom="pb-2")),
             form_row(
-                Div(StrictButton('Create Route', value="Create Route", type="submit", css_class="btn-primary w-100"),
-                    css_class="col-md-4", ))
+                Div(StrictButton('Create Route', value="Create Route", type="submit",
+                                 css_class="w-full bg-white "
+                                           "hover:bg-gradient-to-r "
+                                           "from-sky-300 to-blue-200 "
+                                           "text-gray-800 font-semibold py-2 px-4 border "
+                                           "border-gray-400 rounded shadow-lg mb-4"),
+                    css_class="col-span-4", ))
         )
 
     def fields_required(self, fields):
