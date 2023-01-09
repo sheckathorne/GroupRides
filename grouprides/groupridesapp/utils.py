@@ -175,12 +175,24 @@ def css_container():
     return css
 
 
-def text_input(field_name, id_name, width="md:col-span-4"):
-    return Field(
+def text_input(field_name, id_name, width="md:col-span-4", **kwargs):
+    label = kwargs.pop('label', None)
+
+    field = Field(
         field_name,
         id=f"{id_name}_create_{field_name}",
         css_class="w-full shadow",
         wrapper_class=width)
+
+    if label:
+        field = Field(
+            field_name,
+            id=f"{id_name}_create_{field_name}",
+            css_class="w-full shadow",
+            wrapper_class=width,
+            label=label)
+
+    return field
 
 
 def dropdown(field_name, id_name, width="md:col-span-4", onchange=""):

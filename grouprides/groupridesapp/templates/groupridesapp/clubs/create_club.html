@@ -1,8 +1,10 @@
 {% extends "groupridesapp/header.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
+<div class="w-full">
     <form method="POST" action="{% url 'create_club' %}">
         {% csrf_token %}
         {% crispy form %}
     </form>
+</div>
 {% endblock content %}

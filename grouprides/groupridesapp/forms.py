@@ -129,16 +129,23 @@ class CreateClubForm(forms.ModelForm):
         fields = ['name', 'web_url', 'logo_url', 'zip_code', 'private']
 
     def __init__(self, *args, **kwargs):
+        width = "xl:col-span-4 lg:col-span-6 md:col-span-8 col-span-12"
+        row_padding = "pb-2"
+
         super(CreateClubForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.css_container = css_container()
         self.helper.layout = Layout(
-            Field('name', wrapper_class='mb-3', label='Club Name'),
-            Field('web_url', wrapper_class='mb-3'),
-            Field('logo_url', wrapper_class='mb-3'),
-            Field('zip_code', wrapper_class='mb-3'),
-            Field('private', wrapper_class='mb-3'),
-            StrictButton('Create Club', value='Create Club', type='submit', css_class='btn-outline-primary')
+            form_row(text_input("name", "club", label='Club Name', width=width), padding_bottom=row_padding),
+            form_row(text_input("web_url", "club", width=width), padding_bottom=row_padding),
+            form_row(text_input("logo_url", "club", width=width), padding_bottom=row_padding),
+            form_row(text_input("zip_code", "club", width=width), padding_bottom=row_padding),
+            form_row(Field('private', wrapper_class='mb-3'), padding_bottom=row_padding),
+            form_row(
+                Div(StrictButton('Create Club', value="Create Club", type="submit",
+                                 css_class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 "
+                                           "rounded shadow-lg mb-4"),
+                    css_class=width,))
         )
 
         self.fields['name'].label = 'Club Name'
@@ -174,7 +181,9 @@ class RouteChoiceField(ModelChoiceField):
 
 class CreateEventForm(forms.ModelForm):
     def __init__(self, user_clubs, user_routes, *args, **kwargs):
-
+        width = "xl:col-span-4 md:col-span-6 col-span-12"
+        row_padding = "pb-2"
+        
         super().__init__(*args, **kwargs)
         self.fields['frequency'].label = 'Recurrence'
         self.fields['route'].queryset = user_routes
@@ -183,32 +192,30 @@ class CreateEventForm(forms.ModelForm):
         self.helper.css_container = css_container()
         self.helper.layout = Layout(
             Fieldset('Ride Info',
-                     form_row(text_input("name", "event"), padding_bottom="pb-2"),
-                     form_row(dropdown("privacy", "event"), dropdown("club", "event"), padding_bottom="pb-2"),
-                     form_row(dropdown("route", "event"), padding_bottom="pb-2"),
-                     form_row(text_input("max_riders", "event"), padding_bottom="pb-2"),
+                     form_row(text_input("name", "event", width=width), padding_bottom=row_padding),
+                     form_row(dropdown("privacy", "event", width=width), dropdown("club", "event", width=width),
+                              padding_bottom=row_padding),
+                     form_row(dropdown("route", "event", width=width), padding_bottom=row_padding),
+                     form_row(text_input("max_riders", "event", width=width), padding_bottom=row_padding),
                      css_class='my-4'),
             Fieldset('Pace',
                      form_row(
-                         dropdown("group_classification", "event"), padding_bottom="pb-2"),
+                         dropdown("group_classification", "event", width=width), padding_bottom=row_padding),
                      form_row(
-                         text_input("lower_pace_range", "event"),
-                         text_input("upper_pace_range", "event"), padding_bottom="pb-2"),
+                         text_input("lower_pace_range", "event", width=width),
+                         text_input("upper_pace_range", "event", width=width), padding_bottom=row_padding),
                      css_class='my-4'),
             Fieldset('Date / Time / Recurring',
-                     form_row(text_input("start_date", "event"), text_input("end_date", "event"),
-                              padding_bottom="pb-2"),
-                     form_row(dropdown("time_zone", "event"), text_input("ride_time", "event"), padding_bottom="pb-2"),
-                     form_row(dropdown("frequency", "event"), padding_bottom="pb-2"),
-                     InlineCheckboxes("weekdays", label="", wrapper_class="mb-3"), padding_bottom="pb-4"),
+                     form_row(text_input("start_date", "event", width=width), text_input("end_date", "event", width=width),
+                              padding_bottom=row_padding),
+                     form_row(dropdown("time_zone", "event", width=width), text_input("ride_time", "event", width=width), padding_bottom=row_padding),
+                     form_row(dropdown("frequency", "event", width=width), padding_bottom=row_padding),
+                     InlineCheckboxes("weekdays", label="", wrapper_class="mb-3")),
             form_row(
                 Div(StrictButton('Create Ride', value="Create Ride", type="submit",
-                                 css_class="w-full bg-white "
-                                           "hover:bg-gradient-to-r "
-                                           "from-sky-300 to-blue-200 "
-                                           "text-gray-800 font-semibold py-2 px-4 border "
-                                           "border-gray-400 rounded shadow-lg mb-4"),
-                    css_class="col-span-4", ))
+                                 css_class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 "
+                                           "rounded shadow-lg mb-4"),
+                    css_class=width + " mt-4", ))
         )
 
         self.fields["weekdays"].label = ''
@@ -264,6 +271,8 @@ class CreateEventForm(forms.ModelForm):
 
 class CreateRouteForm(forms.ModelForm):
     def __init__(self, user_clubs, *args, **kwargs):
+        width = "xl:col-span-4 md:col-span-6 col-span-12"
+        row_padding = "pb-2"
         self.user = kwargs.pop('user', None)
         super(CreateRouteForm, self).__init__(*args, **kwargs)
         self.fields['start_location_name'].label = 'Start Location Name'
@@ -274,28 +283,26 @@ class CreateRouteForm(forms.ModelForm):
         self.helper.css_container = css_container()
         self.helper.layout = Layout(
             Fieldset('Route Info',
-                     form_row(text_input("name", "route"), text_input("start_location_name", "route"),
-                              padding_bottom="pb-2"),
-                     form_row(text_input("url", "route"), padding_bottom="pb-2"),
+                     form_row(text_input("name", "route", width=width), text_input("start_location_name", "route",
+                                                                                   width=width),
+                              padding_bottom=row_padding),
+                     form_row(text_input("url", "route", width=width), padding_bottom=row_padding),
                      css_class='mt-4'),
             Fieldset('Distance / Elevation',
                      form_row(
-                         text_input("distance", "route"),
-                         text_input("elevation", "route"), padding_bottom="pb-2"),
+                         text_input("distance", "route", width=width),
+                         text_input("elevation", "route", width=width), padding_bottom=row_padding),
                      css_class='mt-4'),
             Fieldset('Sharing',
                      form_row(Div(Field("shared", id="route_create_shared", wrapper_class="flex flex-row items-center",
                                         css_class="ml-4"),
-                                  css_class="col-span-12 mb-1"), padding_bottom="pb-2"),
-                     form_row(dropdown("club", "route"), padding_bottom="pb-2")),
+                                  css_class="col-span-12 mb-1"), padding_bottom=row_padding),
+                     form_row(dropdown("club", "route", width=width), padding_bottom=row_padding)),
             form_row(
                 Div(StrictButton('Create Route', value="Create Route", type="submit",
-                                 css_class="w-full bg-white "
-                                           "hover:bg-gradient-to-r "
-                                           "from-sky-300 to-blue-200 "
-                                           "text-gray-800 font-semibold py-2 px-4 border "
-                                           "border-gray-400 rounded shadow-lg mb-4"),
-                    css_class="col-span-4", ))
+                                 css_class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 "
+                                           "rounded shadow-lg mb-4"),
+                    css_class=width, ))
         )
 
     def fields_required(self, fields):
