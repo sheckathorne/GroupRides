@@ -216,14 +216,12 @@ def assign_user_colors(event_comments):
 
     distinct_users = event_comments.values('user').distinct()
 
+    distinct_users = [{"user": x } for x in range(100)]
+
     for i, user in enumerate(distinct_users):
-        user_list_size_factor = i // len(colors)
-        if user_list_size_factor > 0:
-            j = i
-            j = j - (len(colors) * user_list_size_factor)
-            user["color"] = colors[j]
-        else:
-            user["color"] = colors[i]
+        user["color"] = colors[i % len(colors)]
+
+    print(distinct_users)
 
     final_data = []
     for comment in event_comments:
