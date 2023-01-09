@@ -45,7 +45,7 @@
         <form method="POST" action="{% url 'ride_comments' event.id %}">
             {% csrf_token %}
             <div class="mb-2">
-                {{ form|crispy }}
+                {% crispy form %}
             </div>
             <button class="btn btn-outline-primary" type="submit">
                 Add Comment

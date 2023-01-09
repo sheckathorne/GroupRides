@@ -4,6 +4,7 @@ import pytz
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import Select, ModelChoiceField
+from tinymce.widgets import TinyMCE
 
 from .models import EventOccurenceMember, EventOccurenceMessage, \
     Club, Event, Route, ClubMembership, ClubMembershipRequest
@@ -37,8 +38,21 @@ class CreateEventOccurenceMessageForm(forms.ModelForm):
         fields = ['message']
 
     def __init__(self, *args, **kwargs):
-        super(CreateEventOccurenceMessageForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['message'].label = ''
+        self.helper = FormHelper(self)
+        self.helper.css_container = css_container()
+        self.helper.layout = Layout(
+            form_row(
+                Field("message", wrapper_class="col-span-12"), padding_bottom="pb-4"),
+            Div(
+                StrictButton('Add Comment', value="Confirm", type="submit",
+                             css_class=f"w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 "
+                                       f"rounded shadow-lg mb-4"),
+
+                css_class="modal-footer"
+            ),
+        )
 
 
 class ClubMembershipForm(forms.ModelForm):
@@ -74,12 +88,8 @@ class ClubMembershipForm(forms.ModelForm):
                      padding_bottom="pb-4"),
             Div(
                 StrictButton('Confirm', value="Confirm", type="submit",
-                             css_class="w-full bg-white "
-                                       "hover:bg-gradient-to-r "
-                                       "from-sky-300 to-blue-200 "
-                                       "text-gray-800 font-semibold py-2 "
-                                       "px-4 border "
-                                       "border-gray-400 rounded shadow-lg mb-4"),
+                             css_class=f"w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 "
+                                       f"rounded shadow-lg mb-4"),
 
                 css_class="modal-footer"
             ),
@@ -184,7 +194,7 @@ class CreateEventForm(forms.ModelForm):
     def __init__(self, user_clubs, user_routes, *args, **kwargs):
         width = "xl:col-span-4 md:col-span-6 col-span-12"
         row_padding = "pb-2"
-        
+
         super().__init__(*args, **kwargs)
         self.fields['frequency'].label = 'Recurrence'
         self.fields['route'].queryset = user_routes
