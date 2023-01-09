@@ -16,19 +16,19 @@
                 {% for comment in event_comments %}
                     {% if forloop.counter|divisibleby:2 %}
                         <li class="list-group-item fw-bold">
-                            <span class="fw-bolder">
-                                {{ comment.user.first_name }}
-                                {{ comment.user.last_name }} -
-                                {{ comment.time_since_message }}</span>
-                             <p>{{ comment.message|safe }}</p>
+                            <span class="fw-bolder {{ comment.color }}">
+                                {{ comment.comment.user.first_name }}
+                                {{ comment.comment.user.last_name }}</span><span class="fw-bolder"> -
+                                {{ comment.comment.time_since_message }}</span>
+                             <p>{{ comment.comment.message|safe }}</p>
                         </li>
                     {% else %}
                         <li class="list-group-item fw-bold" style="background-color: #cccccc;">
-                            <span class="fw-bolder">
-                                {{ comment.user.first_name }}
-                                {{ comment.user.last_name }} -
-                                {{ comment.time_since_message }}</span>
-                            <p>{{ comment.message|safe }}</p>
+                            <span class="fw-bolder {{ comment.color }}">
+                                {{ comment.comment.user.first_name }}
+                                {{ comment.comment.user.last_name }}</span><span class="fw-bolder"> -
+                                {{ comment.comment.time_since_message }}</span>
+                            <p>{{ comment.comment.message|safe }}</p>
                         </li>
                     {% endif %}
                 {% empty %}
@@ -47,9 +47,6 @@
             <div class="mb-2">
                 {% crispy form %}
             </div>
-            <button class="btn btn-outline-primary" type="submit">
-                Add Comment
-            </button>
         </form>
     </div>
 </div>

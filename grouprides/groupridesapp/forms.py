@@ -46,11 +46,9 @@ class CreateEventOccurenceMessageForm(forms.ModelForm):
             form_row(
                 Field("message", wrapper_class="col-span-12"), padding_bottom="pb-4"),
             Div(
-                StrictButton('Add Comment', value="Confirm", type="submit",
+                StrictButton('Add Comment', value="Add", type="submit",
                              css_class=f"w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 "
                                        f"rounded shadow-lg mb-4"),
-
-                css_class="modal-footer"
             ),
         )
 

@@ -206,3 +206,28 @@ def dropdown(field_name, id_name, width="md:col-span-4", onchange=""):
 def form_row(*args, padding_bottom="pb-0", **kwargs):
     row_id = 'generic-row' if 'row_id' not in kwargs else kwargs['row_id']
     return Div(*args, css_class=f"grid gap-2 md:grid-cols-12 {padding_bottom}", id=row_id)
+
+
+def assign_user_colors(event_comments):
+    colors = [
+        "text-red-800", "text-orange-500", "text-green-500", "text-cyan-500", "text-indigo-500", "text-fuchsia-500",
+        "text-rose-500", "text-coolgray-700"
+    ]
+
+    distinct_users = event_comments.values('user').distinct()
+
+    for i, user in enumerate(distinct_users):
+        user_list_size_factor = i // len(colors)
+        if user_list_size_factor > 0:
+            j = i
+            j = j - (len(colors) * user_list_size_factor)
+            user["color"] = colors[j]
+        else:
+            user["color"] = colors[i]
+
+    final_data = []
+    for comment in event_comments:
+        color = next((u for u in distinct_users if u['user'] == comment.user.id), {"color": "text-black"})["color"]
+        final_data.append({"comment": comment, "color": color})
+
+    return final_data

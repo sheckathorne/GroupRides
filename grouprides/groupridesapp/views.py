@@ -14,7 +14,7 @@ from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, 
 from .paginators import CustomPaginator
 from .utils import days_from_today, gather_available_rides, get_filter_fields, \
     get_event_comments, get_members_by_type, \
-    distinct_errors
+    distinct_errors, assign_user_colors
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
@@ -202,14 +202,18 @@ class EventComments(TemplateView):
         form = CreateEventOccurenceMessageForm()
         event = get_object_or_404(EventOccurence, id=event_occurence_id)
         event_comments = get_event_comments(occurence_id=event_occurence_id, order_by='create_date')
+        comments_with_user_color = assign_user_colors(event_comments)
 
         pagination = CustomPaginator(
             request,
-            event_comments,
+            comments_with_user_color,
             5,
             on_each_side=2,
             on_ends=1
         )
+
+        for x in pagination.item_list:
+            print(x)
 
         return render(request=request,
                       template_name="groupridesapp/rides/ride_comments.html",

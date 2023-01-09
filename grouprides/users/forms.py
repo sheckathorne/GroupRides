@@ -27,11 +27,9 @@ class UserRegistrationForm(UserCreationForm):
             Field("password1", css_class="shadow-lg", wrapper_class="mb-4"),
             Field("password2", css_class="shadow-lg", wrapper_class="mb-4"),
 
-            StrictButton("Sign Up", value="Register", type="submit",
-                         css_class="w-full bg-white "
-                                   "hover:bg-gradient-to-r from-sky-300 to-blue-200 "
-                                   "text-gray-800 font-semibold py-2 px-4 border "
-                                   "border-gray-400 rounded shadow-lg mb-4")
+            StrictButton('Sign Up', value="Sign Up", type="submit",
+                         css_class=f"w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 "
+                                   f"rounded shadow-lg mb-4")
         )
 
     class Meta:
@@ -58,9 +56,7 @@ class UserLoginForm(AuthenticationForm):
             Field("username", css_class="shadow-lg", wrapper_class="mb-4", placeholder="Username or Email"),
             Field("password", css_class="shadow-lg", wrapper_class="mb-4", placeholder="Password"),
             Field("captcha", css_class="shadow-lg rounded-lg", wrapper_class="mb-4", placeholder="Enter Recaptcha"),
-            StrictButton("Login", value="Login", type="submit",
-                         css_class="w-full bg-white "
-                                   "hover:bg-gradient-to-r from-sky-300 to-blue-200 "
-                                   "text-gray-800 font-semibold py-2 px-4 border "
-                                   "border-gray-400 rounded shadow-lg")
+            StrictButton('Log In', value="Login", type="submit",
+                         css_class=f"w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 "
+                                   f"rounded shadow-lg mb-4")
         )

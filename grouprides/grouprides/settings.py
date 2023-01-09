@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     'django_unicorn',
     'captcha',
     'compressor',
-    'theme',
 ]
 
 COMPRESS_ROOT = BASE_DIR / 'static'
@@ -174,6 +173,7 @@ AUTH_USER_MODEL = "users.CustomUser"
 TINYMCE_DEFAULT_CONFIG = {
     'custom_undo_redo_levels': 100,
     'selector': 'textarea',
+    'menubar': False,
     'toolbar2': 'bold italic underline blockquote | alignleft aligncenter alignright alignjustify '
                '| bullist numlist | outdent indent | table | link image | codesample | preview code | tiny_mce_wiris_formulaEditor tiny_mce_wiris_formulaEditorChemistry',
 
