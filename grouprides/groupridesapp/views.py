@@ -46,7 +46,7 @@ def homepage(request):
 def my_clubs(request):
     clubs = ClubMembership.objects.filter(
         user=request.user
-    ).order_by('membership_type')
+    ).order_by('membership_type', 'club__name')
 
     return render(request=request,
                   template_name="groupridesapp/clubs/my_clubs.html",
@@ -277,6 +277,7 @@ class CreateClub(TemplateView):
                 }
 
                 Club.objects.create(**data)
+                messages.success(request, 'Successfully created your club!')
                 return HttpResponseRedirect('/')
             else:
                 for error in list(form.errors.values()):

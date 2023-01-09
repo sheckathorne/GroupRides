@@ -7,8 +7,6 @@ register = template.Library()
 
 @register.simple_tag
 def can_register_to_ride(user, event_occurence):
-    print(user, event_occurence)
-    print(event_occurence.can_be_joined_by(user))
     return event_occurence.can_be_joined_by(user)
 
 

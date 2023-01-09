@@ -1403,6 +1403,10 @@ input:checked + .toggle-bg {
   width: 24rem;
 }
 
+.w-3\/5 {
+  width: 60%;
+}
+
 .max-w-2xl {
   max-width: 42rem;
 }
@@ -1551,6 +1555,10 @@ input:checked + .toggle-bg {
 
 .justify-between {
   justify-content: space-between;
+}
+
+.justify-items-center {
+  justify-items: center;
 }
 
 .gap-2 {

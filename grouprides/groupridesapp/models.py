@@ -97,6 +97,7 @@ class Club(models.Model):
     create_date = models.DateField("Date Created", auto_now_add=True)
     created_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     slug = models.SlugField()
+    description = HTMLField("Club description", max_length=3000)
 
     def save(self, *args, **kwargs):
         created = self.pk is None

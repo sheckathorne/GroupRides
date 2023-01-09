@@ -14,10 +14,15 @@
             <p class="mb-3 font-normal text-gray-700">Membership Level: {{ membership.level }}</p>
             <p class="mb-3 font-normal text-gray-700">Membership Expires: {{ membership.membership_expires }}</p>
            {% if membership.user_can_manage_club %}
-            <a href="{% url 'club_member_management' _slug=membership.club.slug club_id=membership.club.id tab_type='active' %}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            <a href="{% url 'club_member_management' _slug=membership.club.slug club_id=membership.club.id tab_type='active' %}" class="justify-center w-3/5 inline-flex items-center px-3 py-2 mb-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                <i class="fa fa-user pr-2" aria-hidden="true"></i>
                 Manage Club Members
             </a>
-            {% endif   %}
+            {% endif %}
+            <a href="/rides/?club={{ membership.club.slug }}&group_classification=&distance__lt=&distance__gt=" class="w-3/5 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                <i class="fa-solid fa-bicycle pr-2"></i>
+                Upcoming Club Rides
+            </a>
         </div>
     </div>
     {% empty %}
