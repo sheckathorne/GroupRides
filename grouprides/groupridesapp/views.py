@@ -212,9 +212,6 @@ class EventComments(TemplateView):
             on_ends=1
         )
 
-        for x in pagination.item_list:
-            print(x)
-
         return render(request=request,
                       template_name="groupridesapp/rides/ride_comments.html",
                       context={
