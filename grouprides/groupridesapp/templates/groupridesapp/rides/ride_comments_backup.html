@@ -1,0 +1,53 @@
+{% extends "groupridesapp/header.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<button class="btn btn-outline-primary" onclick="location.href='{% url 'my_rides' %}'">Back to Rides</button>
+<div class="card border-primary mt-2">
+    <h5 class="card-header bg-primary bg-gradient text-light">
+        Comments for {{ event.occurence_name }} on {{ event.ride_date|date:"M d, Y" }}
+    </h5>
+    <div class="card-body">
+        {% if event_comments.paginator.num_pages > 1 %}
+            {% include 'groupridesapp/pagination.html' %}
+        {% endif %}
+        <div class="row">
+            <div class="col">
+                <ul class="list-group mb-2">
+                {% for comment in event_comments %}
+                    {% if forloop.counter|divisibleby:2 %}
+                        <li class="list-group-item fw-bold">
+                            <span class="fw-bolder {{ comment.color }}">
+                                {{ comment.comment.user.first_name }}
+                                {{ comment.comment.user.last_name }}</span><span class="fw-bolder"> -
+                                {{ comment.comment.time_since_message }}</span>
+                             <p>{{ comment.comment.message|safe }}</p>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item fw-bold" style="background-color: #cccccc;">
+                            <span class="fw-bolder {{ comment.color }}">
+                                {{ comment.comment.user.first_name }}
+                                {{ comment.comment.user.last_name }}</span><span class="fw-bolder"> -
+                                {{ comment.comment.time_since_message }}</span>
+                            <p>{{ comment.comment.message|safe }}</p>
+                        </li>
+                    {% endif %}
+                {% empty %}
+                    No comments for this ride
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% if event_comments.paginator.num_pages > 1 %}
+            {% include 'groupridesapp/pagination.html' %}
+        {% endif %}
+        <hr/>
+        <h5>Add your comment below:</h5>
+        <form method="POST" action="{% url 'ride_comments' event.id %}">
+            {% csrf_token %}
+            <div class="mb-2">
+                {% crispy form %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}

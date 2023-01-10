@@ -1407,6 +1407,10 @@ input:checked + .toggle-bg {
   width: 60%;
 }
 
+.w-3\/4 {
+  width: 75%;
+}
+
 .max-w-2xl {
   max-width: 42rem;
 }
@@ -2041,6 +2045,10 @@ input:checked + .toggle-bg {
   padding-left: 0.5rem;
 }
 
+.pt-4 {
+  padding-top: 1rem;
+}
+
 .text-left {
   text-align: left;
 }
@@ -2105,6 +2113,10 @@ input:checked + .toggle-bg {
 
 .font-light {
   font-weight: 300;
+}
+
+.font-extrabold {
+  font-weight: 800;
 }
 
 .uppercase {
@@ -3032,6 +3044,10 @@ input:checked + .toggle-bg {
 
   .xl\:w-5\/6 {
     width: 83.333333%;
+  }
+
+  .xl\:w-1\/2 {
+    width: 50%;
   }
 }
 

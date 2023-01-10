@@ -210,18 +210,14 @@ def form_row(*args, padding_bottom="pb-0", **kwargs):
 
 def assign_user_colors(event_comments):
     colors = [
-        "text-red-800", "text-orange-500", "text-green-500", "text-cyan-500", "text-indigo-500", "text-fuchsia-500",
+        "text-red-800", "text-green-500", "text-orange-500", "text-cyan-500", "text-fuchsia-500", "text-indigo-500",
         "text-rose-500", "text-coolgray-700"
     ]
 
     distinct_users = event_comments.values('user').distinct()
 
-    distinct_users = [{"user": x } for x in range(100)]
-
     for i, user in enumerate(distinct_users):
         user["color"] = colors[i % len(colors)]
-
-    print(distinct_users)
 
     final_data = []
     for comment in event_comments:
