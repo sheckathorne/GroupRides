@@ -20,7 +20,6 @@
 
         {% include 'tailwind/layout/radioselect.html' %}
     {% elif field|is_checkboxselectmultiple %}
-            SAH BITCH
         <div class="{% if field_class %}{{ field_class }}{% else %}{% endif %}"{% if flat_attrs %} {{ flat_attrs|safe }}{% endif %}>
         {% include 'tailwind/layout/checkboxselectmultiple.html' %}
     {% else %}
@@ -31,6 +30,4 @@
     {% include 'tailwind/layout/help_text_and_errors.html' %}
 
     </{% if tag %}{{ tag }}{% else %}div{% endif %}>
-
-
 {% endif %}

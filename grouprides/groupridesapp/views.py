@@ -1,5 +1,6 @@
 import datetime
 from django.core.exceptions import ValidationError
+from django.forms import model_to_dict
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.utils import IntegrityError
@@ -10,7 +11,7 @@ from .models import Club, EventOccurence, EventOccurenceMember, \
 from django.db.models import Q
 from django.urls import reverse
 from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, \
-    CreateClubForm, CreateEventForm, CreateRouteForm, ClubMembershipForm
+    ClubForm, CreateEventForm, CreateRouteForm, ClubMembershipForm
 from .paginators import CustomPaginator
 from .utils import days_from_today, gather_available_rides, get_filter_fields, \
     get_event_comments, get_members_by_type, \
@@ -47,10 +48,6 @@ def my_clubs(request):
     clubs = ClubMembership.objects.filter(
         user=request.user
     ).order_by('membership_type', 'club__name')
-
-    for membership in clubs:
-        print(membership.club.logo.url)
-
 
     return render(request=request,
                   template_name="groupridesapp/clubs/my_clubs.html",
@@ -261,19 +258,33 @@ class EventComments(TemplateView):
         return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
 
 
-class CreateClub(TemplateView):
+class EditClub(TemplateView):
     def get(self, request, **kwargs):
-        form = CreateClubForm()
+        club_id = kwargs['club_id']
+        club_instance = get_object_or_404(Club, pk=club_id)
+        club = model_to_dict(club_instance)
+        form = ClubForm(initial=club, submit_text="Edit Club")
+
         return render(
             request=request,
-            template_name="groupridesapp/clubs/create_club.html",
+            template_name="groupridesapp/clubs/club.html",
+            context={"form": form}
+        )
+
+
+class CreateClub(TemplateView):
+    def get(self, request, **kwargs):
+        form = ClubForm(submit_text="Create Club")
+        return render(
+            request=request,
+            template_name="groupridesapp/clubs/club.html",
             context={"form": form}
         )
 
     @staticmethod
     def post(request):
         if request.method == 'POST':
-            form = CreateClubForm(request.POST)
+            form = ClubForm(request.POST)
             if form.is_valid():
                 user = request.user
                 slug = slugify(form['name'].value())
@@ -294,7 +305,7 @@ class CreateClub(TemplateView):
                 for error in list(form.errors.values()):
                     messages.error(request, error)
 
-        form = CreateClubForm()
+        form = ClubForm()
 
         return render(
             request=request,

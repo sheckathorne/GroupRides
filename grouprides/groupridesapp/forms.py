@@ -133,7 +133,7 @@ class ClubMembershipForm(forms.ModelForm):
             )
 
 
-class CreateClubForm(forms.ModelForm):
+class ClubForm(forms.ModelForm):
     class Meta:
         model = Club
         fields = ["name", "description", "web_url", "logo", "zip_code", "private"]
@@ -146,7 +146,9 @@ class CreateClubForm(forms.ModelForm):
         width = "xl:col-span-4 lg:col-span-6 md:col-span-8 col-span-12"
         row_padding = "pb-2"
 
-        super(CreateClubForm, self).__init__(*args, **kwargs)
+        self.submit_text = kwargs.pop("submit_text", "Submit")
+
+        super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.css_container = css_container()
         self.helper.layout = Layout(
@@ -157,7 +159,7 @@ class CreateClubForm(forms.ModelForm):
             form_row(text_input("zip_code", "club", width=width), padding_bottom=row_padding),
             form_row(Field('private', wrapper_class='mb-3'), padding_bottom=row_padding),
             form_row(
-                Div(StrictButton('Create Club', value="Create Club", type="submit",
+                Div(StrictButton(self.submit_text, value=self.submit_text, type="submit",
                                  css_class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 "
                                            "rounded shadow-lg mb-4"),
                     css_class=width,))

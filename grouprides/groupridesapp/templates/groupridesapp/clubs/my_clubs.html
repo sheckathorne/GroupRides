@@ -1,12 +1,10 @@
 {% extends "groupridesapp/header.html" %}
 {% block content %}
-<div class="flex flex-grid gap-2 md:grid-cols-4 sm:grid-cols-2 grid-cols-1 mb-2">
+<div class="w-full grid grid-cols-12 gap-2 mb-2">
 {% for membership in clubs %}
-    <div class="max-w-sm flex flex-col bg-white border border-gray-200 rounded-lg shadow-md">
+    <div class="xl:col-span-3 lg:col-span-4 sm:col-span-6 col-span-12 w-full bg-white border border-gray-200 rounded-lg shadow-md">
         <div>
-            <a href="#">
-                <img class="img-fluid" src="{{ membership.club.logo.url }}">
-            </a>
+            <img class="px-2 py-2 img-fluid rounded-lg" src="{{ membership.club.logo.url }}">
         </div>
         <div class="p-5 flex-col flex flex-1">
             <div>
@@ -24,7 +22,7 @@
                         <i class="fa fa-user pr-2" aria-hidden="true"></i>
                         Manage Club Members
                     </a>
-                    <a href="{% url 'club_member_management' _slug=membership.club.slug club_id=membership.club.id tab_type='active' %}" class="w-3/5 shadow-lg inline-flex items-center px-3 py-2 mb-2 text-sm font-medium text-center text-white bg-blue-700 rounded hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    <a href="{% url 'edit_club' _slug=membership.club.slug club_id=membership.club.id %}" class="w-3/5 shadow-lg inline-flex items-center px-3 py-2 mb-2 text-sm font-medium text-center text-white bg-blue-700 rounded hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                         <i class="fa-solid fa-pen-to-square pr-2"></i>
                         Edit Club
                     </a>

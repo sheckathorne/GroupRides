@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import path, include
 from . import views
-from .views import EventComments, CreateClub, CreateEvent, CreateRoute, ClubMemberManagement
+from .views import EventComments, CreateClub, CreateEvent, CreateRoute, ClubMemberManagement, EditClub
 from .decorators import user_is_ride_member, can_manage_club
 
 urlpatterns = [
@@ -34,6 +34,7 @@ urlpatterns = [
         path("joined/", views.my_clubs, name="my_clubs"),
         path("create/", CreateClub.as_view(), name="create_club"),
         path("<str:_slug>-<int:club_id>/", include([
+            path("edit/", login_required(can_manage_club(EditClub.as_view()), login_url='/login'), name="edit_club"),
             path("members/management/", include([
                 path(
                     "<str:tab_type>/",
