@@ -12,6 +12,8 @@ from django.db.models import Q, Count
 from tinymce.models import HTMLField
 from django.core.exceptions import ValidationError
 from datetime import timedelta
+from django.template.defaultfilters import slugify
+import os
 
 
 def length_of_five(value):
@@ -89,9 +91,14 @@ def create_occurences_by_frequency(event, event_freq):
 
 
 class Club(models.Model):
+    def image_upload_to(self, instance=None):
+        if instance:
+            return os.path.join('Club', slugify(self.slug), instance)
+        return None
+
     name = models.CharField("Name", max_length=255)
     web_url = models.CharField("Website", max_length=255)
-    logo_url = models.CharField("Logo URL", max_length=500)
+    logo = models.ImageField(default='default/bicycle.png', upload_to=image_upload_to, max_length=255)
     zip_code = models.CharField("Zip Code", max_length=5, validators=[numeric_chars, length_of_five])
     private = models.BooleanField("Private")
     create_date = models.DateField("Date Created", auto_now_add=True)
@@ -542,12 +549,10 @@ class EventOccurenceMessage(models.Model):
 
         current_datetime = datetime.datetime.now(tz)
         rd = relativedelta(self.create_date, current_datetime)
-
         datetime_string = self.create_date.strftime("%-m/%-d/%Y - %I:%M%p")
         mins_since_comment = abs(rd.hours) * 60 + abs(rd.minutes)
-        TWENTY_THREE_HOURS_FIFTY_NINE_MINUTES = 1439
 
-        if mins_since_comment > TWENTY_THREE_HOURS_FIFTY_NINE_MINUTES:
+        if abs(rd.days) > 0:
             return f"{datetime_string}"
         elif mins_since_comment > 60:
             return f"{abs(rd.hours)} hour{'s'[:abs(rd.hours) ^ 1]} ago"

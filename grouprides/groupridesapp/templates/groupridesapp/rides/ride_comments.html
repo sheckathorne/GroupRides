@@ -2,10 +2,29 @@
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="xl:w-1/2 md:w-3/4 w-full">
-    <div class="mb-3">
-        <span class="text-lg font-medium">
-            Comments for {{ event.occurence_name }} on {{ event.ride_date|date:"M d, Y" }}
-        </span>
+    <div class="flex flex-row justify-between mb-3 items-center">
+        <div>
+            <h5 class="card-header bg-primary bg-gradient text-light">
+                Comments for {{ event.occurence_name }} on {{ event.ride_date|date:"M d, Y" }}
+            </h5>
+        </div>
+        <div class="items-center">
+        {% if sort == "asc" %}
+            <a href="{% url 'ride_comments' ride_id %}?sort=desc">
+                <button class="py-2 px-4 text-sm font-bold bg-white hover:bg-gray-100 border border-gray-300 shadow rounded">
+                    Newest First
+                    <i class="fa-solid fa-sort-up pl-2"></i>
+                </button>
+            </a>
+        {% else %}
+            <a href="{% url 'ride_comments' ride_id %}?sort=asc">
+                <button class="py-2 px-4 text-sm font-bold bg-white hover:bg-gray-100 border border-gray-300 shadow rounded">
+                    Oldest First
+                    <i class="fa-solid fa-sort-down pl-2"></i>
+                </button>
+            </a>
+        {% endif %}
+        </div>
     </div>
     <div>
         {% if event_comments.paginator.num_pages > 1 %}
@@ -36,8 +55,7 @@
         {% if event_comments.paginator.num_pages > 1 %}
             {% include 'groupridesapp/pagination.html' %}
         {% endif %}
-        <div class="pt-4">
-            <span class="text-medium">Add your comment below:</span>
+        <div class="pt-2">
             <form method="POST" action="{% url 'ride_comments' event.id %}">
                 {% csrf_token %}
                 <div class="mb-2">

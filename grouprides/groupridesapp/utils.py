@@ -116,8 +116,15 @@ def create_pagination(f, table_prefix, page_number):
     return page_obj
 
 
-def get_event_comments(occurence_id, order_by):
-    return EventOccurenceMessage.objects.filter(event_occurence__id=occurence_id).order_by(order_by)
+def get_event_comments(occurence_id):
+    return EventOccurenceMessage.objects.filter(event_occurence__id=occurence_id)
+
+
+def sort_event_comments(comments, sort_order):
+    for comment in comments:
+        print(comment['comment'].create_date, comment['comment'].time_since_message)
+
+    return sorted(comments, key=lambda c: c['comment'].create_date, reverse=sort_order)
 
 
 def get_members_by_type(tab_type, qs):

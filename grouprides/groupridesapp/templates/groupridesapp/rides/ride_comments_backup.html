@@ -3,9 +3,14 @@
 {% block content %}
 <button class="btn btn-outline-primary" onclick="location.href='{% url 'my_rides' %}'">Back to Rides</button>
 <div class="card border-primary mt-2">
-    <h5 class="card-header bg-primary bg-gradient text-light">
-        Comments for {{ event.occurence_name }} on {{ event.ride_date|date:"M d, Y" }}
-    </h5>
+    <div class="w-3/5">
+        <h5 class="card-header bg-primary bg-gradient text-light">
+            Comments for {{ event.occurence_name }} on {{ event.ride_date|date:"M d, Y" }}
+        </h5>
+    </div>
+    <div class="w-2/5">
+        <p>Sort Button</p>
+    </div>
     <div class="card-body">
         {% if event_comments.paginator.num_pages > 1 %}
             {% include 'groupridesapp/pagination.html' %}

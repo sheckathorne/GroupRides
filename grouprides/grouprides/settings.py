@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'django_unicorn',
     'captcha',
     'compressor',
+    'image_uploader_widget',
 ]
 
 COMPRESS_ROOT = BASE_DIR / 'static'
@@ -163,6 +164,10 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'node_modules', ),
 ]
 
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -175,7 +180,8 @@ TINYMCE_DEFAULT_CONFIG = {
     'selector': 'textarea',
     'menubar': False,
     'toolbar2': 'bold italic underline blockquote | alignleft aligncenter alignright alignjustify '
-               '| bullist numlist | outdent indent | table | link image | codesample | preview code | tiny_mce_wiris_formulaEditor tiny_mce_wiris_formulaEditorChemistry',
+                '| bullist numlist | outdent indent | table | link image | codesample | preview code | '
+                'tiny_mce_wiris_formulaEditor tiny_mce_wiris_formulaEditorChemistry',
 
     'block_formats': 'Paragraph=p; Header 1=h1; Header 2=h2',
     'fontsize_formats': "8pt 10pt 12pt 14pt 16pt 18pt",

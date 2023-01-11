@@ -2,27 +2,39 @@
 {% block content %}
 <div class="flex flex-grid gap-2 md:grid-cols-4 sm:grid-cols-2 grid-cols-1 mb-2">
 {% for membership in clubs %}
-    <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-md">
-        <a href="#">
-            <img class="rounded-t-lg" src="https://stcycling.com/wp-content/uploads/2017/08/shawnee-logo.jpg" alt="" />
-        </a>
-        <div class="p-5">
+    <div class="max-w-sm flex flex-col bg-white border border-gray-200 rounded-lg shadow-md">
+        <div>
             <a href="#">
-                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900">{{ membership.club.name }}</h5>
+                <img class="img-fluid" src="{{ membership.club.logo.url }}">
             </a>
-            <p class="mb-3 font-normal text-gray-70 mb-6">Some description of the club.</p>
-            <p class="mb-3 font-normal text-gray-700">Membership Level: {{ membership.level }}</p>
-            <p class="mb-3 font-normal text-gray-700">Membership Expires: {{ membership.membership_expires }}</p>
-           {% if membership.user_can_manage_club %}
-            <a href="{% url 'club_member_management' _slug=membership.club.slug club_id=membership.club.id tab_type='active' %}" class="justify-center w-3/5 inline-flex items-center px-3 py-2 mb-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                <i class="fa fa-user pr-2" aria-hidden="true"></i>
-                Manage Club Members
-            </a>
-            {% endif %}
-            <a href="/rides/?club={{ membership.club.slug }}&group_classification=&distance__lt=&distance__gt=" class="w-3/5 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                <i class="fa-solid fa-bicycle pr-2"></i>
-                Upcoming Club Rides
-            </a>
+        </div>
+        <div class="p-5 flex-col flex flex-1">
+            <div>
+                <a href="#">
+                    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900">{{ membership.club.name }}</h5>
+                </a>
+                <p class="mb-3 font-normal text-gray-70 mb-6">{{ membership.club.description }}</p>
+                <p class="mb-3 font-normal text-gray-700">Membership Level: {{ membership.level }}</p>
+                <p class="mb-3 font-normal text-gray-700">Membership Expires: {{ membership.membership_expires }}</p>
+            </div>
+            <div class="flex-1">
+                <div class="self-baseline">
+                   {% if membership.user_can_manage_club %}
+                    <a href="{% url 'club_member_management' _slug=membership.club.slug club_id=membership.club.id tab_type='active' %}" class="w-3/5 shadow-lg inline-flex items-center px-3 py-2 mb-2 text-sm font-medium text-center text-white bg-blue-700 rounded hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <i class="fa fa-user pr-2" aria-hidden="true"></i>
+                        Manage Club Members
+                    </a>
+                    <a href="{% url 'club_member_management' _slug=membership.club.slug club_id=membership.club.id tab_type='active' %}" class="w-3/5 shadow-lg inline-flex items-center px-3 py-2 mb-2 text-sm font-medium text-center text-white bg-blue-700 rounded hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <i class="fa-solid fa-pen-to-square pr-2"></i>
+                        Edit Club
+                    </a>
+                    {% endif %}
+                    <a href="/rides/?club={{ membership.club.slug }}&group_classification=&distance__lt=&distance__gt=" class="w-3/5 shadow-lg inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <i class="fa-solid fa-bicycle pr-2"></i>
+                        Upcoming Club Rides
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
     {% empty %}

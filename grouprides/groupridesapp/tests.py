@@ -20,7 +20,6 @@ def create_club(**kwargs):
     return Club.objects.create(
         name="Group name",
         web_url="Web URL",
-        logo_url="Logo URL",
         zip_code=zip_code,
         private=True,
         created_by=user

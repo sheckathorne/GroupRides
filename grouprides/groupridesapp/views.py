@@ -14,7 +14,7 @@ from .forms import DeleteRideRegistrationForm, CreateEventOccurenceMessageForm, 
 from .paginators import CustomPaginator
 from .utils import days_from_today, gather_available_rides, get_filter_fields, \
     get_event_comments, get_members_by_type, \
-    distinct_errors, assign_user_colors
+    distinct_errors, assign_user_colors, sort_event_comments
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
@@ -47,6 +47,10 @@ def my_clubs(request):
     clubs = ClubMembership.objects.filter(
         user=request.user
     ).order_by('membership_type', 'club__name')
+
+    for membership in clubs:
+        print(membership.club.logo.url)
+
 
     return render(request=request,
                   template_name="groupridesapp/clubs/my_clubs.html",
@@ -193,20 +197,24 @@ def event_occurence_comments_click(request, event_occurence_id):
         }
 
         EventOccurenceMessageVisit.objects.update_or_create(**data, defaults={'last_visit': timezone.now()})
-        return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)))
+        return HttpResponseRedirect(reverse('ride_comments', args=(event_occurence_id,)) + "?sort=desc")
 
 
 class EventComments(TemplateView):
     def get(self, request, **kwargs):
         event_occurence_id = kwargs["event_occurence_id"]
+        sort = request.GET.get('sort', 'asc')
+
         form = CreateEventOccurenceMessageForm()
         event = get_object_or_404(EventOccurence, id=event_occurence_id)
-        event_comments = get_event_comments(occurence_id=event_occurence_id, order_by='create_date')
+        sort_asc = sort == "asc"
+        event_comments = get_event_comments(occurence_id=event_occurence_id)
         comments_with_user_color = assign_user_colors(event_comments)
+        sorted_comments = sort_event_comments(comments_with_user_color, sort_asc)
 
         pagination = CustomPaginator(
             request,
-            comments_with_user_color,
+            sorted_comments,
             5,
             on_each_side=2,
             on_ends=1
@@ -218,7 +226,9 @@ class EventComments(TemplateView):
                           "event_comments": pagination.item_list,
                           "pagination_items": pagination.html_list,
                           "event": event,
-                          "form": form
+                          "form": form,
+                          "sort": sort,
+                          "ride_id": event_occurence_id
                       })
 
     @staticmethod
@@ -270,7 +280,7 @@ class CreateClub(TemplateView):
                 data = {
                     'name': form['name'].value(),
                     'web_url': form['web_url'].value(),
-                    'logo_url': form['logo_url'].value(),
+                    # 'logo_url': form['logo_url'].value(),
                     'zip_code': form['zip_code'].value(),
                     'private': form['private'].value(),
                     "created_by": user,

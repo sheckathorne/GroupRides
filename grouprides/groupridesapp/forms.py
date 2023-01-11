@@ -4,6 +4,7 @@ import pytz
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import Select, ModelChoiceField
+from image_uploader_widget.widgets import ImageUploaderWidget
 from tinymce.widgets import TinyMCE
 
 from .models import EventOccurenceMember, EventOccurenceMessage, \
@@ -44,7 +45,8 @@ class CreateEventOccurenceMessageForm(forms.ModelForm):
         self.helper.css_container = css_container()
         self.helper.layout = Layout(
             form_row(
-                Field("message", wrapper_class="col-span-12"), padding_bottom="pb-4"),
+                Field("message", wrapper_class="col-span-12 shadow-lg"),
+                padding_bottom="pb-4"),
             Div(
                 StrictButton('Add Comment', value="Add", type="submit",
                              css_class=f"w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 "
@@ -134,7 +136,11 @@ class ClubMembershipForm(forms.ModelForm):
 class CreateClubForm(forms.ModelForm):
     class Meta:
         model = Club
-        fields = ["name", "description", "web_url", "logo_url", "zip_code", "private"]
+        fields = ["name", "description", "web_url", "logo", "zip_code", "private"]
+
+        widgets = {
+            'logo': ImageUploaderWidget(),
+        }
 
     def __init__(self, *args, **kwargs):
         width = "xl:col-span-4 lg:col-span-6 md:col-span-8 col-span-12"
@@ -145,9 +151,9 @@ class CreateClubForm(forms.ModelForm):
         self.helper.css_container = css_container()
         self.helper.layout = Layout(
             form_row(text_input("name", "club", label='Club Name', width=width), padding_bottom=row_padding),
-            form_row(Field("description", wrapper_class=width), padding_bottom=row_padding),
+            form_row(Field("description", wrapper_class=width + " shadow-lg"), padding_bottom=row_padding),
             form_row(text_input("web_url", "club", width=width), padding_bottom=row_padding),
-            form_row(text_input("logo_url", "club", width=width), padding_bottom=row_padding),
+            form_row(Field("logo", wrapper_class=width + " shadow-lg"), padding_bottom=row_padding),
             form_row(text_input("zip_code", "club", width=width), padding_bottom=row_padding),
             form_row(Field('private', wrapper_class='mb-3'), padding_bottom=row_padding),
             form_row(
